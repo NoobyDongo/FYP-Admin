@@ -30,19 +30,6 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useRouter } from 'next/navigation';
 
-const component = () => {
-
-    const [b, setB] = useState(a)
-
-    useEffect(() => {
-        setB(a + 100)
-    },[])
-
-    return (
-        <div type>{b}</div>
-    )
-}
-
 
 export default function Wrapper({ children, token }) {
 
@@ -72,7 +59,6 @@ export default function Wrapper({ children, token }) {
 
             <Container maxWidth="xl">
                 <DrawerHeader />
-                {component(123)}
                 <FadeWrapper>
                     {children}
                 </FadeWrapper>
