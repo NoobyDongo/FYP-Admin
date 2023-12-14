@@ -30,12 +30,47 @@ const sharedPalette = (shade) => ({
     main: blue[shade],
   }
 })
+//does not work!!!
+const sharedOverride = () => ({
+  overrides: {
+    MuiCssBaseline: {
+      "@global": {
+        "*": {
+          "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+            backgroundColor: "black",
+            width: "1rem",
+            height: "1rem",
+          },
+          "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+            borderRadius: 8,
+            backgroundColor: "black",
+            minHeight: 24,
+            border: "3px solid black",
+          },
+          "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus": {
+            backgroundColor: "black",
+          },
+          "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active": {
+            backgroundColor: "#959595",
+          },
+          "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#959595",
+          },
+          "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
+            backgroundColor: "#2b2b2b",
+          },
+        },
+      },
+    },
+  },
+})
 
 const darkTheme = createTheme({
     palette: {
       mode: 'dark',
       ...sharedPalette(100)
     },
+    ...sharedOverride(),
     ...sharedDrawerTheme('black', "white"),
 });
 const lightSharedPalette = {...sharedPalette(500)}
@@ -44,6 +79,7 @@ const lightTheme = createTheme({
       mode: 'light',
       ...lightSharedPalette
     },
+    ...sharedOverride(),
     ...sharedDrawerTheme(lightSharedPalette.primary.main, "white"),
 });
   

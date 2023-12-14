@@ -3,11 +3,12 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { useTheme } from '@emotion/react';
 import { TabMenu, TabPanel } from '@/components/tabs';
-import { DataGridExample } from './table';
+import ExampleWithProviders from './table3'
+//import Example from './table2';
 
 
 export default function Home() {
-const theme = useTheme()
+  const theme = useTheme()
 
   const [value, setValue] = React.useState(0);
   const handleChange = (e, newValue) => {
@@ -15,14 +16,14 @@ const theme = useTheme()
   };
 
   return (
-    <Box paddingTop={theme.spacing(2)}>
+    <Box paddingTop={theme.spacing(2)} sx={{ maxWidth: "100%" }}>
       <TabMenu
         value={value}
         handleChange={handleChange}
         tabs={["Employee List"]}
       />
       <TabPanel value={value} index={0}>
-        <DataGridExample></DataGridExample>
+        <ExampleWithProviders></ExampleWithProviders>
       </TabPanel>
 
     </Box>
