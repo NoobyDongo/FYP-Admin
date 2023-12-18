@@ -1,11 +1,16 @@
 'use client'
+const { usePathname } = require("next/navigation");
 import { motion } from "framer-motion";
 
 export default function FadeWrapper(props) {
-    const { children, ...other } = props;
+    const { children, key, ...other } = props;
+
+    const pathname = usePathname()
+
     return (
 
         <motion.div
+            key={key ? key : pathname}
             initial="initial"
             animate="animate"
             exit="initial"

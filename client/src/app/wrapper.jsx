@@ -11,6 +11,7 @@ import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import CssBaseline from '@mui/material/CssBaseline';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -28,26 +29,23 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useRouter } from 'next/navigation';
-import { Box, lighten } from "@mui/material";
-import { alpha } from '@material-ui/core/styles/colorManipulator';
 
 
 export default function Wrapper({ children, token }) {
 
-
     useEffect(() => {
         // Add listener to update styles
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => setDarkmode(e.matches));
-
+      
         // Setup dark/light mode for the first time
         setDarkmode(window.matchMedia('(prefers-color-scheme: dark)').matches)
-
+      
         // Remove listener
         return () => {
-            window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', () => {
-            });
+          window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', () => {
+          });
         }
-    }, []);
+      }, []);
 
     const [darkmode, setDarkmode] = useState(true)
     const toggleDarkMode = (e) => {
@@ -63,14 +61,16 @@ export default function Wrapper({ children, token }) {
 
     return (
         <Themed darkmode={darkmode}>
+            {token && <MiniDrawer toggleDarkMode={toggleDarkMode} />}
+
 
             <CustomAppbar open={open} whenOpen={handleDrawerOpen} whenClose={handleDrawerClose} />
             <CustomDrawer toggleDarkMode={toggleDarkMode} open={open} />
 
             <Box sx={{
                 flexShrink: 1,
-            }} width={`calc(100% - ${open ? drawerOpenedWidth : drawerClosedWidth}px)`}>
-                <Box sx={{ px: 4 }}>
+            }}width={`calc(100% - ${open? drawerOpenedWidth : drawerClosedWidth}px)`}>
+                <Box sx={{px:4}}>
                     <DrawerHeader />
                     <FadeWrapper>
                         {children}
@@ -82,7 +82,6 @@ export default function Wrapper({ children, token }) {
 }
 
 const drawerOpenedWidth = 220;
-const drawerClosedWidth = 65;
 
 const openedMixin = (theme) => ({
     width: drawerOpenedWidth,
@@ -160,7 +159,7 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open',
         }),
         ...(theme.palette.mode == 'dark' && {
             backdropFilter: "blur(15px) saturate(150%) brightness(90%)",
-            background: alpha(lighten(theme.palette.background.default, .1), .4),
+            background: "transparent",
         }),
         ...(open && {
             transition: theme.transitions.create(['width', 'margin'], {
@@ -225,7 +224,7 @@ function CustomAppbar(props) {
                         aria-label="open drawer"
                         edge="start"
                         sx={{
-                            margin: "auto",
+                            margin: "auto"
                         }}
                         onClick={open ? whenClose : whenOpen}
                     >
