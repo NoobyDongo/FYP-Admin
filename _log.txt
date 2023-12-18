@@ -1,0 +1,38 @@
+13/12/2023
+to do:
+fix abrupt transition when changing table height.
+notification for edit/creation
+comformation for record deletion
+fit 'product'
+done:
+created a editprompt for the table
+adjusted spacing of UI
+
+14/12/2023
+to do:
+fix abrupt transition when changing table height. --done by moving the pagnation to the top...
+notification for edit/creation
+comformation for record deletion. --done with an alert prompt
+fit 'product'
+history of edit
+adjust the apperence of scrollbar on different platform and under different color mode
+done:
+switched to using Material React Table (https://www.material-react-table.com/)
+able to create and edit records via the modal
+the table no longer resize its container upon resizing the columns.
+implemented loading animationm, fullpage mode and etc (with just a few lines of code..)
+
+18/12/2023
+to do:
+notification for edit/creation
+fit 'product'
+history of edit?
+better adjustment method for scrollbars
+done:
+made table a component
+prevented the presence of scrollbar from affecting the pageContainer's layout:
+    Thx to https://stackoverflow.com/a/30293718
+scrolling are now done within the table
+rearranged the table's layout
+colors of scrollbars can now be influenced by the browser's theme
+changing the browser's theme will also change the interface's theme

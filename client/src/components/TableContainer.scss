@@ -1,0 +1,23 @@
+
+
+#pageContainer{
+    height: 100%;
+
+    & .fadeWrapper{
+        height: 100%;
+    }
+    & .tableContainer{
+        height: 100%;
+
+        & > .MuiPaper-root{
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        & .MuiTableContainer-root{
+            flex: 1;
+            flex-basis: 0;
+        }
+    }
+}

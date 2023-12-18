@@ -6,6 +6,7 @@ export default function FadeWrapper(props) {
     return (
 
         <motion.div
+            className="fadeWrapper"
             initial="initial"
             animate="animate"
             exit="initial"

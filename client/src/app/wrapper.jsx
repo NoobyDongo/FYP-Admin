@@ -1,7 +1,7 @@
 'use client'
 import Themed from "@/components/theme";
 import Container from '@mui/material/Container';
-import FadeWrapper from '@/components/wrapper'
+import FadeWrapper from '@/components/FadeWrapper'
 import { useEffect, useState } from "react";
 import LoginForm from "@/components/login";
 
@@ -38,16 +38,12 @@ export default function Wrapper({ children, token }) {
     useEffect(() => {
         // Add listener to update styles
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => setDarkmode(e.matches));
-      
-        // Setup dark/light mode for the first time
         setDarkmode(window.matchMedia('(prefers-color-scheme: dark)').matches)
-      
-        // Remove listener
         return () => {
-          window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', () => {
-          });
+            window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', () => {
+            });
         }
-      }, []);
+    }, []);
 
     const [darkmode, setDarkmode] = useState(true)
     const toggleDarkMode = (e) => {
@@ -69,9 +65,12 @@ export default function Wrapper({ children, token }) {
 
             <Box sx={{
                 flexShrink: 1,
-            }}width={`calc(100% - ${open? drawerOpenedWidth : drawerClosedWidth}px)`}>
-                <Box sx={{px:4}}>
-                    <DrawerHeader />
+                display: "flex",
+                flexDirection: "column",
+                paddingLeft: `calc(100% - ${open ? drawerOpenedWidth : drawerClosedWidth}px - 100%)`,
+            }} width={`calc(100% - ${open ? drawerOpenedWidth : drawerClosedWidth}px)`}>
+            <DrawerHeader />
+                <Box id="pageContainer" sx={{ px: 4,}}>
                     <FadeWrapper>
                         {children}
                     </FadeWrapper>

@@ -11,6 +11,7 @@ import {
     MenuItem,
     Typography,
     lighten,
+    ListItemText,
 } from '@mui/material';
 //MRT Imports
 import {
@@ -29,6 +30,9 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@emotion/react';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { useEffect, useRef, useState } from 'react';
 
 const Example = (props) => {
     const theme = useTheme()
@@ -111,9 +115,9 @@ const Example = (props) => {
         enableStickyHeader: true,
         createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
         editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-        enableEditing: true,
-        layoutMode: "semantic",
+        layoutMode: "grid",
         paginationDisplayMode: 'pages',
+        
         muiSearchTextFieldProps: {
             size: 'small',
             variant: 'outlined',
@@ -123,7 +127,7 @@ const Example = (props) => {
                 pd: 0,
             },
             color: 'primary',
-            rowsPerPageOptions: [10, 20, 30],
+            rowsPerPageOptions: [10, 15, 20, 30, 50],
             variant: 'filled',
         },
         muiTableHeadCellProps: {
@@ -139,8 +143,6 @@ const Example = (props) => {
         muiTableContainerProps: ({ table }) => ({
             style: {
                 overflow: "auto",
-                //height of the top toolbar and the bottom one...
-                maxHeight: table.getState().isFullScreen ? `calc(100% - ${40 + 56}px)` : '100%',
             },
         }),
         muiTablePaperProps: ({ table }) => ({
@@ -153,15 +155,9 @@ const Example = (props) => {
             style: {
                 overflow: "auto",
                 //height of the sticky header
-                maxHeight: table.getState().isFullScreen ? `calc(100% - ${35}px)` : '100%',
                 zIndex: table.getState().isFullScreen ? 1200 : undefined,
             },
         }),
-        muiBottomToolbarProps: {
-            sx: {
-                transition: 'none',
-            }
-        },
         muiTableBodyRowProps: {
             sx: {
                 backgroundColor: 'transparent',
@@ -172,16 +168,6 @@ const Example = (props) => {
                 border: "none",
                 boxShadow: "none"
             }
-        },
-        muiSearchTextFieldProps: {
-            sx: (theme) => ({
-                [theme.breakpoints.up('lg')]: {
-                    display: "inline-block",
-                    alignItems: "center",
-                    justifyContent: 'space-between',
-                    gap: '0.5rem',
-                },
-            })
         },
         muiToolbarAlertBannerProps: isLoadingError
             ? {
@@ -235,20 +221,64 @@ const Example = (props) => {
                 </DialogActions>
             </>
         ),
-        renderRowActions: ({ row, table }) => (
-            <Box sx={{ display: 'flex', gap: '1rem' }}>
-                <Tooltip title="Edit">
-                    <IconButton onClick={() => table.setEditingRow(row)}>
-                        <EditIcon />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-                        <DeleteIcon />
-                    </IconButton>
-                </Tooltip>
-            </Box>
-        ),
+        renderRowActionMenuItems: ({ row }) => [
+
+            <MenuItem key="edit" onClick={() => table.setEditingRow(row)}>
+                <ListItemIcon>
+                    <EditIcon color='primary'/>
+                </ListItemIcon>
+                <ListItemText primary="Edit" />
+            </MenuItem>,
+
+            <MenuItem key="delete" onClick={() => openDeleteConfirmModal(row)}>
+                <ListItemIcon>
+                    <DeleteIcon color='error'/>
+                </ListItemIcon>
+                <ListItemText primary="Delete" />
+            </MenuItem>,
+
+        ],
+        renderBottomToolbar: ({ table }) => {
+
+            return (
+                <Box
+                    sx={(theme) => ({
+                        backgroundColor: lighten(theme.palette.background.default, 0.05),
+                        px: 2,
+                        py: .5,
+
+                        display: 'flex',
+                        alignItems: "center",
+                        justifyContent: 'flex-end',
+                        gap: '0.5rem',
+
+                        "& > .MuiButtonBase-root": {
+                            height: "fit-content",
+                            paddingBlock: .45,
+                            paddingInline: 1,
+                            fontSize: 13
+                        },
+                        "& .MuiFormLabel-root": {
+                            fontSize: 14
+                        },
+                        "& #mrt-rows-per-page": {
+                            paddingLeft: 1,
+                            paddingBlock: .5
+                        },
+                        "& .MuiTablePagination-root": {
+                            padding: 0,
+                            paddingLeft: 0,
+                            paddingBlock: 0,
+                        },
+                        "& .MuiTablePagination-root": {
+                            justifyContent: "flex-end"
+                        }
+                    })}
+                >
+                    <MRT_TablePagination table={table} />
+                </Box>
+            );
+        },
         renderTopToolbar: ({ table }) => {
 
             return (
@@ -256,13 +286,10 @@ const Example = (props) => {
                     sx={(theme) => ({
                         backgroundColor: lighten(theme.palette.background.default, 0.05),
                         padding: 2,
-
-                        [theme.breakpoints.up('lg')]: {
-                            display: 'flex',
-                            alignItems: "center",
-                            justifyContent: 'space-between',
-                            gap: '0.5rem',
-                        },
+                        display: 'flex',
+                        alignItems: "center",
+                        justifyContent: 'space-between',
+                        gap: '0.5rem',
                     })}
                 >
                     <Box sx={{
@@ -270,25 +297,6 @@ const Example = (props) => {
                             display: 'flex', gap: '0.5rem', height: "fit-content", alignItems: 'center',
                         },
                     }}>
-
-                        <Button
-                            variant="contained"
-                            sx={{
-                                px: 2,
-                                py: 1.5,
-                            }}
-                            onClick={() => {
-                                table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-                                //or you can pass in a row object to set default values with the `createRow` helper function
-                                // table.setCreatingRow(
-                                //   createRow(table, {
-                                //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-                                //   }),
-                                // );
-                            }}
-                        >
-                            Create New User
-                        </Button>
 
                         <MRT_ToggleGlobalFilterButton sx={{
                             [theme.breakpoints.only('xs')]: {
@@ -301,46 +309,24 @@ const Example = (props) => {
                         <MRT_ToggleDensePaddingButton table={table} />
                         <MRT_ToggleFullScreenButton table={table} />
                     </Box>
-                    <Box>
-                        <Box sx={(theme) =>
-                        ({
-                            display: 'flex', gap: '0.5rem', alignItems: "center",
-                            [theme.breakpoints.down('lg')]: {
-                                justifyContent: 'flex-end',
-                            },
-                            "& > .MuiButtonBase-root": {
-                                height: "fit-content",
-                                paddingBlock: .45,
-                                paddingInline: 1,
-                                fontSize: 13
-                            },
-                            "& .MuiFormLabel-root": {
-                                fontSize: 14
-                            },
-                            "& #mrt-rows-per-page": {
-                                paddingLeft: 1,
-                                paddingBlock: .5
-                            },
-                            "& .MuiTablePagination-root": {
-                                padding: 0,
-                                paddingLeft: 0,
-                                paddingBlock: 0,
-                            },
-                            "& .MuiTablePagination-root": {
-                                justifyContent: "flex-end"
-                            }
-                        })
-                        }>
-
-                            <MRT_TablePagination table={table} />
-                        </Box>
-                        <Box sx={
-                            {
-                                display: 'flex', gap: '0.5rem', alignItems: "center", justifyContent: "flex-end",
-                            }
-                        }>
-                        </Box>
-                    </Box>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            px: 2,
+                            py: 1.5,
+                        }}
+                        onClick={() => {
+                            table.setCreatingRow(true); //simplest way to open the create row modal with no default values
+                            //or you can pass in a row object to set default values with the `createRow` helper function
+                            // table.setCreatingRow(
+                            //   createRow(table, {
+                            //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
+                            //   }),
+                            // );
+                        }}
+                    >
+                        Create New User
+                    </Button>
                 </Box>
             );
         },
@@ -358,8 +344,7 @@ const Example = (props) => {
 };
 
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+
 
 const Table = (props) => (
     //Put this with your other react-query providers near root of your app
