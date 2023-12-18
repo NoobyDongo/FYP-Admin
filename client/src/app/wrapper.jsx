@@ -30,7 +30,6 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useRouter } from 'next/navigation';
 import { Box, lighten } from "@mui/material";
-import { alpha } from '@material-ui/core/styles/colorManipulator';
 import { alpha } from "@mui/material";
 
 export default function Wrapper({ children, token }) {
