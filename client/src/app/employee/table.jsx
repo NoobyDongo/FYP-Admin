@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import dayjs from 'dayjs';
 import {
     DataGrid,
@@ -24,6 +23,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import { Box, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material";
+import { useTheme } from '@emotion/react';
+import Modal from '@mui/material/Modal';
 
 function Pagination({ page, onPageChange, className }) {
     const apiRef = useGridApiContext();
@@ -46,7 +48,7 @@ var id = 11
 const initialRows = [
     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35, joinDate: Date(), role: 'Market' },
     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42, joinDate: Date(), role: 'Market' },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45, joinDate: Date(),role: 'Market' },
+    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45, joinDate: Date(), role: 'Market' },
     { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16, joinDate: Date(), role: 'Market' },
     { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null, joinDate: Date(), role: 'Market' },
     { id: 6, lastName: 'Melisandre', firstName: null, age: 150, joinDate: Date(), role: 'Market' },
@@ -69,10 +71,13 @@ function CustomPagination(props) {
 }
 
 function CustomToolbar(props) {
+    const { setInCreation } = props;
     return (
-        <GridToolbarContainer>
-            <EditToolbar {...props} />
-            <GridToolbarColumnsButton sx={{ml:"auto"}}/>
+        <GridToolbarContainer sx={{ mb: 2 }}>
+            <Button color="primary" variant="contained" startIcon={<AddIcon />} onClick={() => setInCreation(true)}>
+                Add record
+            </Button>
+            <GridToolbarColumnsButton sx={{ ml: "auto" }} />
             <GridToolbarFilterButton />
             <GridToolbarDensitySelector />
             <GridToolbarExport />
@@ -81,34 +86,109 @@ function CustomToolbar(props) {
 }
 
 
-function EditToolbar(props) {
+function EditPrompt(props) {
     const { setRows, setRowModesModel } = props;
+    const { open, setOpen } = props;
 
-    var oid = 0
-    const handleClick = () => {
-        const id = "+ " + oid++;
-        setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
-        setRowModesModel((oldModel) => ({
-            ...oldModel,
-            [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-        }));
-    };
+    const [id, setId] = React.useState(1)
+    const [fname, setFName] = React.useState("fragile")
+    const [lname, setLName] = React.useState("banana")
+    console.log(fname)
+    console.log(lname)
+
+    const theme = useTheme()
+
+    const newRecord = () => {
+        setId(id + 1)
+        console.log(fname)
+        if (true) {
+            setRows((oldRows) => [...oldRows, { id: "+ " + id, firstName: fname, lastName: lname, age: '', isNew: true }]);
+            setRowModesModel((oldModel) => ({
+                ...oldModel,
+                [id]: { mode: GridRowModes.View, fieldToFocus: 'name' },
+            }));
+            setOpen(false)
+        }
+    }
 
     return (
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-                Add record
-            </Button>
-    );
+        <Modal
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: 'center',
+            }}
+            slotProps={{
+                backdrop: { sx: { backdropFilter: "blur(5px) brightness(80%) saturate(200%)" } }
+            }}
+            open={open}
+        >
+            <Paper sx={{ minWidth: "90vw", minHeight: "90vh", outline: "none", position: "relative" }}>
+                <Box sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 3
+                }}>
+                    <Typography sx={{ display: "inline-block" }} variant="h5">New Record</Typography>
+                    <IconButton sx={{ ml: "auto" }} onClick={() => { setOpen(false) }}>
+                        <CancelIcon />
+                    </IconButton>
+                </Box>
+                <Divider sx={{ borderColor: theme.palette.background.default }} />
+
+                <Stack gap={3} sx={{ padding: 3 }}>
+                    <Stack gap={3}>
+
+
+                        <TextField
+                            label="Firstname"
+                            variant="outlined"
+                            type="text"
+                            onChange={(e) => setFName(e.target.value)}
+                            fullWidth
+
+                            InputProps={{
+                                disableUnderline: true
+                            }}
+                        />
+                        <TextField
+                            label="Lastname"
+                            variant="outlined"
+                            type="text"
+                            onChange={(e) => setLName(e.target.value)}
+                            fullWidth
+                        />
+
+                    </Stack>
+                    <Stack direction="row" gap={2}>
+                    </Stack>
+                </Stack>
+
+                <Box position="absolute" bottom={0} sx={{
+                    height: "max-content",
+                    width: 1,
+                }}>
+                    <Stack direction="row-reverse" gap={2} sx={{ padding: 2, px: 3 }}>
+                        <Button variant='contained' onClick={newRecord}>Save Record</Button>
+                    </Stack>
+                </Box>
+
+            </Paper>
+        </Modal>
+    )
 }
 
-export function DataGridExample() {
+export function DataGridExample({ height }) {
     const [rows, setRows] = React.useState(initialRows);
     const [rowModesModel, setRowModesModel] = React.useState({});
-/*
-    const setCookie = (num) => {
-        cookieStore.set("tableRowPerPage", num)
-    }
-*/
+
+    const [inCreation, setInCreation] = React.useState(false)
+
+    /*
+        const setCookie = (num) => {
+            cookieStore.set("tableRowPerPage", num)
+        }
+    */
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
@@ -168,6 +248,8 @@ export function DataGridExample() {
             headerName: 'Age',
             type: 'number',
             editable: true,
+            headerAlign: 'left',
+            align: "left",
             width: 90,
         },
         {
@@ -190,7 +272,9 @@ export function DataGridExample() {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 100,
+            headerAlign: 'center',
+            align: "center",
+            width: 150,
             cellClassName: 'actions',
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -198,6 +282,7 @@ export function DataGridExample() {
                 if (isInEditMode) {
                     return [
                         <GridActionsCellItem
+                            key={123}
                             icon={<SaveIcon />}
                             label="Save"
                             sx={{
@@ -206,6 +291,15 @@ export function DataGridExample() {
                             onClick={handleSaveClick(id)}
                         />,
                         <GridActionsCellItem
+                            key={124}
+                            icon={<CancelIcon />}
+                            label="Cancel"
+                            className="textPrimary"
+                            onClick={handleCancelClick(id)}
+                            color="inherit"
+                        />,
+                        <GridActionsCellItem
+                            key={125}
                             icon={<CancelIcon />}
                             label="Cancel"
                             className="textPrimary"
@@ -217,6 +311,7 @@ export function DataGridExample() {
 
                 return [
                     <GridActionsCellItem
+                        key={126}
                         icon={<EditIcon />}
                         label="Edit"
                         className="textPrimary"
@@ -224,9 +319,18 @@ export function DataGridExample() {
                         color="inherit"
                     />,
                     <GridActionsCellItem
+                        key={127}
                         icon={<DeleteIcon />}
                         label="Delete"
                         onClick={handleDeleteClick(id)}
+                        color="inherit"
+                    />,
+                    <GridActionsCellItem
+                        key={128}
+                        icon={<CancelIcon />}
+                        label="Cancel"
+                        className="textPrimary"
+                        onClick={handleCancelClick(id)}
                         color="inherit"
                     />,
                 ];
@@ -235,34 +339,40 @@ export function DataGridExample() {
     ];
 
     return (
-        <Box
-            sx={{
-                height: "100%",
-                width: '100%',
-                '& .actions': {
-                    color: 'text.secondary',
-                },
-                '& .textPrimary': {
-                    color: 'text.primary',
-                },
-            }}
-        >
+        <div>
+            <EditPrompt open={inCreation} setOpen={setInCreation} setRows={setRows} setRowModesModel={setRowModesModel}></EditPrompt>
             <DataGrid
-                sx={{ 
+                sx={{
                     border: 0,
-                    maxHeight: "100%",
+                    "& .MuiDataGrid-columnHeadersInner": {
+                        width: "100%"
+                    },
+                    '& .MuiDataGrid-iconSeparator:last-child': {
+                        display: "none"
+                    },
+                    "& .MuiDataGrid-cell:nth-last-child(2)": {
+                        position: "absolute",
+                        background: "transparent",
+                        right: 0,
+                        transform: "translateX(100%)"
+                    },
+                    "& .MuiDataGrid-columnHeader:last-child": {
+                        position: "absolute",
+                        background: "transparent",
+                        zIndex: -1,
+                        right: 0,
+                    },
                 }}
                 pagination
                 initialState={{
                     pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
+                        paginationModel: { page: 0, pageSize: 10 },
                     }
                 }}
                 loading={false}
-                pageSize={20} //integer value representing max number of rows
-                pageSizeOptions={[5, 10, 15, 25]}
-                autoHeight
+                pageSizeOptions={[5, 10, 15, 20]}
                 rows={rows}
+                autoHeight
                 columns={columns}
                 editMode="row"
                 rowModesModel={rowModesModel}
@@ -274,9 +384,9 @@ export function DataGridExample() {
                     toolbar: CustomToolbar,
                 }}
                 slotProps={{
-                    toolbar: { setRows, setRowModesModel }
+                    toolbar: { setInCreation }
                 }}
             />
-        </Box>
+        </div>
     );
 }

@@ -11,7 +11,6 @@ import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import CssBaseline from '@mui/material/CssBaseline';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -25,13 +24,17 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useRouter } from 'next/navigation';
+import { Box, lighten } from "@mui/material";
+import { alpha } from '@material-ui/core/styles/colorManipulator';
 
 
 export default function Wrapper({ children, token }) {
+
 
     useEffect(() => {
         // Add listener to update styles
@@ -61,8 +64,6 @@ export default function Wrapper({ children, token }) {
 
     return (
         <Themed darkmode={darkmode}>
-            {token && <MiniDrawer toggleDarkMode={toggleDarkMode} />}
-
 
             <CustomAppbar open={open} whenOpen={handleDrawerOpen} whenClose={handleDrawerClose} />
             <CustomDrawer toggleDarkMode={toggleDarkMode} open={open} />
@@ -82,6 +83,7 @@ export default function Wrapper({ children, token }) {
 }
 
 const drawerOpenedWidth = 220;
+const drawerClosedWidth = 65;
 
 const openedMixin = (theme) => ({
     width: drawerOpenedWidth,
@@ -159,7 +161,7 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open',
         }),
         ...(theme.palette.mode == 'dark' && {
             backdropFilter: "blur(15px) saturate(150%) brightness(90%)",
-            background: "transparent",
+            background: alpha(lighten(theme.palette.background.default, .1), .4),
         }),
         ...(open && {
             transition: theme.transitions.create(['width', 'margin'], {
@@ -224,7 +226,7 @@ function CustomAppbar(props) {
                         aria-label="open drawer"
                         edge="start"
                         sx={{
-                            margin: "auto"
+                            margin: "auto",
                         }}
                         onClick={open ? whenClose : whenOpen}
                     >
@@ -245,6 +247,11 @@ function CustomDrawer(props) {
     const theme = useTheme();
     const Router = useRouter();
 
+
+    const GoTo = (e) => {
+        Router.push("/" + e)
+    }
+
     const ViewEmployees = (e) => {
         Router.push("/employee")
     }
@@ -258,25 +265,26 @@ function CustomDrawer(props) {
     const options1 = [
         {
             name: "dashboard",
-            func: GoToDashboard,
+            func: () => GoTo(""),
             icon: <DashboardIcon />
         },
         {
             name: "account",
-            func: GoToDashboard,
+            func: () => GoTo(""),
             icon: <ManageAccountsIcon />
         },
     ]
     const options2 = [
         {
             name: "employee",
-            func: ViewEmployees,
+            func: () => GoTo("employee"),
             icon: <EngineeringIcon />
-        }, {
-            name: "profile",
-            func: OpenProfile,
-            icon: <BadgeIcon />
         },
+        {
+            name: "product",
+            func: () => GoTo("product"),
+            icon: <CategoryIcon />
+        }
     ]
 
     var key = 0
