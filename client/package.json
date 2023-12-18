@@ -1,0 +1,32 @@
+{
+  "name": "fyp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
+    "@mui/icons-material": "^5.14.3",
+    "@mui/material": "^5.12.3",
+    "@mui/x-data-grid": "latest",
+    "@mui/x-date-pickers": "latest",
+    "@preact/signals-react": "^1.3.8",
+    "@tanstack/react-query": "^5.13.4",
+    "dayjs": "^1.11.10",
+    "framer-motion": "^10.16.4",
+    "material-react-table": "^2.x.x",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scrollbars-custom": "^4.1.1"
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "eslint-config-next": "latest"
+  }
+}
