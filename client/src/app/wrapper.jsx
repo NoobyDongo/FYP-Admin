@@ -24,6 +24,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -246,6 +247,11 @@ function CustomDrawer(props) {
     const theme = useTheme();
     const Router = useRouter();
 
+
+    const GoTo = (e) => {
+        Router.push("/" + e)
+    }
+
     const ViewEmployees = (e) => {
         Router.push("/employee")
     }
@@ -259,25 +265,26 @@ function CustomDrawer(props) {
     const options1 = [
         {
             name: "dashboard",
-            func: GoToDashboard,
+            func: () => GoTo(""),
             icon: <DashboardIcon />
         },
         {
             name: "account",
-            func: GoToDashboard,
+            func: () => GoTo(""),
             icon: <ManageAccountsIcon />
         },
     ]
     const options2 = [
         {
             name: "employee",
-            func: ViewEmployees,
+            func: () => GoTo("employee"),
             icon: <EngineeringIcon />
-        }, {
-            name: "profile",
-            func: OpenProfile,
-            icon: <BadgeIcon />
         },
+        {
+            name: "product",
+            func: () => GoTo("product"),
+            icon: <CategoryIcon />
+        }
     ]
 
     var key = 0

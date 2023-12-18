@@ -1,3 +1,4 @@
+'use client'
 import { useMemo, useState } from 'react';
 import {
     Box,
@@ -316,7 +317,7 @@ const Example = () => {
         muiTableHeadCellProps: {
             sx: {
                 overflow: "hidden",
-                boxShadow:"none",
+                boxShadow: "none",
                 "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
                     position: 'absolute',
                     right: 0,
@@ -326,7 +327,8 @@ const Example = () => {
         muiTableContainerProps: ({ table }) => ({
             style: {
                 overflow: "auto",
-                maxHeight: table.getState().isFullScreen ? '100vh' : '100%',
+                //height of the top toolbar and the bottom one...
+                maxHeight: table.getState().isFullScreen ? `calc(100% - ${40 + 56}px)` : '100%',
             },
         }),
         muiTablePaperProps: ({ table }) => ({
@@ -337,25 +339,28 @@ const Example = () => {
                 backgroundColor: table.getState().isFullScreen ? theme.palette.background.default : 'transparent',
             },
             style: {
+                overflow: "auto",
+                //height of the sticky header
+                maxHeight: table.getState().isFullScreen ? `calc(100% - ${35}px)` : '100%',
                 zIndex: table.getState().isFullScreen ? 1200 : undefined,
             },
         }),
 
         muiBottomToolbarProps: {
-            sx:{
+            sx: {
                 transition: 'none',
             }
         },
 
         muiTableBodyRowProps: {
-            sx:{
+            sx: {
                 backgroundColor: 'transparent',
             }
         },
-        muiTableBodyCellProps:{
-            sx:{
-                border:"none",
-                boxShadow:"none"
+        muiTableBodyCellProps: {
+            sx: {
+                border: "none",
+                boxShadow: "none"
             }
         },
         getRowId: (row) => row.id,
@@ -585,11 +590,17 @@ function useDeleteUser() {
 
 const queryClient = new QueryClient();
 
+
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+
 const ExampleWithProviders = () => (
     //Put this with your other react-query providers near root of your app
-    <QueryClientProvider client={queryClient}>
-        <Example />
-    </QueryClientProvider>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <QueryClientProvider client={queryClient}>
+            <Example />
+        </QueryClientProvider>
+    </LocalizationProvider>
 );
 
 export default ExampleWithProviders;

@@ -25,6 +25,11 @@ const sharedDrawerTheme = (background, color) => ({
     }
   }
 })
+const sharedTypographyTheme = {
+  typography: {
+    "fontFamily": "Inter"
+   }
+}
 const sharedPalette = (shade) => ({
   primary: {
     main: blue[shade],
@@ -72,6 +77,7 @@ const darkTheme = createTheme({
     },
     ...sharedOverride(),
     ...sharedDrawerTheme('black', "white"),
+    ...sharedTypographyTheme,
 });
 const lightSharedPalette = {...sharedPalette(500)}
 const lightTheme = createTheme({
@@ -81,6 +87,7 @@ const lightTheme = createTheme({
     },
     ...sharedOverride(),
     ...sharedDrawerTheme(lightSharedPalette.primary.main, "white"),
+    ...sharedTypographyTheme,
 });
   
 export default function Themed({darkmode, children}){
