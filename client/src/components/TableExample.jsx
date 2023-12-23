@@ -226,7 +226,7 @@ function useCreate() {
         },
         //client side optimistic update
         onMutate: (newUserInfo) => {
-            queryClient.setQueryData(['users'], (prevUsers) => [
+            queryClient.setQueryData(['product'], (prevUsers) => [
                 ...prevUsers,
                 {
                     ...newUserInfo,
@@ -234,14 +234,14 @@ function useCreate() {
                 },
             ]);
         },
-        // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+        onSettled: () => queryClient.invalidateQueries({ queryKey: ['product'] }), //refetch users after mutation, disabled for demo
     });
 }
 
 //READ hook (get users from api)
 function useGet() {
     return useQuery({
-        queryKey: ['users'],
+        queryKey: ['product'],
         queryFn: async () => {
             //send api request here
             await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
@@ -262,13 +262,13 @@ function useUpdate() {
         },
         //client side optimistic update
         onMutate: (newUserInfo) => {
-            queryClient.setQueryData(['users'], (prevUsers) =>
+            queryClient.setQueryData(['product'], (prevUsers) =>
                 prevUsers?.map((prevUser) =>
                     prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
                 ),
             );
         },
-        onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+        onSettled: () => queryClient.invalidateQueries({ queryKey: ['product'] }), //refetch users after mutation, disabled for demo
     });
 }
 
@@ -283,11 +283,11 @@ function useDelete() {
         },
         //client side optimistic update
         onMutate: (userId) => {
-            queryClient.setQueryData(['users'], (prevUsers) =>
+            queryClient.setQueryData(['product'], (prevUsers) =>
                 prevUsers?.filter((user) => user.id !== userId),
             );
         },
-        // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+        // onSettled: () => queryClient.invalidateQueries({ queryKey: ['product'] }), //refetch users after mutation, disabled for demo
     });
 }
 

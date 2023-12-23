@@ -1,5 +1,5 @@
 'use client'
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, alpha, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { blue, red } from '@mui/material/colors';
 
@@ -30,9 +30,12 @@ const sharedTypographyTheme = {
     "fontFamily": "Inter"
    }
 }
-const sharedPalette = (shade) => ({
+const sharedPalette = (shade, defaultTheme) => ({
   primary: {
     main: blue[shade],
+  },
+  border: {
+    main: alpha(defaultTheme.palette.text.disabled, 0.1)
   }
 })
 //does not work!!!
@@ -73,13 +76,13 @@ const sharedOverride = () => ({
 const darkTheme = createTheme({
     palette: {
       mode: 'dark',
-      ...sharedPalette(100)
+      ...sharedPalette(100, defaultDarkTheme)
     },
     ...sharedOverride(),
     ...sharedDrawerTheme('black', "white"),
     ...sharedTypographyTheme,
 });
-const lightSharedPalette = {...sharedPalette(500)}
+const lightSharedPalette = {...sharedPalette(500, defaultLightTheme)}
 const lightTheme = createTheme({
     palette: {
       mode: 'light',

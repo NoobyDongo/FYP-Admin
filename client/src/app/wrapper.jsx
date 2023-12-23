@@ -158,7 +158,7 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open',
             duration: theme.transitions.duration.leavingScreen,
         }),
         ...(theme.palette.mode == 'dark' && {
-            backdropFilter: "blur(15px) saturate(150%) brightness(90%)",
+            backdropFilter: "blur(50px) saturate(150%) brightness(90%)",
             background: alpha(lighten(theme.palette.background.default, .1), .4),
         }),
         ...(open && {

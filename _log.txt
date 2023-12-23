@@ -36,3 +36,16 @@ scrolling are now done within the table
 rearranged the table's layout
 colors of scrollbars can now be influenced by the browser's theme
 changing the browser's theme will also change the interface's theme
+
+23/12/2023
+to do:
+notification for edit/creation
+create a product type list
+add more compoents
+history of edit?
+better adjustment method for scrollbars
+done:
+improved to table component
+    allowed validator to be auto configureted with columns
+    overrides the internalComponents thing with material react table
+    image can now be uploaded thx to https://www.npmjs.com/package/react-images-uploading

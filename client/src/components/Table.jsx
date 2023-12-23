@@ -5,15 +5,16 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    IconButton,
-    Tooltip,
     ListItemIcon,
     MenuItem,
     Typography,
     lighten,
     ListItemText,
+    Paper,
+    Divider,
+    alpha,
+    Stack,
 } from '@mui/material';
-//MRT Imports
 import {
     MRT_EditActionButtons,
     MaterialReactTable,
@@ -32,34 +33,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@emotion/react';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { useEffect, useRef, useState } from 'react';
 
 const Example = (props) => {
     const theme = useTheme()
 
-    const { queryClient, useCreate, useGet, useUpdate, useDelete } = props
     const { setValidationErrors, validateRecord } = props
-    const { columns } = props
+    const { handleSave, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
+    const { createRecord, updateRecord, deleteRecord } = props
+    const { columns, initialState, tableName } = props
+    const { fetchedRecords } = props
+    const { isCreatingRecord, isUpdatingRecord, isDeletingRecord } = props
+    const { isFetchingRecords, isLoadingError, isLoadingRecords } = props
 
-    //call CREATE hook
-    const { mutateAsync: createRecord, isPending: isCreatingUser } =
-        useCreate();
-    //call READ hook
-    const {
-        data: fetchedRecords = [],
-        isError: isLoadingError,
-        isFetching: isFetchingRecords,
-        isLoading: isLoadingRecords,
-    } = useGet();
-    //call UPDATE hook
-    const { mutateAsync: updateRecord, isPending: isUpdatingRecords } =
-        useUpdate();
-    //call DELETE hook
-    const { mutateAsync: deleteRecord, isPending: isDeletingRecords } =
-        useDelete();
-
-    //CREATE action
-    const handleCreate = async ({ values, table }) => {
+    const defaultHandleCreate = async ({ values, table }) => {
+        console.log(values)
         const newValidationErrors = validateRecord(values);
         if (Object.values(newValidationErrors).some((error) => error)) {
             setValidationErrors(newValidationErrors);
@@ -70,8 +57,8 @@ const Example = (props) => {
         table.setCreatingRow(null); //exit creating mode
     };
 
-    //UPDATE action
-    const handleSave = async ({ values, table }) => {
+    const defaultHandleSave = async ({ values, table }) => {
+        console.log(values)
         const newValidationErrors = validateRecord(values);
         if (Object.values(newValidationErrors).some((error) => error)) {
             setValidationErrors(newValidationErrors);
@@ -82,8 +69,37 @@ const Example = (props) => {
         table.setEditingRow(null); //exit editing mode
     };
 
-    //DELETE action
-    const openDeleteConfirmModal = (row) => {
+    const defaultEditPrompt = ({ table, row, internalEditComponents }) => (
+        <>
+            <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
+            <Divider />
+            <DialogContent
+                sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            >
+                {internalEditComponents} {/* or render custom edit components here */}
+            </DialogContent>
+            <DialogActions>
+                <MRT_EditActionButtons variant="text" table={table} row={row} />
+            </DialogActions>
+        </>
+    )
+
+    const defaultCreatePrompt = ({ table, row, internalEditComponents }) => (
+        <>
+            <DialogTitle variant="h4">Create New {tableName || "Record"}</DialogTitle>
+            <Divider />
+            <DialogContent
+                sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
+                {internalEditComponents} {/* or render custom edit components here */}
+            </DialogContent>
+            <DialogActions>
+                <MRT_EditActionButtons variant="text" table={table} row={row} />
+            </DialogActions>
+        </>
+    )
+
+    const defaultOpenDeleteConfirmModal = (row) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             deleteRecord(row.original.id);
         }
@@ -93,15 +109,9 @@ const Example = (props) => {
         columns,
         data: fetchedRecords,
         initialState: {
-            columnVisibility: {
-                firstName: false,
-                lastName: false
-            },
+            ...initialState,
             showColumnFilters: false,
             showGlobalFilter: true,
-            columnPinning: {
-                right: ['startDate']
-            }
         },
         enableColumnFilterModes: true,
         enableColumnOrdering: true,
@@ -109,22 +119,25 @@ const Example = (props) => {
         enableColumnPinning: true,
         enableFacetedValues: true,
         enableRowActions: true,
-        enableRowSelection: true,
+        enableRowSelection: false,
         enableColumnResizing: true,
         enableBottomToolbar: true,
         enableStickyHeader: true,
         createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
         editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-        layoutMode: "grid",
+        layoutMode: "grid-nogrow",
         paginationDisplayMode: 'pages',
-        
         muiSearchTextFieldProps: {
             size: 'small',
             variant: 'outlined',
         },
+        muiEditRowDialogProps: {
+            
+        },
         muiPaginationProps: {
             sx: {
                 pd: 0,
+                marginLeft: "auto"
             },
             color: 'primary',
             rowsPerPageOptions: [10, 15, 20, 30, 50],
@@ -133,18 +146,19 @@ const Example = (props) => {
         muiTableHeadCellProps: {
             sx: {
                 overflow: "hidden",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "1rem",
+                paddingBottom: ".5rem",
                 boxShadow: "none",
+                border: 0,
                 "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
                     position: 'absolute',
                     right: 0,
                 },
             }
         },
-        muiTableContainerProps: ({ table }) => ({
-            style: {
-                overflow: "auto",
-            },
-        }),
         muiTablePaperProps: ({ table }) => ({
             //not sx
             elevation: theme.palette.mode == "dark" ? 1 : 0,
@@ -158,6 +172,12 @@ const Example = (props) => {
                 zIndex: table.getState().isFullScreen ? 1200 : undefined,
             },
         }),
+        muiTableHeadRowProps: {
+            sx: {
+                borderBottom: 1,
+                borderColor: theme.palette.border.main
+            }
+        },
         muiTableBodyRowProps: {
             sx: {
                 backgroundColor: 'transparent',
@@ -169,70 +189,64 @@ const Example = (props) => {
                 boxShadow: "none"
             }
         },
+        muiTableFooterProps: {
+            sx: {
+                outline: "none"
+            }
+        },
         muiToolbarAlertBannerProps: isLoadingError
             ? {
                 color: 'error',
                 children: 'Error loading data',
             }
             : undefined,
+        displayColumnDefOptions: {
+            'mrt-row-actions': {
+                header: 'Edit', //change "Actions" to "Edit"
+                size: 50,
+            },
+        },
+        /*
+    renderDetailPanel: ({ row }) => (
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+            }}
+        >
+            <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h4">Pending</Typography>
+            </Box>
+        </Box>
+    ),
+    */
         getRowId: (row) => row.id,
         onCreatingRowCancel: () => setValidationErrors({}),
-        onCreatingRowSave: handleCreate,
         onEditingRowCancel: () => setValidationErrors({}),
-        onEditingRowSave: handleSave,
-        //optionally customize modal content
-        renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
-            <>
-                <DialogTitle variant="h3">Create New User</DialogTitle>
-                <DialogContent
-                    sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-                >
-                    {internalEditComponents} {/* or render custom edit components here */}
-                </DialogContent>
-                <DialogActions>
-                    <MRT_EditActionButtons variant="text" table={table} row={row} />
-                </DialogActions>
-            </>
-        ),
-        renderDetailPanel: ({ row }) => (
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                }}
-            >
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h4">Pending</Typography>
-                </Box>
-            </Box>
-        ),
-        //optionally customize modal content
-        renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
-            <>
-                <DialogTitle variant="h3">Edit User</DialogTitle>
-                <DialogContent
-                    sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-                >
-                    {internalEditComponents} {/* or render custom edit components here */}
-                </DialogContent>
-                <DialogActions>
-                    <MRT_EditActionButtons variant="text" table={table} row={row} />
-                </DialogActions>
-            </>
-        ),
+        onCreatingRowSave: handleCreate || defaultHandleCreate,
+        onEditingRowSave: handleSave || defaultHandleSave,
+        renderCreateRowDialogContent: createPrompt || defaultCreatePrompt,
+        renderEditRowDialogContent: editPrompt || defaultEditPrompt,
+
+        displayColumnDefOptions: {
+            'mrt-row-actions': {
+                header: 'Actions', //change "Actions" to "Edit"
+                size: 120,
+            },
+        },
         renderRowActionMenuItems: ({ row }) => [
 
             <MenuItem key="edit" onClick={() => table.setEditingRow(row)}>
                 <ListItemIcon>
-                    <EditIcon color='primary'/>
+                    <EditIcon color='primary' />
                 </ListItemIcon>
                 <ListItemText primary="Edit" />
             </MenuItem>,
 
-            <MenuItem key="delete" onClick={() => openDeleteConfirmModal(row)}>
+            <MenuItem key="delete" onClick={() => (openDeleteConfirmModal || defaultOpenDeleteConfirmModal)(row)}>
                 <ListItemIcon>
-                    <DeleteIcon color='error'/>
+                    <DeleteIcon color='error' />
                 </ListItemIcon>
                 <ListItemText primary="Delete" />
             </MenuItem>,
@@ -241,12 +255,14 @@ const Example = (props) => {
         renderBottomToolbar: ({ table }) => {
 
             return (
-                <Box
+                <Paper
                     sx={(theme) => ({
-                        backgroundColor: lighten(theme.palette.background.default, 0.05),
                         px: 2,
-                        py: .5,
-
+                        py: 1.5,
+                        borderTop: 1,
+                        borderColor: theme.palette.border.main,
+                        borderTopLeftRadius: 0,
+                        borderTopRightRadius: 0,
                         display: 'flex',
                         alignItems: "center",
                         justifyContent: 'flex-end',
@@ -263,7 +279,8 @@ const Example = (props) => {
                         },
                         "& #mrt-rows-per-page": {
                             paddingLeft: 1,
-                            paddingBlock: .5
+                            paddingBlock: .5,
+                            paddingBottom: .3,
                         },
                         "& .MuiTablePagination-root": {
                             padding: 0,
@@ -271,12 +288,30 @@ const Example = (props) => {
                             paddingBlock: 0,
                         },
                         "& .MuiTablePagination-root": {
-                            justifyContent: "flex-end"
+                            justifyContent: "flex-end",
+                            padding: 0,
+                            width: "100%",
                         }
                     })}
                 >
+                    <Box sx={(theme) => ({
+                        width: "fit-content",
+                        whiteSpace: "nowrap",
+                        fontSize: 14,
+                        marginRight: 4,
+
+                        [theme.breakpoints.down('md')]: {
+                            display: "none"
+                        },
+                    })}>
+                        Total Record: <span style={{
+                            color: theme.palette.primary.main,
+                            fontSize: 16, marginLeft: 8
+                        }}>
+                            {fetchedRecords.length}</span>
+                    </Box>
                     <MRT_TablePagination table={table} />
-                </Box>
+                </Paper>
             );
         },
         renderTopToolbar: ({ table }) => {
@@ -325,14 +360,14 @@ const Example = (props) => {
                             // );
                         }}
                     >
-                        Create New User
+                        Create New {tableName || "record"}
                     </Button>
                 </Box>
             );
         },
         state: {
             isLoading: isLoadingRecords,
-            isSaving: isCreatingUser || isUpdatingRecords || isDeletingRecords,
+            isSaving: isCreatingRecord || isUpdatingRecord || isDeletingRecord,
             showAlertBanner: isLoadingError,
             showProgressBars: isFetchingRecords,
         },
@@ -343,8 +378,25 @@ const Example = (props) => {
     )
 };
 
+export function TableEditTextFieldProps(setValidationErrors, validationErrors, { type, required, name }) {
 
-
+    return (
+        {
+            muiEditTextFieldProps: {
+                type: type || "text",
+                required: required,
+                error: !!validationErrors?.[name],
+                helperText: validationErrors?.[name],
+                //remove any previous validation errors when user focuses on the input
+                onFocus: () =>
+                    setValidationErrors({
+                        ...validationErrors,
+                        [name]: undefined,
+                    }),
+            }
+        }
+    )
+}
 
 const Table = (props) => (
     //Put this with your other react-query providers near root of your app
