@@ -1,7 +1,7 @@
 'use client'
 import { ThemeProvider, alpha, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { blue, red } from '@mui/material/colors';
+import { blue, red, orange } from '@mui/material/colors';
 
 const defaultDarkTheme = createTheme({
   palette: {
@@ -32,14 +32,14 @@ const sharedTypographyTheme = {
 }
 const sharedPalette = (shade, defaultTheme) => ({
   primary: {
-    main: blue[shade],
+    main: orange[shade],
   },
   border: {
     main: alpha(defaultTheme.palette.text.disabled, 0.1)
   },
   logo:{
-    main: defaultTheme.palette.mode == "light"? "white" : "#F28C28",
-    secondary: defaultTheme.palette.mode == "light"? "white" : "#FF7F50",
+    main: defaultTheme.palette.mode == "light"? "#FFFFFF" : orange[500],
+    secondary: defaultTheme.palette.mode == "light"? "#FFFFFF" : orange[700],
   },
 })
 //does not work!!!
@@ -80,13 +80,13 @@ const sharedOverride = () => ({
 const darkTheme = createTheme({
     palette: {
       mode: 'dark',
-      ...sharedPalette(100, defaultDarkTheme)
+      ...sharedPalette(400, defaultDarkTheme)
     },
     ...sharedOverride(),
     ...sharedDrawerTheme('black', "white"),
     ...sharedTypographyTheme,
 });
-const lightSharedPalette = {...sharedPalette(500, defaultLightTheme)}
+const lightSharedPalette = {...sharedPalette(700, defaultLightTheme)}
 const lightTheme = createTheme({
     palette: {
       mode: 'light',

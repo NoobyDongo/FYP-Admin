@@ -34,15 +34,18 @@ export function CustomAppbar({ open, onOpen, onClose }) {
                 <DrawerHeader open={open} />
                 <AppBarIcon>
                     <IconButton
-                        color="inherit"
+                        color="logo"
                         aria-label="open drawer"
                         edge="start"
                         sx={{
+                            height: 40,
+                            width: 40,
                             margin: "auto",
+                            stroke: "currentcolor", strokeWidth: 1,
                         }}
                         onClick={open ? onOpen : onClose}
                     >
-                        {open ? <MenuIcon /> : <ChevronRightIcon />}
+                        {open ? <MenuIcon /> : <ChevronRightIcon fontSize="large"/>}
                     </IconButton>
                 </AppBarIcon>
 
