@@ -36,7 +36,11 @@ const sharedPalette = (shade, defaultTheme) => ({
   },
   border: {
     main: alpha(defaultTheme.palette.text.disabled, 0.1)
-  }
+  },
+  logo:{
+    main: defaultTheme.palette.mode == "light"? "white" : "#F28C28",
+    secondary: defaultTheme.palette.mode == "light"? "white" : "#FF7F50",
+  },
 })
 //does not work!!!
 const sharedOverride = () => ({

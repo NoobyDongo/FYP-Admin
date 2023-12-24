@@ -5,6 +5,7 @@ import ImageUploading from 'react-images-uploading';
 import ImageIcon from '@mui/icons-material/Image';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
+import Image from 'next/image';
 
 
 export default function ImageUpload({ images, maxNumber, onChange, inputProps, ...others }) {

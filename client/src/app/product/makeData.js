@@ -13,7 +13,7 @@ data.forEach((e, i) => {
 })
 */
 
-var raw =
+var rawProduct =
     [
         {
             id: "3",
@@ -21,10 +21,8 @@ var raw =
             image: "",
             name: "Apple",
             desc: "Red Apple.",
-            producttype: {
-                id: "3",
-                name: "Fruit"
-            }
+            producttype: "1",
+            origin: "1"
         }
     ]
 
@@ -47,15 +45,43 @@ const flattenObject = (input) => {
 }
 
 
-const data = []
-raw.forEach((e) => {
+const products = []
+rawProduct.forEach((e) => {
     for (let i = 5; i >= 0; i--){
-        e.id = i
-        data.push(flattenObject(e))
+        var a = {...e}
+        a.id = i
+        a.producttype = Math.ceil(Math.random() * 2)
+        a.origin = Math.ceil(Math.random() * 2)
+        products.push(a)
+        //products.push(flattenObject(e))
     }
 })
-console.log(data)
+console.log(products)
 
+const rawOrigin =
+    [
+        {
+            id: "1",
+            name: "China"
+        },
+        {
+            id: "2",
+            name: "Hong Kong"
+        }
+        
+    ]
 
+const rawType =
+[
+    {
+        id: "1",
+        name: "Fruit"
+    },
+    {
+        id: "2",
+        name: "Vegetable"
+    }
+    
+]
 
-export { data }
+export { products, rawOrigin, rawType }

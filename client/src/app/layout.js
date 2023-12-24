@@ -1,10 +1,10 @@
-
 import './globals.css'
 import '../fonts/Inter-3.19/Inter Web/inter.css'
 
 
 import { cookies } from 'next/headers'
-import Wrapper from "./wrapper";
+import Wrapper from "../components/Nav/wrapper";
+import { useRouter } from 'next/navigation';
 
 export const metadata = {
   title: 'Create Next App',
@@ -17,14 +17,12 @@ export default function RootLayout({ children }) {
   const cookieStore = cookies()
   const cToken = cookieStore.get('token')
 
-  console.log(cToken)
-
   return (
     <html style={{
       overflow: "hidden", fontFamily: "Inter"
     }} lang="en">
 
-      <body style={{ fontFamily: "inherit", height: "100vh", width: "100vw", overflow: "auto", display: "flex" }}>
+      <body suppressHydrationWarning style={{ fontFamily: "inherit", height: "100vh", width: "100vw", overflow: "auto", display: "flex" }}>
 
         <Wrapper token={cToken}>{children}</Wrapper>
 

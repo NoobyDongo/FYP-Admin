@@ -1,3 +1,5 @@
+'use client'
+
 import { useTheme } from "@emotion/react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material";
@@ -75,54 +77,3 @@ export default function LoginForm(props) {
         </Box>
     )
 }
-
-/*
-return (
-        <Modal
-        sx={{
-            display:"flex",
-            alignItems:"center",
-            justifyContent:'center',
-        }}
-        slotProps={{
-            backdrop:{sx:{backdropFilter:"blur(5px)"}}
-        }}
-            open
-        >
-            <Paper sx={{ width: 400, height: 500, outline:"none"}}>
-                <Typography sx={{ padding: 3 }} variant="h5">Sign in</Typography>
-                <Divider sx={{ borderColor: theme.palette.background.default }} />
-
-                <Stack gap={3} sx={{ padding: 3 }}>
-                    <Stack gap={3}>
-
-
-                        <TextField
-                            label="Username/Email"
-                            variant="outlined"
-                            type="text"
-                            onChange={(e) => setValue(e)}
-                            fullWidth
-
-                            InputProps={{
-                                disableUnderline: true
-                            }}
-                        />
-                        <TextField
-                            label="Username/Email"
-                            variant="outlined"
-                            type="text"
-                            onChange={(e) => setValue(e)}
-                            fullWidth
-                        />
-
-                    </Stack>
-                    <Stack direction="row" gap={2}>
-                        <Link href="#" underline="hover">Forgot Password?</Link>
-                    </Stack>
-                </Stack>
-
-            </Paper>
-        </Modal>
-    )
-    */

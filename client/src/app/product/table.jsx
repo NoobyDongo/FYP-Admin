@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
     QueryClient,
@@ -17,64 +17,34 @@ import {
     Divider,
     Stack,
     TextField,
+    MenuItem,
 } from '@mui/material';
-import { data } from './makeData';
-import { TableEditTextFieldProps } from '@/components/Table'
+import { products, rawOrigin, rawType } from './makeData';
 import Table from '@/components/Table'
 import { MRT_EditActionButtons } from 'material-react-table';
-import ImageUploading from 'react-images-uploading';
 import ImageUpload from '@/components/ImageUpload';
-import { images } from '../../../next.config';
-
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
 
 
-
-function TextInputField(props) {
-    const { onChange } = props
-    const { label, variant, size, type, name, required, multiline } = props
-    const { InputProps, fullWidth } = props
-    const { ...others } = props
-
-    return (
-        <TextField
-            key={name}
-            label={label}
-            variant={variant}
-            size={size || "small"}
-            type={type}
-            name={name}
-            required={required}
-            onChange={onChange}
-            fullWidth={fullWidth}
-            multiline={multiline}
-            InputProps={{
-                ...InputProps,
-            }}
-            {...others}
-
-        />
-    )
-}
+var numberReg = /^-?\d+\.?\d*$/
 
 function TableColumnEditField(props) {
     const { col, validationErrors, setValidationErrors, onChange } = props
     if (col.input) {
         var input = col.input
         return (
-            <TextInputField
-                key={col.accessorKey}
+            <TextField
                 label={col.header}
                 name={col.accessorKey}
                 required={input.required}
                 type={input.type}
-                variant={input.variant || "standard"}
-                fullWidth={false}
+                variant={input.variant}
+                fullWidth={true}
                 multiline={input.multiline}
                 InputProps={input.InputProps}
-
+                select={input.optionList?.length >= 1}
                 onChange={onChange}
+
+                InputLabelProps={{ shrink: true }}
 
                 error={!!validationErrors?.[col.accessorKey]}
                 helperText={validationErrors?.[col.accessorKey]}
@@ -83,11 +53,21 @@ function TableColumnEditField(props) {
                         ...validationErrors,
                         [col.accessorKey]: undefined,
                     })}
-            />
+            >
+                {input.optionList?.map((e) => {
+                    var value = input.optionValueAccessorFn?.(e) || e.value
+                    var label = input.optionLabelAccessorFn?.(e) || e.label
+                    return (
+                        <MenuItem key={value} value={value}>
+                            {label}
+                        </MenuItem>
+                    )
+                })}
+            </TextField>
         )
     }
 }
-
+/*
 function DateInputField({ edit, value, setValue }) {
 
     return (
@@ -106,11 +86,11 @@ function DateInputField({ edit, value, setValue }) {
                     }}
                 />
             }
-            {(!value && !edit) && <TextInputField value={"——"} />}
+            {(!value && !edit) && <Text value={"——"} />}
         </>
     )
 }
-
+*/
 function useRecordValidation(columns) {
     const [validators, setValidators] = useState([]);
 
@@ -128,22 +108,36 @@ function useRecordValidation(columns) {
                 ...t
             }
         })
-
         return r
     }
 
     useEffect(() => {
-        console.log("Table rendered")
         setValidators([])
         columns.forEach((c) => {
+            if (c.input?.required && c.input?.validator) {
+                setValidators(prev => [
+                    ...prev,
+                    (r) => ({
+                        [c.accessorKey]:
+                        !validateRequired(r[c.accessorKey]) ? `${c.header} is Required`
+                            :
+                            !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : ''
+                    })
+                ])
+            }
             if (c.input?.required) {
                 setValidators(prev => [
                     ...prev,
                     (r) => ({ [c.accessorKey]: !validateRequired(r[c.accessorKey]) ? `${c.header} is Required` : '' })
                 ])
             }
+            if (c.input?.validator) {
+                setValidators(prev => [
+                    ...prev,
+                    (r) => ({ [c.accessorKey]: !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : '' })
+                ])
+            }
         })
-        console.log("Table rendered", "errors", validators)
     }, [columns])
 
     return validateRecord
@@ -188,12 +182,12 @@ function RawProductTable() {
         table.setEditingRow(null); //exit editing mode
     };
 
+    console.log("Table Rendered")
 
     const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate();
     const { data: fetchedRecords = [], isError: isLoadingError, isFetching: isFetchingRecords, isLoading: isLoadingRecords, } = useGet();
     const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate();
     const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete();
-
 
     const columns = useMemo(
         () => [
@@ -208,10 +202,10 @@ function RawProductTable() {
                 header: 'Name',
                 size: 200,
                 input: {
-                    multiline: true,
                     required: true,
                 },
-                Cell: ({ renderedCellValue, row }) => (
+                Cell: ({ renderedCellValue, row}) => { 
+                    return(
                     <Box
                         sx={{
                             display: 'flex',
@@ -223,14 +217,14 @@ function RawProductTable() {
                             alt="avatar"
                             height={30}
                             width={30}
-                            src="/image/avatar.png"
+                            src={row.original.image || "/image/avatar.png"}
                             loading="lazy"
                             style={{ borderRadius: '50%' }}
                         />
                         {/* using renderedCellValue instead of cell.getValue() preserves filter match highlighting */}
                         <span>{renderedCellValue}</span>
                     </Box>
-                ),
+                )},
             },
             {
                 accessorKey: 'desc',
@@ -242,15 +236,52 @@ function RawProductTable() {
                 },
             },
             {
-                accessorKey: 'producttype_name',
-                header: 'Type',
+                accessorKey: 'price',
+                header: 'Price',
                 size: 150,
+                input: {
+                    type: "tel", //no updown arrow this way lol
+                    required: true,
+                    validator: (value) => value > 0 && numberReg.test(value),
+                    errorMessage: "Number format incorrect"
+                },
             },
+            {
+                accessorKey: 'producttype',
+                header: 'Type',
+                size: 200,
+                input: {
+                    optionList: rawType,
+                    optionValueAccessorFn: (value) => value.id,
+                    optionLabelAccessorFn: (value) => value.name,
+                    required: true,
+                },
+                Cell: ({ cell }) => (
+                    <Box>
+                        {rawType.find((e) => e.id == cell.getValue()).name}
+                    </Box>
+                ),
+            },
+            {
+                accessorKey: "origin",
+                header: "Origin",
+                size: 200,
+                input: {
+                    optionList: rawOrigin,
+                    optionValueAccessorFn: (value) => value.id,
+                    optionLabelAccessorFn: (value) => value.name,
+                    required: true,
+                },
+                Cell: ({ cell }) => (
+                    <Box>
+                        {rawOrigin.find((e) => e.id == cell.getValue()).name}
+                    </Box>
+                ),
+            }
 
         ], [validationErrors],
     );
     const validateRecord = useRecordValidation(columns)
-
 
     const editPrompt = ({ table, row, internalEditComponents }) => (
         <>
@@ -267,7 +298,6 @@ function RawProductTable() {
         </>
     )
 
-
     const createForm = useRef({})
     const [images, setImages] = useState([]);
 
@@ -276,12 +306,11 @@ function RawProductTable() {
 
         const onImageUploadChange = (imageList, addUpdateIndex) => {
             // data for submit
-            console.log(imageList, addUpdateIndex);
             setImages(imageList);
             onFormValueChange({
                 target: {
                     name: "image",
-                    value: imageList
+                    value: imageList[0]?.data_url || null
                 }
             })
         };
@@ -304,11 +333,9 @@ function RawProductTable() {
                             maxNumber={1}
                             onChange={onImageUploadChange}
                         ></ImageUpload>
-                        <Stack gap="1rem" direction="">
-                        </Stack>
                     </Stack>
                     {
-                        columns.map((col, i) =>
+                        columns.slice(0, 4).map((col, i) =>
                             <TableColumnEditField key={i}
                                 col={col}
                                 onChange={onFormValueChange}
@@ -316,6 +343,17 @@ function RawProductTable() {
                                 setValidationErrors={setValidationErrors} />
                         )
                     }
+                    <Stack gap="1rem" direction="row" width={1}>
+                        {
+                            columns.slice(4, 6).map((col, i) =>
+                                <TableColumnEditField key={i}
+                                    col={col}
+                                    onChange={onFormValueChange}
+                                    validationErrors={validationErrors}
+                                    setValidationErrors={setValidationErrors} />
+                            )
+                        }
+                    </Stack>
                 </DialogContent>
                 <DialogActions>
                     <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -402,7 +440,7 @@ function useGet() {
         queryFn: async () => {
             //send api request here
             await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-            return Promise.resolve(data);
+            return Promise.resolve(products);
         },
         refetchOnWindowFocus: false,
     });

@@ -49,3 +49,25 @@ improved to table component
     allowed validator to be auto configureted with columns
     overrides the internalComponents thing with material react table
     image can now be uploaded thx to https://www.npmjs.com/package/react-images-uploading
+
+24/12/2023
+to do:
+notification for edit/creation
+add more components(ImageUpload, slider, ...)
+edit prompt
+refactor
+better scrollbar
+done:
+improved table component:
+    can create a new product record(UI logic)
+    select is added to the tableColumnTextField
+    validator can now be customized: input.validator
+improved visual:
+    improved sidebar
+        better animation
+        option will be highlited when active
+        added an logo to sidebar
+    fixed a bug that prevented motion.div from updating when switching page
+    
+
+

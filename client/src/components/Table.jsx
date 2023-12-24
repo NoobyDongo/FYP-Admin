@@ -34,7 +34,7 @@ import { useTheme } from '@emotion/react';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
-const Example = (props) => {
+const RawTable = (props) => {
     const theme = useTheme()
 
     const { setValidationErrors, validateRecord } = props
@@ -68,7 +68,7 @@ const Example = (props) => {
         await updateRecord(values);
         table.setEditingRow(null); //exit editing mode
     };
-
+    
     const defaultEditPrompt = ({ table, row, internalEditComponents }) => (
         <>
             <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
@@ -401,7 +401,7 @@ export function TableEditTextFieldProps(setValidationErrors, validationErrors, {
 const Table = (props) => (
     //Put this with your other react-query providers near root of your app
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Example {...props} />
+        <RawTable {...props} />
     </LocalizationProvider>
 );
 
