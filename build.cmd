@@ -1,2 +1,4 @@
+@echo off
 cd client
-npm run build
+call npm run build
+pause

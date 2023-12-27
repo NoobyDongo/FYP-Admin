@@ -2,9 +2,10 @@
 
 import { useTheme } from "@emotion/react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Box, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-
+import { useCookies } from 'next-client-cookies';
+import { useRouter } from "next/navigation";
 
 export default function LoginForm(props) {
     const theme = useTheme()
@@ -17,18 +18,26 @@ export default function LoginForm(props) {
         event.preventDefault();
     };
 
+    const cookies = useCookies()
+    const router = useRouter()
+    const signin = async() => {
+        cookies.set("token", "value")
+        router.push("/")
+    }
+
     return (
-        <Box 
+        <Box
             display="flex"
             justifyContent="center"
             alignItems="center"
             minHeight="100vh"
+            minWidth="100vw"
         >
-            <Paper sx={{ minWidth: 400, minHeight: 500 }}>
+            <Paper sx={{ minWidth: 400, minHeight: "fit-content" }}>
                 <Typography sx={{ padding: 3 }} variant="h5">Sign in</Typography>
                 <Divider sx={{ borderColor: theme.palette.background.default }} />
 
-                <Stack gap={3} sx={{ padding: 3 }}>
+                <Stack gap={3} sx={{ padding: 3, height: 1 }}>
                     <Stack gap={3}>
 
 
@@ -70,6 +79,14 @@ export default function LoginForm(props) {
                     <Stack direction="row" gap={2}>
                         <Link href="#" underline="hover">Forgot Password?</Link>
                         <Link href="#" underline="hover">New User?</Link>
+                    </Stack>
+                    <Stack direction="row" gap={2} sx={{
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        marginTop: 10,
+                    }}>
+                        <Button> Cancel</Button>
+                        <Button variant="contained" onClick={signin}>Login</Button>
                     </Stack>
                 </Stack>
 

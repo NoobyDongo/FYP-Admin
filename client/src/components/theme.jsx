@@ -86,7 +86,7 @@ const darkTheme = createTheme({
     ...sharedDrawerTheme('black', "white"),
     ...sharedTypographyTheme,
 });
-const lightSharedPalette = {...sharedPalette(700, defaultLightTheme)}
+const lightSharedPalette = {...sharedPalette(800, defaultLightTheme)}
 const lightTheme = createTheme({
     palette: {
       mode: 'light',

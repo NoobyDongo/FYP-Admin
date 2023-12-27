@@ -1,3 +1,5 @@
+@echo off
 cd client
 explorer http://localhost:3000
-npm run dev
+call npm run dev
+pause

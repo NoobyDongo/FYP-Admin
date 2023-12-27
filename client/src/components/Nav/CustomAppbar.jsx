@@ -22,15 +22,22 @@ import { useRouter } from 'next/navigation';
 import { Stack, alpha } from "@mui/material";
 import { Box, lighten } from "@mui/material";
 import { usePathname } from "next/navigation";
+import { useCookies } from "next-client-cookies";
 
 export function CustomAppbar({ open, onOpen, onClose }) {
-    const theme = useTheme()
+
+    const cookies = useCookies()
+    const router = useRouter()
+    const signout = () => {
+        cookies.set("token", "")
+        router.push("/signin")
+    }
+
     return (
         <AppBar position="fixed" open={open} sx={{
 
         }}>
-            <Toolbar style={{ padding: 0 }}>
-
+            <Toolbar style={{ padding: 0, paddingRight: 16 }}>
                 <DrawerHeader open={open} />
                 <AppBarIcon>
                     <IconButton
@@ -52,6 +59,20 @@ export function CustomAppbar({ open, onOpen, onClose }) {
                 <Typography variant="h6" fontWeight={600} noWrap component="div">
                     {"{Placeholder}"}
                 </Typography>
+
+                <IconButton
+                        aria-label="sign out"
+                        edge="start"
+                        sx={{
+                            height: 40,
+                            width: 40,
+                            marginLeft: "auto",
+                            stroke: "currentcolor", strokeWidth: 1,
+                        }}
+                        onClick={signout}
+                    >
+                        <ChevronRightIcon fontSize="large"/>
+                    </IconButton>
             </Toolbar>
         </AppBar>
     )
