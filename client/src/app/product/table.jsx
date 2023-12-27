@@ -24,13 +24,16 @@ import Table from '@/components/Table'
 import { MRT_EditActionButtons } from 'material-react-table';
 import ImageUpload from '@/components/ImageUpload';
 
-
 var numberReg = /^-?\d+\.?\d*$/
 
 function TableColumnEditField(props) {
     const { col, validationErrors, setValidationErrors, onChange, value } = props
-    if (col.input) {
-        var input = col.input
+
+    if (!col.input)
+        return
+
+    var input = col.input
+    if (!col.type || col.type == "text")
         return (
             <TextField
                 label={col.header}
@@ -66,8 +69,17 @@ function TableColumnEditField(props) {
                 })}
             </TextField>
         )
-    }
+    else if (col.type == "image")
+        return (
+            <ImageUpload
+                images={images}
+                maxNumber={1}
+                onChange={onImageUploadChange}
+            ></ImageUpload>
+        )
+
 }
+
 /*
 function DateInputField({ edit, value, setValue }) {
 
@@ -126,13 +138,13 @@ function useRecordValidation(columns) {
                     })
                 ])
             }
-            if (c.input?.required) {
+            else if (c.input?.required) {
                 setValidators(prev => [
                     ...prev,
                     (r) => ({ [c.accessorKey]: !validateRequired(r[c.accessorKey]) ? `${c.header} is Required` : '' })
                 ])
             }
-            if (c.input?.validator) {
+            else if (c.input?.validator) {
                 setValidators(prev => [
                     ...prev,
                     (r) => ({ [c.accessorKey]: !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : '' })
@@ -173,15 +185,16 @@ function useEditForm(columns, tableName){
 }
 */
 
-function EditPrompt(props){
+function EditPrompt(props) {
     const [validationErrors, setValidationErrors] = useState({});
 
-    const {table, columns, images, setImages, editForm, row, tableName} = props
+    const { table, columns, images, setImages, editForm, row, tableName } = props
     useEffect(() => {
-        setImages([{data_url : row.original.image}])
-        editForm.current = {...row.original}
+        setImages([{ data_url: row.original.image }])
+        editForm.current = { ...row.original }
         editForm.current.id = row.original.id
-    },[])
+        console.log("Render EditPrompt")
+    }, [])
 
     const onImageUploadChange = (imageList, addUpdateIndex) => {
         // data for submit
@@ -195,7 +208,7 @@ function EditPrompt(props){
     };
 
     const onFormValueChange = (e) => {
-        editForm.current[e.target.name]= e.target.value
+        editForm.current[e.target.name] = e.target.value
         console.log(editForm.current)
     }
 
@@ -278,7 +291,7 @@ function RawProductTable() {
             ...editForm.current,
         }
 
-        console.log("editForm", {...values})
+        console.log("editForm", { ...values })
 
         const newValidationErrors = validateRecord(obj);
         if (Object.values(newValidationErrors).some((error) => error)) {
@@ -397,7 +410,7 @@ function RawProductTable() {
     const [images, setImages] = useState([]);
     const editForm = useRef({})
 
-    const editPrompt = ({ table, row, internalEditComponents }) => 
+    const editPrompt = ({ table, row, internalEditComponents }) =>
         <EditPrompt table={table} columns={columns} tableName={tableName} row={row} setImages={setImages} images={images} editForm={editForm}></EditPrompt>
 
     const createForm = useRef({})

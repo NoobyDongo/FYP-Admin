@@ -69,5 +69,19 @@ improved visual:
         added an logo to sidebar
     fixed a bug that prevented motion.div from updating when switching page
     
-
+27/12/2023
+to do:
+notification for edit/creation
+add more components(ImageUpload, slider, ...)
+refactor
+better scrollbar
+fix known issues
+    the target page will display for a brief moment before redirection to the login page
+    editprompt cant seem to load default value of select input on first load
+    
+done:
+Signin and signout logics are now implemented
+improved visual:
+    Theme color adjustment
+    
 

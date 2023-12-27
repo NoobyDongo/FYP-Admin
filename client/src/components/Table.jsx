@@ -37,7 +37,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 const RawTable = (props) => {
     const theme = useTheme()
 
-    const { setValidationErrors, validateRecord } = props
+    const { setValidationErrors, validateRecord, onCreatingRowCancel, onEditingRowCancel } = props
     const { handleSave, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
     const { createRecord, updateRecord, deleteRecord } = props
     const { columns, initialState, tableName } = props
@@ -222,8 +222,8 @@ const RawTable = (props) => {
     ),
     */
         getRowId: (row) => row.id,
-        onCreatingRowCancel: () => setValidationErrors({}),
-        onEditingRowCancel: () => setValidationErrors({}),
+        onCreatingRowCancel: () => {setValidationErrors({}), onCreatingRowCancel?.()},
+        onEditingRowCancel: () => {setValidationErrors({}), onEditingRowCancel?.()},
         onCreatingRowSave: handleCreate || defaultHandleCreate,
         onEditingRowSave: handleSave || defaultHandleSave,
         renderCreateRowDialogContent: createPrompt || defaultCreatePrompt,
@@ -377,26 +377,6 @@ const RawTable = (props) => {
         <MaterialReactTable table={table} />
     )
 };
-
-export function TableEditTextFieldProps(setValidationErrors, validationErrors, { type, required, name }) {
-
-    return (
-        {
-            muiEditTextFieldProps: {
-                type: type || "text",
-                required: required,
-                error: !!validationErrors?.[name],
-                helperText: validationErrors?.[name],
-                //remove any previous validation errors when user focuses on the input
-                onFocus: () =>
-                    setValidationErrors({
-                        ...validationErrors,
-                        [name]: undefined,
-                    }),
-            }
-        }
-    )
-}
 
 const Table = (props) => (
     //Put this with your other react-query providers near root of your app

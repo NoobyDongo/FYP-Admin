@@ -24,9 +24,9 @@ export default function RootLayout({ children }) {
     }} lang="en">
 
       <body suppressHydrationWarning style={{ fontFamily: "inherit", height: "100vh", width: "100vw", overflow: "auto", display: "flex" }}>
-<CookiesProvider>
-        <Wrapper token={cToken}>{children}</Wrapper>
-</CookiesProvider>
+        <CookiesProvider>
+          <Wrapper token={cToken}>{children}</Wrapper>
+        </CookiesProvider>
 
       </body>
     </html>
