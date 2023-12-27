@@ -27,13 +27,9 @@ import ImageUpload from '@/components/ImageUpload';
 var numberReg = /^-?\d+\.?\d*$/
 
 function TableColumnEditField(props) {
-    const { col, validationErrors, setValidationErrors, onChange, value } = props
-
-    if (!col.input)
-        return
-
-    var input = col.input
-    if (!col.type || col.type == "text")
+    const { col, validationErrors, setValidationErrors, onChange } = props
+    if (col.input) {
+        var input = col.input
         return (
             <TextField
                 label={col.header}
@@ -155,106 +151,6 @@ function useRecordValidation(columns) {
 
     return validateRecord
 }
-/*
-function useEditForm(columns, tableName){
-    const [validationErrors, setValidationErrors] = useState({});
-    const [images, setImages] = useState([]);
-    const [form, setForm] = useState([]);
-
-    useEffect(() => {
-        setImages([{data_url : row.original.image}])
-        setForm({...form, ...row.original, id:row.original.id})
-    },[])
-
-    const onImageUploadChange = (imageList, addUpdateIndex) => {
-        // data for submit
-        setImages(imageList);
-        onFormValueChange({
-            target: {
-                name: "image",
-                value: imageList[0]?.data_url || null
-            }
-        })
-    };
-
-    const onFormValueChange = (e) => {
-        setForm({...form, id:row.original.id})
-        editForm.current[e.target.name]= e.target.value
-        console.log(editForm.current)
-    }
-}
-*/
-
-function EditPrompt(props) {
-    const [validationErrors, setValidationErrors] = useState({});
-
-    const { table, columns, images, setImages, editForm, row, tableName } = props
-    useEffect(() => {
-        setImages([{ data_url: row.original.image }])
-        editForm.current = { ...row.original }
-        editForm.current.id = row.original.id
-        console.log("Render EditPrompt")
-    }, [])
-
-    const onImageUploadChange = (imageList, addUpdateIndex) => {
-        // data for submit
-        setImages(imageList);
-        onFormValueChange({
-            target: {
-                name: "image",
-                value: imageList[0]?.data_url || null
-            }
-        })
-    };
-
-    const onFormValueChange = (e) => {
-        editForm.current[e.target.name] = e.target.value
-        console.log(editForm.current)
-    }
-
-    return (
-        <>
-            <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
-            <Divider />
-            <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-                <Stack direction="row" gap="1rem">
-                    <ImageUpload
-                        images={images}
-                        maxNumber={1}
-                        onChange={onImageUploadChange}
-                    ></ImageUpload>
-                </Stack>
-                {
-                    columns.slice(0, 4).map((col, i) =>
-                        <TableColumnEditField key={i}
-                            col={col}
-                            value={editForm.current[col.accessorKey]}
-                            onChange={onFormValueChange}
-                            validationErrors={validationErrors}
-                            setValidationErrors={setValidationErrors} />
-                    )
-                }
-                <Stack gap="1rem" direction="row" width={1}>
-                    {
-                        columns.slice(4, 6).map((col, i) =>
-                            <TableColumnEditField key={i}
-                                col={col}
-                                value={editForm.current[col.accessorKey]}
-                                onChange={onFormValueChange}
-                                validationErrors={validationErrors}
-                                setValidationErrors={setValidationErrors} />
-                        )
-                    }
-                </Stack>
-            </DialogContent>
-            <DialogActions>
-                <MRT_EditActionButtons variant="text" table={table} row={row} />
-            </DialogActions>
-        </>
-    )
-}
 
 function RawProductTable() {
     const [validationErrors, setValidationErrors] = useState({});
@@ -284,16 +180,8 @@ function RawProductTable() {
     };
 
     const handleSave = async ({ values, table }) => {
-
-        console.log("editForm", editForm.current)
-
-        const obj = {
-            ...editForm.current,
-        }
-
-        console.log("editForm", { ...values })
-
-        const newValidationErrors = validateRecord(obj);
+        console.log(values)
+        const newValidationErrors = validateRecord(values);
         if (Object.values(newValidationErrors).some((error) => error)) {
             setValidationErrors(newValidationErrors);
             return;
@@ -407,11 +295,20 @@ function RawProductTable() {
     );
     const validateRecord = useRecordValidation(columns)
 
-    const [images, setImages] = useState([]);
-    const editForm = useRef({})
-
-    const editPrompt = ({ table, row, internalEditComponents }) =>
-        <EditPrompt table={table} columns={columns} tableName={tableName} row={row} setImages={setImages} images={images} editForm={editForm}></EditPrompt>
+    const editPrompt = ({ table, row, internalEditComponents }) => (
+        <>
+            <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
+            <Divider />
+            <DialogContent
+                sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            >
+                {internalEditComponents} {/* or render custom edit components here */}
+            </DialogContent>
+            <DialogActions>
+                <MRT_EditActionButtons variant="text" table={table} row={row} />
+            </DialogActions>
+        </>
+    )
 
     const createForm = useRef({})
 
