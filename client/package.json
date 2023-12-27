@@ -21,6 +21,7 @@
     "framer-motion": "^10.16.4",
     "material-react-table": "^2.x.x",
     "next": "latest",
+    "next-client-cookies": "^1.1.0",
     "react": "latest",
     "react-dom": "latest",
     "react-images-uploading": "^3.1.7",

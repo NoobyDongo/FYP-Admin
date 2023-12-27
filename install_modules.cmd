@@ -1,2 +1,4 @@
+@echo off
 cd client
-npm i
+call npm i
+pause

@@ -12,9 +12,24 @@ import EngineeringIcon from '@mui/icons-material/Engineering';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import CategoryIcon from '@mui/icons-material/Category';
 import { Box } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useCookies } from 'next-client-cookies';
+import { usePathname } from "next/navigation";
 
-export default function Wrapper({ children, token }) {
+function useLogin() {
+    const cookies = useCookies()
+    const token = cookies.get('token')
+    const router = useRouter()
+    const location = usePathname()
+    React.useEffect(() => {
+        if (!token && location !== "/signin") {
+            router.push("/signin")
+        }
+    })
+    return [token, location]
+}
 
+export default function Wrapper({ children }) {
     const [open, setOpen] = React.useState(false);
     const onDrawerOpen = () => {
         setOpen(true);
@@ -48,20 +63,26 @@ export default function Wrapper({ children, token }) {
         ]
     ]
 
+    const [token, location] = useLogin()
+
     return (
         <Themed darkmode={darkmode}>
 
-            <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen}/>
-            <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />
+            {token && location !== "/signin" && <>
+                <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
+                <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />
 
-            <Body open={open} className="test-body">
-                <DrawerHeader />
-                <Box id="pageContainer" sx={{ px: 4, }}>
-                    <FadeWrapper>
-                        {children}
-                    </FadeWrapper>
-                </Box>
-            </Body>
+                <Body open={open} className="test-body">
+                    <DrawerHeader />
+                    <Box id="pageContainer" sx={{ px: 4, }}>
+                        <FadeWrapper>
+                            {children}
+                        </FadeWrapper>
+                    </Box>
+                </Body>
+            </>}
+
+            {(!token || location == "/signin") && children}
         </Themed>
     )
 }

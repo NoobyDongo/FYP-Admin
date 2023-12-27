@@ -50,8 +50,8 @@ rawProduct.forEach((e) => {
     for (let i = 5; i >= 0; i--){
         var a = {...e}
         a.id = i
-        a.producttype = Math.ceil(Math.random() * 2)
-        a.origin = Math.ceil(Math.random() * 2)
+        a.producttype = `${Math.ceil(Math.random() * 2)}`
+        a.origin = `${Math.ceil(Math.random() * 2)}`
         products.push(a)
         //products.push(flattenObject(e))
     }

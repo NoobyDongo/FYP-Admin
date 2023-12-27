@@ -79,7 +79,11 @@
   margin: 0;
   scrollbar-width: thin;
 }
-
+/*
+html, body{
+  background: yellow;
+}
+*/
 @media (prefers-color-scheme: dark) {
 *::-webkit-scrollbar {
   width: 1rem;
