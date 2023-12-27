@@ -185,7 +185,6 @@ function useEditForm(columns, tableName){
 }
 */
 
-<<<<<<< HEAD
 function EditPrompt(props) {
     const [validationErrors, setValidationErrors] = useState({});
 
@@ -196,17 +195,6 @@ function EditPrompt(props) {
         editForm.current.id = row.original.id
         console.log("Render EditPrompt")
     }, [])
-=======
-function EditPrompt(props){
-    const [validationErrors, setValidationErrors] = useState({});
-
-    const {table, columns, images, setImages, editForm, row, tableName} = props
-    useEffect(() => {
-        setImages([{data_url : row.original.image}])
-        editForm.current = {...row.original}
-        editForm.current.id = row.original.id
-    },[])
->>>>>>> 8d4e3f9d762a13b4997f5e7d363043262b8aa1d5
 
     const onImageUploadChange = (imageList, addUpdateIndex) => {
         // data for submit
@@ -220,11 +208,7 @@ function EditPrompt(props){
     };
 
     const onFormValueChange = (e) => {
-<<<<<<< HEAD
         editForm.current[e.target.name] = e.target.value
-=======
-        editForm.current[e.target.name]= e.target.value
->>>>>>> 8d4e3f9d762a13b4997f5e7d363043262b8aa1d5
         console.log(editForm.current)
     }
 
@@ -307,11 +291,7 @@ function RawProductTable() {
             ...editForm.current,
         }
 
-<<<<<<< HEAD
         console.log("editForm", { ...values })
-=======
-        console.log("editForm", {...values})
->>>>>>> 8d4e3f9d762a13b4997f5e7d363043262b8aa1d5
 
         const newValidationErrors = validateRecord(obj);
         if (Object.values(newValidationErrors).some((error) => error)) {
@@ -430,11 +410,7 @@ function RawProductTable() {
     const [images, setImages] = useState([]);
     const editForm = useRef({})
 
-<<<<<<< HEAD
     const editPrompt = ({ table, row, internalEditComponents }) =>
-=======
-    const editPrompt = ({ table, row, internalEditComponents }) => 
->>>>>>> 8d4e3f9d762a13b4997f5e7d363043262b8aa1d5
         <EditPrompt table={table} columns={columns} tableName={tableName} row={row} setImages={setImages} images={images} editForm={editForm}></EditPrompt>
 
     const createForm = useRef({})
