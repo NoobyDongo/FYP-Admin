@@ -7,13 +7,10 @@ import {
     DialogTitle,
     ListItemIcon,
     MenuItem,
-    Typography,
     lighten,
     ListItemText,
     Paper,
     Divider,
-    alpha,
-    Stack,
 } from '@mui/material';
 import {
     MRT_EditActionButtons,
@@ -33,11 +30,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@emotion/react';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import useRecordValidation from '@/hooks/useRecordValidation';
 
 const RawTable = (props) => {
     const theme = useTheme()
 
-    const { setValidationErrors, validateRecord, onCreatingRowCancel, onEditingRowCancel } = props
+    const { onCreatingRowCancel, onEditingRowCancel } = props
     const { handleSave, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
     const { createRecord, updateRecord, deleteRecord } = props
     const { columns, initialState, tableName } = props
@@ -45,6 +43,12 @@ const RawTable = (props) => {
     const { isCreatingRecord, isUpdatingRecord, isDeletingRecord } = props
     const { isFetchingRecords, isLoadingError, isLoadingRecords } = props
 
+    const validateRecord = useRecordValidation(columns)
+/*
+    useEffect(() => {
+        start()
+    })
+*/
     const defaultHandleCreate = async ({ values, table }) => {
         console.log(values)
         const newValidationErrors = validateRecord(values);
@@ -68,7 +72,7 @@ const RawTable = (props) => {
         await updateRecord(values);
         table.setEditingRow(null); //exit editing mode
     };
-    
+
     const defaultEditPrompt = ({ table, row, internalEditComponents }) => (
         <>
             <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
@@ -132,7 +136,7 @@ const RawTable = (props) => {
             variant: 'outlined',
         },
         muiEditRowDialogProps: {
-            
+
         },
         muiPaginationProps: {
             sx: {
@@ -222,8 +226,8 @@ const RawTable = (props) => {
     ),
     */
         getRowId: (row) => row.id,
-        onCreatingRowCancel: () => {setValidationErrors({}), onCreatingRowCancel?.()},
-        onEditingRowCancel: () => {setValidationErrors({}), onEditingRowCancel?.()},
+        onCreatingRowCancel: () => { onCreatingRowCancel?.() },
+        onEditingRowCancel: () => { onEditingRowCancel?.() },
         onCreatingRowSave: handleCreate || defaultHandleCreate,
         onEditingRowSave: handleSave || defaultHandleSave,
         renderCreateRowDialogContent: createPrompt || defaultCreatePrompt,
@@ -325,6 +329,7 @@ const RawTable = (props) => {
                         alignItems: "center",
                         justifyContent: 'space-between',
                         gap: '0.5rem',
+                        position: "relative",
                     })}
                 >
                     <Box sx={{
@@ -369,7 +374,7 @@ const RawTable = (props) => {
             isLoading: isLoadingRecords,
             isSaving: isCreatingRecord || isUpdatingRecord || isDeletingRecord,
             showAlertBanner: isLoadingError,
-            showProgressBars: isFetchingRecords,
+            showProgressBars: isFetchingRecords || true || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
         },
     });
 

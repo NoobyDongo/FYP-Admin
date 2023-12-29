@@ -78,10 +78,22 @@ better scrollbar
 fix known issues
     the target page will display for a brief moment before redirection to the login page
     editprompt cant seem to load default value of select input on first load
-    
 done:
 Signin and signout logics are now implemented
 improved visual:
     Theme color adjustment
     
-
+29/12/2023
+to do:
+refactor
+better scrollbar??
+done:
+table prompts are now better:
+    usePrompt is available
+    editPrompt is completely fine now
+    enhanced prompt performance, typing in text input no longer update the whole prompt/form
+    ImageUpload is added to TableColumnEditField
+    TableColumnEditField can now be grouped and ordered
+a progress bar is added on top of the page, with invokers in useProgress.js
+notifications can now be displayed with https://github.com/iamhosseindhv/notistack thanks a lot :-))
+the page no longer glitch when getting redirected to login page

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from "react";
 import { styled, useTheme } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -18,11 +17,10 @@ import ListItemText from '@mui/material/ListItemText';
 
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { useRouter } from 'next/navigation';
-import { Stack, alpha } from "@mui/material";
-import { Box, lighten } from "@mui/material";
-import { usePathname } from "next/navigation";
+import { Box, lighten, alpha } from "@mui/material";
+import { usePathname, useRouter } from "next/navigation";
 import { useCookies } from "next-client-cookies";
+import { closedTransitionMixin, openCloseTransitionMixin, openedTransitionMixin } from "@/style/TransitionMixin";
 
 export function CustomAppbar({ open, onOpen, onClose }) {
 
@@ -81,33 +79,10 @@ export function CustomAppbar({ open, onOpen, onClose }) {
 export const drawerOpenedWidth = 200;
 export const drawerClosedWidth = 65;
 
-const openCloseTransitionMixin = (theme, open, thing, onOpen, onClose) => ({
-    ...(!open && {
-        ...closedTransitionMixin(theme, thing),
-        ...onClose
-    }),
-    ...(open && {
-        ...openedTransitionMixin(theme, thing),
-        ...onOpen
-    }),
-})
-
-const openedTransitionMixin = (theme, thing) => ({
-    transition: theme.transitions.create(thing, {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-    }),
-});
 const openedMixin = (theme) => ({
     ...openedTransitionMixin(theme, "width"),
     width: drawerOpenedWidth,
     overflowX: 'hidden',
-});
-const closedTransitionMixin = (theme, thing) => ({
-    transition: theme.transitions.create(thing, {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-    }),
 });
 const closedMixin = (theme) => ({
     ...closedTransitionMixin(theme, "width"),
@@ -184,6 +159,7 @@ export const Body = styled(Box, { shouldForwardProp: (prop) => prop !== 'open' }
     flexShrink: 1,
     display: "flex",
     flexDirection: "column",
+    overflowX: "hidden",
     ...openCloseTransitionMixin(theme, open, "width", {
         paddingLeft: `calc(100% - ${drawerOpenedWidth}px - 100%)`,
         width: `calc(100vw - ${drawerOpenedWidth}px)`
@@ -192,7 +168,6 @@ export const Body = styled(Box, { shouldForwardProp: (prop) => prop !== 'open' }
         width: `calc(100vw - ${drawerClosedWidth}px)`
     })
 }))
-
 const CustomListItemIcon = styled(ListItemIcon, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     minWidth: 0,
     justifyContent: 'center',
@@ -212,7 +187,7 @@ function ListOption(props) {
     const { e, open, ...others } = props
     const pathname = usePathname()
     const theme = useTheme()
-    console.log(pathname, e.link)
+    console.log(pathname, e.link, e.name)
 
     return (
         <ListItem disablePadding sx={{ display: 'block' }} {...others}>

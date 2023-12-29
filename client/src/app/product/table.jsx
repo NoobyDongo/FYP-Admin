@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import {
     QueryClient,
@@ -11,301 +11,23 @@ import {
 
 import {
     Box,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    Stack,
-    TextField,
-    MenuItem,
 } from '@mui/material';
 import { products, rawOrigin, rawType } from './makeData';
 import Table from '@/components/Table'
-import { MRT_EditActionButtons } from 'material-react-table';
-import ImageUpload from '@/components/ImageUpload';
-
-var numberReg = /^-?\d+\.?\d*$/
-
-function TableColumnEditField(props) {
-    const { col, validationErrors, setValidationErrors, onChange, value } = props
-
-    if (!col.input)
-        return
-
-    var input = col.input
-    if (!col.type || col.type == "text")
-        return (
-            <TextField
-                label={col.header}
-                name={col.accessorKey}
-                required={input.required}
-                type={input.type}
-                variant={input.variant}
-                fullWidth={true}
-                defaultValue={value}
-                multiline={input.multiline}
-                InputProps={input.InputProps}
-                select={input.optionList?.length >= 1}
-                onChange={onChange}
-
-                InputLabelProps={{ shrink: true }}
-
-                error={!!validationErrors?.[col.accessorKey]}
-                helperText={validationErrors?.[col.accessorKey]}
-                onFocus={() =>
-                    setValidationErrors({
-                        ...validationErrors,
-                        [col.accessorKey]: undefined,
-                    })}
-            >
-                {input.optionList?.map((e) => {
-                    var value = input.optionValueAccessorFn?.(e) || e.value
-                    var label = input.optionLabelAccessorFn?.(e) || e.label
-                    return (
-                        <MenuItem key={value} value={value}>
-                            {label}
-                        </MenuItem>
-                    )
-                })}
-            </TextField>
-        )
-    else if (col.type == "image")
-        return (
-            <ImageUpload
-                images={images}
-                maxNumber={1}
-                onChange={onImageUploadChange}
-            ></ImageUpload>
-        )
-
-}
-
-/*
-function DateInputField({ edit, value, setValue }) {
-
-    return (
-        <>
-            {(value || edit) &&
-                <DatePicker
-                    defaultValue={value || dayjs(new Date())}
-                    disableOpenPicker={!edit}
-                    onChange={(e) => setValue(e)}
-                    slotProps={{
-                        disableUnderline: !edit, textField: {
-                            variant: "standard", size: 'small', readOnly: !edit, InputProps: {
-                                disableUnderline: !edit
-                            }
-                        }
-                    }}
-                />
-            }
-            {(!value && !edit) && <Text value={"——"} />}
-        </>
-    )
-}
-*/
-function useRecordValidation(columns) {
-    const [validators, setValidators] = useState([]);
-
-    const validateRequired = (value) => value !== undefined && !!value.length;
-    function validateRecord(record) {
-        console.log("validateRecord", record)
-        console.log("validateRecordError", validators)
-
-        var r = {}
-        validators.forEach(e => {
-            var t = e(record)
-            console.log("temp", t)
-            r = {
-                ...r,
-                ...t
-            }
-        })
-        return r
-    }
-
-    useEffect(() => {
-        setValidators([])
-        columns.forEach((c) => {
-            if (c.input?.required && c.input?.validator) {
-                setValidators(prev => [
-                    ...prev,
-                    (r) => ({
-                        [c.accessorKey]:
-                            !validateRequired(r[c.accessorKey]) ? `${c.header} is Required`
-                                :
-                                !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : ''
-                    })
-                ])
-            }
-            else if (c.input?.required) {
-                setValidators(prev => [
-                    ...prev,
-                    (r) => ({ [c.accessorKey]: !validateRequired(r[c.accessorKey]) ? `${c.header} is Required` : '' })
-                ])
-            }
-            else if (c.input?.validator) {
-                setValidators(prev => [
-                    ...prev,
-                    (r) => ({ [c.accessorKey]: !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : '' })
-                ])
-            }
-        })
-    }, [columns])
-
-    return validateRecord
-}
-/*
-function useEditForm(columns, tableName){
-    const [validationErrors, setValidationErrors] = useState({});
-    const [images, setImages] = useState([]);
-    const [form, setForm] = useState([]);
-
-    useEffect(() => {
-        setImages([{data_url : row.original.image}])
-        setForm({...form, ...row.original, id:row.original.id})
-    },[])
-
-    const onImageUploadChange = (imageList, addUpdateIndex) => {
-        // data for submit
-        setImages(imageList);
-        onFormValueChange({
-            target: {
-                name: "image",
-                value: imageList[0]?.data_url || null
-            }
-        })
-    };
-
-    const onFormValueChange = (e) => {
-        setForm({...form, id:row.original.id})
-        editForm.current[e.target.name]= e.target.value
-        console.log(editForm.current)
-    }
-}
-*/
-
-function EditPrompt(props) {
-    const [validationErrors, setValidationErrors] = useState({});
-
-    const { table, columns, images, setImages, editForm, row, tableName } = props
-    useEffect(() => {
-        setImages([{ data_url: row.original.image }])
-        editForm.current = { ...row.original }
-        editForm.current.id = row.original.id
-        console.log("Render EditPrompt")
-    }, [])
-
-    const onImageUploadChange = (imageList, addUpdateIndex) => {
-        // data for submit
-        setImages(imageList);
-        onFormValueChange({
-            target: {
-                name: "image",
-                value: imageList[0]?.data_url || null
-            }
-        })
-    };
-
-    const onFormValueChange = (e) => {
-        editForm.current[e.target.name] = e.target.value
-        console.log(editForm.current)
-    }
-
-    return (
-        <>
-            <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
-            <Divider />
-            <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-                <Stack direction="row" gap="1rem">
-                    <ImageUpload
-                        images={images}
-                        maxNumber={1}
-                        onChange={onImageUploadChange}
-                    ></ImageUpload>
-                </Stack>
-                {
-                    columns.slice(0, 4).map((col, i) =>
-                        <TableColumnEditField key={i}
-                            col={col}
-                            value={editForm.current[col.accessorKey]}
-                            onChange={onFormValueChange}
-                            validationErrors={validationErrors}
-                            setValidationErrors={setValidationErrors} />
-                    )
-                }
-                <Stack gap="1rem" direction="row" width={1}>
-                    {
-                        columns.slice(4, 6).map((col, i) =>
-                            <TableColumnEditField key={i}
-                                col={col}
-                                value={editForm.current[col.accessorKey]}
-                                onChange={onFormValueChange}
-                                validationErrors={validationErrors}
-                                setValidationErrors={setValidationErrors} />
-                        )
-                    }
-                </Stack>
-            </DialogContent>
-            <DialogActions>
-                <MRT_EditActionButtons variant="text" table={table} row={row} />
-            </DialogActions>
-        </>
-    )
-}
+import { numberReg } from '@/hooks/useRecordValidation';
+import usePrompt from '@/hooks/usePrompt';
+import { useProgress } from '@/hooks/useProgress';
+import { useNotification } from '@/hooks/useNotification';
 
 function RawProductTable() {
-    const [validationErrors, setValidationErrors] = useState({});
     const tableName = "Product"
 
-    const handleCreate = async ({ values, table }) => {
+    const onCreatingRowCancel = () => { }
+    const onEditingRowCancel = () => { }
 
-        console.log("createForm", createForm.current)
-
-        const obj = {
-            ...values,
-            ...createForm.current,
-        }
-
-        console.log("Object", obj)
-        const newValidationErrors = validateRecord(obj);
-        console.log("Error", newValidationErrors)
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        setValidationErrors({});
-        await createRecord(obj);
-        table.setCreatingRow(null); //exit creating mode
-        createForm.current = {}
-        setImages([])
-    };
-
-    const handleSave = async ({ values, table }) => {
-
-        console.log("editForm", editForm.current)
-
-        const obj = {
-            ...editForm.current,
-        }
-
-        console.log("editForm", { ...values })
-
-        const newValidationErrors = validateRecord(obj);
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        setValidationErrors({});
-        await updateRecord(obj);
-        table.setEditingRow(null); //exit editing mode
-        editForm.current = {}
-        setImages([])
-    };
-
-    console.log("Table Rendered")
+    useEffect(() => {
+        console.log("Table Rendered")
+    })
 
     const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate();
     const { data: fetchedRecords = [], isError: isLoadingError, isFetching: isFetchingRecords, isLoading: isLoadingRecords, } = useGet();
@@ -320,6 +42,36 @@ function RawProductTable() {
                 size: 120,
                 enableClickToCopy: true,
             },
+
+            {
+                accessorKey: 'image',
+                header: 'Image',
+                size: 180,
+                input: {
+                    type: "image",
+                },
+                Cell: ({ row }) => {
+                    return (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                            }}
+                        >
+                            <Image
+                                alt="avatar"
+                                height={30}
+                                width={30}
+                                src={row.original.image || "/image/avatar.png"}
+                                loading="lazy"
+                                style={{ borderRadius: '50%' }}
+                            />
+                        </Box>
+                    )
+                },
+            },
+
             {
                 accessorKey: 'name',
                 header: 'Name',
@@ -375,6 +127,7 @@ function RawProductTable() {
                 header: 'Type',
                 size: 200,
                 input: {
+                    group: 2,
                     optionList: rawType,
                     optionValueAccessorFn: (value) => value.id,
                     optionLabelAccessorFn: (value) => value.name,
@@ -391,6 +144,7 @@ function RawProductTable() {
                 header: "Origin",
                 size: 200,
                 input: {
+                    group: 2,
                     optionList: rawOrigin,
                     optionValueAccessorFn: (value) => value.id,
                     optionLabelAccessorFn: (value) => value.name,
@@ -403,87 +157,20 @@ function RawProductTable() {
                 ),
             }
 
-        ], [validationErrors],
+        ], [isUpdatingRecord],
     );
-    const validateRecord = useRecordValidation(columns)
 
-    const [images, setImages] = useState([]);
-    const editForm = useRef({})
-
-    const editPrompt = ({ table, row, internalEditComponents }) =>
-        <EditPrompt table={table} columns={columns} tableName={tableName} row={row} setImages={setImages} images={images} editForm={editForm}></EditPrompt>
-
-    const createForm = useRef({})
-
-    const createPrompt = ({ table, row, internalEditComponents }) => {
-
-        const onImageUploadChange = (imageList, addUpdateIndex) => {
-            // data for submit
-            setImages(imageList);
-            onFormValueChange({
-                target: {
-                    name: "image",
-                    value: imageList[0]?.data_url || null
-                }
-            })
-        };
-
-        const onFormValueChange = (e) => {
-            createForm.current = { ...createForm.current, [e.target.name]: e.target.value }
-            console.log(createForm.current)
-        }
-
-        return (
-            <>
-                <DialogTitle variant="h4">Create New {tableName || "Record"}</DialogTitle>
-                <Divider />
-                <DialogContent
-                    sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-                >
-                    <Stack direction="row" gap="1rem">
-                        <ImageUpload
-                            images={images}
-                            maxNumber={1}
-                            onChange={onImageUploadChange}
-                        ></ImageUpload>
-                    </Stack>
-                    {
-                        columns.slice(0, 4).map((col, i) =>
-                            <TableColumnEditField key={i}
-                                col={col}
-                                onChange={onFormValueChange}
-                                validationErrors={validationErrors}
-                                setValidationErrors={setValidationErrors} />
-                        )
-                    }
-                    <Stack gap="1rem" direction="row" width={1}>
-                        {
-                            columns.slice(4, 6).map((col, i) =>
-                                <TableColumnEditField key={i}
-                                    col={col}
-                                    onChange={onFormValueChange}
-                                    validationErrors={validationErrors}
-                                    setValidationErrors={setValidationErrors} />
-                            )
-                        }
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <MRT_EditActionButtons variant="text" table={table} row={row} />
-                </DialogActions>
-            </>
-        )
-    }
+    const [createPrompt, handleCreate] = usePrompt({ columns, action: 0, tableName, saveRecord: createRecord })
+    const [editPrompt, handleEdit] = usePrompt({ columns, action: 1, tableName, saveRecord: updateRecord })
 
     const openDeleteConfirmModal = (row) => {
-        if (window.confirm('Are dawdwadwadw sure you want to delete this user?')) {
+        if (window.confirm('Are you sure you want to delete this record?')) {
             deleteRecord(row.original.id);
         }
-    };
+    };  
 
     return (
         <Table
-            setValidationErrors={setValidationErrors}
             fetchedRecords={fetchedRecords}
 
             createPrompt={createPrompt}
@@ -493,6 +180,8 @@ function RawProductTable() {
             createRecord={createRecord}
             updateRecord={updateRecord}
             deleteRecord={deleteRecord}
+            onCreatingRowCancel={onCreatingRowCancel}
+            onEditingRowCancel={onEditingRowCancel}
 
             isLoadingError={isLoadingError}
             isLoadingRecords={isLoadingRecords}
@@ -501,11 +190,10 @@ function RawProductTable() {
             isDeletingRecords={isDeletingRecord}
             isFetchingRecords={isFetchingRecords}
 
-            validateRecord={validateRecord}
             columns={columns}
             tableName={tableName}
             handleCreate={handleCreate}
-            handleSave={handleSave}
+            handleSave={handleEdit}
             initialState={{
                 columnVisibility: { image: false }
             }}
@@ -525,20 +213,27 @@ export default function ProductTable() {
     )
 }
 
+const {start, stop} = useProgress()
+const startAsync = async(func) => {
+    start();await func();setTimeout(stop(), 100);
+}
+const newNotification = useNotification()
+
 function useCreate() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (user) => {
+        mutationFn: async (record) => {
             //send api update request here
-            await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+            await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))) ; //fake api call
+            newNotification("A record has been created","info")
             return Promise.resolve();
         },
         //client side optimistic update
-        onMutate: (newUserInfo) => {
-            queryClient.setQueryData(['users'], (prevUsers) => [
-                ...prevUsers,
+        onMutate: (newRecord) => {
+            queryClient.setQueryData(['product'], (prevRecords) => [
+                ...prevRecords,
                 {
-                    ...newUserInfo,
+                    ...newRecord,
                     id: (Math.random() + 1).toString(36).substring(7),
                 },
             ]);
@@ -549,10 +244,10 @@ function useCreate() {
 
 function useGet() {
     return useQuery({
-        queryKey: ['users'],
+        queryKey: ['product'],
         queryFn: async () => {
             //send api request here
-            await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+            await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))) ; //fake api call
             return Promise.resolve(products);
         },
         refetchOnWindowFocus: false,
@@ -562,35 +257,36 @@ function useGet() {
 function useUpdate() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (user) => {
+        mutationFn: async (record) => {
             //send api update request here
-            await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+            await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))) ; //fake api call
+            newNotification("A record has been edited","info")
             return Promise.resolve();
         },
         //client side optimistic update
-        onMutate: (newUserInfo) => {
-            queryClient.setQueryData(['users'], (prevUsers) =>
-                prevUsers?.map((prevUser) =>
-                    prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
+        onMutate: (newRecord) => {
+            queryClient.setQueryData(['product'], (prevRecords) =>
+                prevRecords?.map((prevRecord) =>
+                    prevRecord.id === newRecord.id ? newRecord : prevRecord,
                 ),
             );
         },
-        //onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+        //onSettled: () => queryClient.invalidateQueries({ queryKey: ['product'] }), //refetch users after mutation, disabled for demo
     });
 }
 
 function useDelete() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (userId) => {
+        mutationFn: async (recordId) => {
             //send api update request here
-            await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+            await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))) ; //fake api call
             return Promise.resolve();
         },
         //client side optimistic update
-        onMutate: (userId) => {
-            queryClient.setQueryData(['users'], (prevUsers) =>
-                prevUsers?.filter((user) => user.id !== userId),
+        onMutate: (recordId) => {
+            queryClient.setQueryData(['product'], (prevRecords) =>
+                prevRecords?.filter((record) => record.id !== recordId),
             );
         },
         // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo

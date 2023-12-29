@@ -6,40 +6,21 @@ import * as React from 'react';
 import useDarkMode from "@/hooks/useDarkmode";
 import { Body, CustomDrawer, DrawerHeader, CustomAppbar } from "./CustomAppbar";
 
-
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import EngineeringIcon from '@mui/icons-material/Engineering';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import CategoryIcon from '@mui/icons-material/Category';
 import { Box } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useCookies } from 'next-client-cookies';
-import { usePathname } from "next/navigation";
 
-function useLogin() {
-    const cookies = useCookies()
-    const token = cookies.get('token')
-    const router = useRouter()
-    const location = usePathname()
-    React.useEffect(() => {
-        if (!token && location !== "/signin") {
-            router.push("/signin")
-        }
-    })
-    return [token, location]
-}
+import ProgressBar from "./ProgressBar";
+import { Notifications } from "@/hooks/useNotification";
+import useClientLogin from "@/hooks/useClientLogin";
+
 
 export default function Wrapper({ children }) {
-    const [open, setOpen] = React.useState(false);
-    const onDrawerOpen = () => {
-        setOpen(true);
-    };
-    const onDrawerClose = () => {
-        setOpen(false);
-    };
+    const [open, setOpen] = React.useState(false)
+    const onDrawerOpen = () => setOpen(true)
+    const onDrawerClose = () => setOpen(false)
     const { darkmode, toggleDarkMode } = useDarkMode()
-
-    console.log(CustomAppbar)
 
     const optionLists = [
         [
@@ -63,14 +44,19 @@ export default function Wrapper({ children }) {
         ]
     ]
 
-    const [token, location] = useLogin()
+    const [token, location] = useClientLogin()
 
     return (
         <Themed darkmode={darkmode}>
 
             {token && location !== "/signin" && <>
+                <Box sx={{ zIndex: 200000, width: 1, height: 10, position: "absolute" }}>
+                    <ProgressBar />
+                </Box>
                 <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                 <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />
+
+                <Notifications />
 
                 <Body open={open} className="test-body">
                     <DrawerHeader />
@@ -82,7 +68,16 @@ export default function Wrapper({ children }) {
                 </Body>
             </>}
 
-            {(!token || location == "/signin") && children}
+            {(!token && location === "/signin") &&
+                <FadeWrapper>
+                    {children}
+                </FadeWrapper>}
+
+            {!token && location !== "/signin" &&
+                <Box sx={(theme) => ({ backgroundColor: theme.palette.background.default, zIndex: 10000, width: 1, height: 1 })}>
+
+                </Box>
+            }
         </Themed>
     )
 }

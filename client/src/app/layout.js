@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import Wrapper from "../components/Nav/wrapper";
 import { useRouter } from 'next/navigation';
 import { CookiesProvider } from 'next-client-cookies/server';
+import useServerLogin from '@/hooks/useServerLogin';
 
 export const metadata = {
   title: 'Create Next App',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
 
   const cookieStore = cookies()
   const cToken = cookieStore.get('token')
+  const [token, location] = useServerLogin()
 
   return (
     <html style={{

@@ -4,24 +4,33 @@ import React, { useEffect } from 'react';
 import ImageUploading from 'react-images-uploading';
 import ImageIcon from '@mui/icons-material/Image';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CloseIcon from '@mui/icons-material/Close';
-import Image from 'next/image';
 
-
-export default function ImageUpload({ images, maxNumber, onChange, inputProps, ...others }) {
+export default function ImageUpload(props) {
 
     const theme = useTheme()
+
+    const { name, onChange } = props
+    const { images, maxNumber, inputProps, ...others } = props
 
     useEffect(() => {
         console.log(images)
     }, [images])
+
+    const onImageChange = (imageList, addUpdateIndex) => {
+        onChange({
+            target: {
+                name: name || "image",
+                value: imageList[0]?.data_url || null
+            }
+        })
+    }
 
     return (
         <div className="App">
             <ImageUploading
                 multiple
                 value={images}
-                onChange={onChange}
+                onChange={onImageChange}
                 maxNumber={maxNumber}
                 dataURLKey="data_url"
                 inputProps={{
@@ -58,7 +67,7 @@ export default function ImageUpload({ images, maxNumber, onChange, inputProps, .
                                     position: 'relative',
                                 }}
                                 onClick={(e) => {
-                                    if (images.length == 1) {
+                                    if (images?.length == 1) {
                                         onImageUpdate(0)
                                     }
                                     else {
@@ -68,40 +77,38 @@ export default function ImageUpload({ images, maxNumber, onChange, inputProps, .
                                 {...dragProps}
                             >
                                 {
-                                    images.length < 1 &&
+                                    (images?.length < 1 || !images) &&
                                     <>
                                         <ImageIcon />
                                         {others.imagePlaceholder || "Click or Drop here"}
                                     </>
                                 }
                                 {
-                                    images.length == 1 &&
-                                    imageList.map((image, index) => (
-                                        <div key={index} style={{width:"100%",height:"100%"}}>
-                                            <img  src={image['data_url']} alt="" width="100%" height="100%"
-                                                style={{
-                                                    objectFit: "contain",
-                                                    objectPosition: "center"
-                                                }}
-                                            />
-                                            <IconButton
-                                                key={index+1/2}
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    onImageRemoveAll(e)
-                                                }}
-                                                color="error"
-                                                sx={{
-                                                    position: "absolute",
-                                                    bottom: 8,
-                                                    right: 8,
-                                                    height: 30,
-                                                    width: 30,
-                                                }}>
-                                                <CancelIcon />
-                                            </IconButton>
-                                        </div>
-                                    ))
+                                    maxNumber == 1 && images &&
+                                    <div style={{ width: "100%", height: "100%" }}>
+                                        <img src={images} alt="" width="100%" height="100%"
+                                            style={{
+                                                objectFit: "contain",
+                                                objectPosition: "center"
+                                            }}
+                                        />
+                                        <IconButton
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                onImageRemoveAll(e)
+                                            }}
+                                            color="error"
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: 8,
+                                                right: 8,
+                                                height: 30,
+                                                width: 30,
+                                            }}>
+                                            <CancelIcon />
+                                        </IconButton>
+                                    </div>
+
                                 }
                             </Paper>
                         }
