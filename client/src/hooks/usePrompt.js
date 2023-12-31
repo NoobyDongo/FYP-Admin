@@ -123,7 +123,7 @@ export default function usePrompt(props) {
             console.log("Prompt unmounted")
             setValidationErrors({})
         }
-    }, [])
+    }, [columns])
 
     const handleSave = async ({ values, table }) => {
         console.log("Form data", formData)

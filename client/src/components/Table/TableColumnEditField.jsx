@@ -1,15 +1,27 @@
 import {
     TextField,
     MenuItem,
+    Box,
 } from '@mui/material';
 import ImageUpload from '@/components/ImageUpload';
 import { useCallback, useEffect, useState } from 'react';
 
+export function SelectInput(input){
+
+    return {
+        input: {
+            ...input
+        },
+        Cell: ({ cell }) => (
+            <Box>
+                {input.optionLabelAccessorFn(input.optionList?.find((e) => input.optionValueAccessorFn(e) == cell.getValue()))}
+            </Box>
+        ),
+    }
+}
+
 export default function TableColumnEditField(props) {
     const { col, validationErrors, setValidationErrors, onChange, value } = props
-
-    if (!col.input)
-        return
 
     const [localValue, setValue] = useState()
     useEffect(() => {
@@ -19,6 +31,10 @@ export default function TableColumnEditField(props) {
     const CustomOnChange = useCallback((e) => {
         setValue(e.target.value)
     },[])
+
+    
+    if (!col.input)
+        return
 
     var input = col.input
     if (input.type == "image")

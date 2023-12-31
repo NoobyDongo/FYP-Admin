@@ -50,7 +50,7 @@ export function CustomAppbar({ open, onOpen, onClose }) {
                         }}
                         onClick={open ? onOpen : onClose}
                     >
-                        {open ? <MenuIcon /> : <ChevronRightIcon fontSize="large"/>}
+                        {open ? <MenuIcon /> : <ChevronRightIcon fontSize="large" />}
                     </IconButton>
                 </AppBarIcon>
 
@@ -59,18 +59,18 @@ export function CustomAppbar({ open, onOpen, onClose }) {
                 </Typography>
 
                 <IconButton
-                        aria-label="sign out"
-                        edge="start"
-                        sx={{
-                            height: 40,
-                            width: 40,
-                            marginLeft: "auto",
-                            stroke: "currentcolor", strokeWidth: 1,
-                        }}
-                        onClick={signout}
-                    >
-                        <ChevronRightIcon fontSize="large"/>
-                    </IconButton>
+                    aria-label="sign out"
+                    edge="start"
+                    sx={{
+                        height: 40,
+                        width: 40,
+                        marginLeft: "auto",
+                        stroke: "currentcolor", strokeWidth: 1,
+                    }}
+                    onClick={signout}
+                >
+                    <ChevronRightIcon fontSize="large" />
+                </IconButton>
             </Toolbar>
         </AppBar>
     )
@@ -144,7 +144,7 @@ const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open',
             backdropFilter: "blur(50px) saturate(150%) brightness(90%)",
             background: alpha(lighten(theme.palette.background.default, .1), .4),
         }),
-        ...openCloseTransitionMixin(theme, open, ['width', 'margin'])
+        ...openCloseTransitionMixin({ theme, open, transition: ['width', 'margin'] })
     })
 );
 const AppBarIcon = styled('div')(({ theme }) => ({
@@ -160,26 +160,28 @@ export const Body = styled(Box, { shouldForwardProp: (prop) => prop !== 'open' }
     display: "flex",
     flexDirection: "column",
     overflowX: "hidden",
-    ...openCloseTransitionMixin(theme, open, "width", {
-        paddingLeft: `calc(100% - ${drawerOpenedWidth}px - 100%)`,
-        width: `calc(100vw - ${drawerOpenedWidth}px)`
-    }, {
-        paddingLeft: `calc(100% - ${drawerClosedWidth}px - 100%)`,
-        width: `calc(100vw - ${drawerClosedWidth}px)`
+    ...openCloseTransitionMixin({
+        theme, open, transition: "width", onOpen: {
+            paddingLeft: `calc(100% - ${drawerOpenedWidth}px - 100%)`,
+            width: `calc(100vw - ${drawerOpenedWidth}px)`
+        }, onClose: {
+            paddingLeft: `calc(100% - ${drawerClosedWidth}px - 100%)`,
+            width: `calc(100vw - ${drawerClosedWidth}px)`
+        }
     })
 }))
 const CustomListItemIcon = styled(ListItemIcon, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     minWidth: 0,
     justifyContent: 'center',
-    ...openCloseTransitionMixin(theme, open, "margin")
+    ...openCloseTransitionMixin({ theme, open, transition:"margin"})
 }))
 const CustomListItemText = styled(ListItemText, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     textTransform: "capitalize",
-    ...openCloseTransitionMixin(theme, open, "margin")
+    ...openCloseTransitionMixin({theme, open, transition:"margin"})
 }))
 const CustomListItemButton = styled(ListItemButton, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     justifyContent: open ? 'initial' : 'center',
-    ...openCloseTransitionMixin(theme, open, "padding")
+    ...openCloseTransitionMixin({theme, open, transition:"padding"})
 }))
 
 
@@ -242,7 +244,7 @@ export function CustomDrawer(props) {
                 open={open}
                 sx={{
                     display: "flex",
-                    flexDirection: open? "row" : "column",
+                    flexDirection: open ? "row" : "column",
                     columnGap: 1.5,
                     alignItems: "center",
                     justifyContent: "center",
@@ -250,16 +252,16 @@ export function CustomDrawer(props) {
                 }}>
                 <Typography sx={{
                     color: theme.palette.logo.secondary,
-                    fontWeight: 1000, 
-                    fontSize: open? 30 : 20,
+                    fontWeight: 1000,
+                    fontSize: open ? 30 : 20,
                     textAlign: "center"
                 }}>
                     V#</Typography>
                 <Typography sx={{
                     color: theme.palette.logo.main,
                     fontWeight: 1000,
-                    fontSize: open? 20 : 10,
-                    textTransform: open? "uppercase" : "capitalize",
+                    fontSize: open ? 20 : 10,
+                    textTransform: open ? "uppercase" : "capitalize",
                     textAlign: "center"
                 }}>
                     We Shop</Typography>

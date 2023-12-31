@@ -9,7 +9,7 @@ export default function useServerLogin() {
     const pathname = headersList.get("x-invoke-path") || "";
 
     if (!token && pathname !== "/signin") {
-        redirect("/signin", "replace")
+        //redirect("/signin", "replace")
     }
     return [token, pathname]
 }

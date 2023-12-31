@@ -1,30 +1,35 @@
+'use client'
 import { Box } from '@mui/material';
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import FadeWrapper from '@/components/FadeWrapper'
+import { useState } from 'react';
 
-export function TabMenu(props) {
+export function useTabMenu(){
+    const [value, setValue] = useState(0);
+    const handleChange = (e, newValue) => {
+        setValue(newValue);
+    };
+    return [value, handleChange]
+}
 
-    var key = 0
-    const { tabs, value, handleChange, sx, ...other } = props;
-
+export function TabMenu({ tabs, value, handleChange, sx, ...other }) {
     return (
-        <Box sx={{ minWidth: "100%", borderBottom: 1, borderColor: "divider", ...sx, marginBottom: 4 }}>
+        <Box sx={{ minWidth: "100%", borderBottom: 1, borderColor: "divider", marginBottom: 2, ...sx }}>
             <Tabs {...other} value={value} onChange={handleChange} aria-label="basic tabs example">
-                {tabs.map((e) => {
-                    return (<Tab key={key}
+                {tabs.map((e, i) => {
+                    return (<Tab key={i}
                         sx={{
                         }}
-                        label={e} {...a11yProps(key++)} />)
+                        label={e} {...a11yProps(i)} />)
                 })}
             </Tabs>
         </Box>
     )
 }
 
-export function TabPanel(props) {
-    const { children, value, index, ...other } = props;
+export function TabPanel({ children, value, index, ...other }) {
 
     return (
         <FadeWrapper
@@ -36,9 +41,9 @@ export function TabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box>
+                <>
                     {children}
-                </Box>
+                </>
             )}
         </FadeWrapper>
     );
@@ -51,7 +56,7 @@ TabPanel.propTypes = {
 
 function a11yProps(index) {
     return {
-        id: `simple-tab-${index}`,
+        id: `tabpanel-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
     };
 }

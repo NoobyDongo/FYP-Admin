@@ -3,8 +3,7 @@ import '../fonts/Inter-3.19/Inter Web/inter.css'
 
 
 import { cookies } from 'next/headers'
-import Wrapper from "../components/Nav/wrapper";
-import { useRouter } from 'next/navigation';
+import NavWrapper from "../components/Nav/wrapper";
 import { CookiesProvider } from 'next-client-cookies/server';
 import useServerLogin from '@/hooks/useServerLogin';
 
@@ -27,7 +26,7 @@ export default function RootLayout({ children }) {
 
       <body suppressHydrationWarning style={{ fontFamily: "inherit", height: "100vh", width: "100vw", overflow: "auto", display: "flex" }}>
         <CookiesProvider>
-          <Wrapper token={cToken}>{children}</Wrapper>
+          <NavWrapper token={cToken}>{children}</NavWrapper>
         </CookiesProvider>
 
       </body>

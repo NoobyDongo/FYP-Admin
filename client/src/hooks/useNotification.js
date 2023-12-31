@@ -7,12 +7,11 @@ import { useEffect } from 'react';
 function MyApp() {
     const { enqueueSnackbar } = useSnackbar();
 
-    const handleNewNotification = (e) => {
-        // variant could be success, error, warning, info, or default
-        enqueueSnackbar(e.detail.message || "", { variant: e.detail.variant || "default" });
-    };
-
     useEffect(() => {
+        const handleNewNotification = (e) => {
+            // variant could be success, error, warning, info, or default
+            enqueueSnackbar(e.detail.message || "", { variant: e.detail.variant || "default" });
+        };
         window.addEventListener("newNotification", handleNewNotification)
         return () => {
             window.removeEventListener("newNotification", handleNewNotification)

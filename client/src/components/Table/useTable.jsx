@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import {
     MRT_EditActionButtons,
-    MaterialReactTable,
     useMaterialReactTable,
     MRT_GlobalFilterTextField,
     MRT_ToggleFiltersButton,
@@ -28,15 +27,13 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@emotion/react';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import useRecordValidation from '@/hooks/useRecordValidation';
 
-const RawTable = (props) => {
+const useTable = (props) => {
     const theme = useTheme()
 
     const { onCreatingRowCancel, onEditingRowCancel } = props
-    const { handleSave, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
+    const { handleEdit, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
     const { createRecord, updateRecord, deleteRecord } = props
     const { columns, initialState, tableName } = props
     const { fetchedRecords } = props
@@ -44,11 +41,7 @@ const RawTable = (props) => {
     const { isFetchingRecords, isLoadingError, isLoadingRecords } = props
 
     const validateRecord = useRecordValidation(columns)
-/*
-    useEffect(() => {
-        start()
-    })
-*/
+
     const defaultHandleCreate = async ({ values, table }) => {
         console.log(values)
         const newValidationErrors = validateRecord(values);
@@ -229,7 +222,7 @@ const RawTable = (props) => {
         onCreatingRowCancel: () => { onCreatingRowCancel?.() },
         onEditingRowCancel: () => { onEditingRowCancel?.() },
         onCreatingRowSave: handleCreate || defaultHandleCreate,
-        onEditingRowSave: handleSave || defaultHandleSave,
+        onEditingRowSave: handleEdit || defaultHandleSave,
         renderCreateRowDialogContent: createPrompt || defaultCreatePrompt,
         renderEditRowDialogContent: editPrompt || defaultEditPrompt,
 
@@ -378,18 +371,9 @@ const RawTable = (props) => {
         },
     });
 
-    return (
-        <MaterialReactTable table={table} />
-    )
+    return table
 };
 
-const Table = (props) => (
-    //Put this with your other react-query providers near root of your app
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <RawTable {...props} />
-    </LocalizationProvider>
-);
-
-export default Table;
+export default useTable;
 
 

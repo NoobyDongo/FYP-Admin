@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import ImageUploading from 'react-images-uploading';
 import ImageIcon from '@mui/icons-material/Image';
 import CancelIcon from '@mui/icons-material/Cancel';
+import Image from 'next/image';
 
 export default function ImageUpload(props) {
 
@@ -86,7 +87,9 @@ export default function ImageUpload(props) {
                                 {
                                     maxNumber == 1 && images &&
                                     <div style={{ width: "100%", height: "100%" }}>
-                                        <img src={images} alt="" width="100%" height="100%"
+                                        <Image src={images} alt=""
+                                            height={others.height || 200}
+                                            width={others.width || 200}
                                             style={{
                                                 objectFit: "contain",
                                                 objectPosition: "center"
@@ -118,7 +121,7 @@ export default function ImageUpload(props) {
 
                         {maxNumber > 1 && imageList.map((image, index) => (
                             <div key={index} className="image-item">
-                                <img src={image['data_url']} alt="" width="100" />
+                                <Image src={image['data_url']} alt="" height={others.height || 200} width={others.width || 200} />
                                 <div className="image-item__btn-wrapper">
                                     <button onClick={() => onImageUpdate(index)}>Update</button>
                                     <button onClick={() => onImageRemove(index)}>Remove</button>

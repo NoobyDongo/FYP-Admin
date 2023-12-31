@@ -11,12 +11,12 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import CategoryIcon from '@mui/icons-material/Category';
 import { Box } from "@mui/material";
 
-import ProgressBar from "./ProgressBar";
 import { Notifications } from "@/hooks/useNotification";
 import useClientLogin from "@/hooks/useClientLogin";
+import { ProgressBar } from "@/hooks/useProgress";
 
 
-export default function Wrapper({ children }) {
+export default function NavWrapper({ children }) {
     const [open, setOpen] = React.useState(false)
     const onDrawerOpen = () => setOpen(true)
     const onDrawerClose = () => setOpen(false)
@@ -50,7 +50,7 @@ export default function Wrapper({ children }) {
         <Themed darkmode={darkmode}>
 
             {token && location !== "/signin" && <>
-                <Box sx={{ zIndex: 200000, width: 1, height: 10, position: "absolute" }}>
+                <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
                     <ProgressBar />
                 </Box>
                 <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />

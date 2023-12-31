@@ -97,3 +97,13 @@ table prompts are now better:
 a progress bar is added on top of the page, with invokers in useProgress.js
 notifications can now be displayed with https://github.com/iamhosseindhv/notistack thanks a lot :-))
 the page no longer glitch when getting redirected to login page
+
+31/12/2023
+to do:
+user corner
+integrate with backend
+refactor
+better scrollbar??
+done:
+records in any table can now be fetched with useAllRecords.js
+product table now uses origin and product type from api server.
