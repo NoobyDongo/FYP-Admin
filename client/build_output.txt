@@ -1,0 +1,43 @@
+
+> fyp@0.1.0 build
+> next build
+
+   ▲ Next.js 14.0.4
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/product/table.jsx
+30:9  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+198:12  Warning: React Hook useMemo has missing dependencies: 'fetchedRecords.origin' and 'fetchedRecords.producttype'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/profile/page.js
+331:15  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./src/components/ExampleTable/TS.jsx
+48:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+163:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/Table/TableColumnEditField.jsx
+17:9  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+17:10  Error: 'Image' is not defined.  react/jsx-no-undef
+
+./src/CRUD/useAllRecords.js
+49:8  Warning: React Hook useEffect has missing dependencies: 'api', 'get', 'getCache', and 'tableName'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/CRUD/useFetchJSON.js
+36:8  Warning: React Hook useEffect was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies.  react-hooks/exhaustive-deps
+36:8  Warning: React Hook useEffect has missing dependencies: 'init' and 'url'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useNotification.js
+19:8  Warning: React Hook useEffect has a missing dependency: 'enqueueSnackbar'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/usePrompt.js
+42:8  Warning: React Hook useEffect has a missing dependency: 'setValidationErrors'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+139:8  Warning: React Hook useEffect has a missing dependency: 'images'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+171:8  Warning: React Hook useCallback has missing dependencies: 'action' and 'tableName'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

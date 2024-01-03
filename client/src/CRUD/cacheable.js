@@ -1,3 +1,5 @@
+//https://hilla.dev/docs/react/guides/client-caching, https://hilla.dev
+
 export async function cacheable(fn, key, defaultValue) {
     let result;
     try {
@@ -19,5 +21,12 @@ export async function cacheable(fn, key, defaultValue) {
 
 export function getCache(CACHE_NAME) {
     const cache = localStorage.getItem(CACHE_NAME) || '';
-    return JSON.parse(cache);
+    let j
+    if (cache)
+        j = JSON.parse(cache)
+    return j;
+}
+
+export function clearCache(CACHE_NAME) {
+    localStorage.removeItem(CACHE_NAME);
 }

@@ -51,7 +51,7 @@ export default function NavWrapper({ children }) {
 
             {token && location !== "/signin" && <>
                 <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
-                    <ProgressBar />
+                    <ProgressBar id={1}/>
                 </Box>
                 <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                 <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />

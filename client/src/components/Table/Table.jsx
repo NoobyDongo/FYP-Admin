@@ -2,18 +2,13 @@
 import {
     Box,
     Button,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     ListItemIcon,
     MenuItem,
     lighten,
     ListItemText,
     Paper,
-    Divider,
 } from '@mui/material';
 import {
-    MRT_EditActionButtons,
     useMaterialReactTable,
     MRT_GlobalFilterTextField,
     MRT_ToggleFiltersButton,
@@ -22,79 +17,32 @@ import {
     MRT_ToggleGlobalFilterButton,
     MRT_ToggleFullScreenButton,
     MRT_ShowHideColumnsButton,
+    MaterialReactTable,
 } from 'material-react-table';
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@emotion/react';
-import useRecordValidation from '@/hooks/useRecordValidation';
+import Prompt from '@/components/Table/Prompt';
+import { useState } from 'react';
 
-const useTable = (props) => {
+export const Table = (props) => {
     const theme = useTheme()
 
     const { onCreatingRowCancel, onEditingRowCancel } = props
-    const { handleEdit, handleCreate, createPrompt, editPrompt, openDeleteConfirmModal } = props
+    const { openDeleteConfirmModal } = props
     const { createRecord, updateRecord, deleteRecord } = props
     const { columns, initialState, tableName } = props
     const { fetchedRecords } = props
     const { isCreatingRecord, isUpdatingRecord, isDeletingRecord } = props
     const { isFetchingRecords, isLoadingError, isLoadingRecords } = props
 
-    const validateRecord = useRecordValidation(columns)
+    const [creating, setCreating] = useState(false)
+    const [row, setRow] = useState({})
+    const [editing, setEditing] = useState(false)
 
-    const defaultHandleCreate = async ({ values, table }) => {
-        console.log(values)
-        const newValidationErrors = validateRecord(values);
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        setValidationErrors({});
-        await createRecord(values);
-        table.setCreatingRow(null); //exit creating mode
-    };
-
-    const defaultHandleSave = async ({ values, table }) => {
-        console.log(values)
-        const newValidationErrors = validateRecord(values);
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        setValidationErrors({});
-        await updateRecord(values);
-        table.setEditingRow(null); //exit editing mode
-    };
-
-    const defaultEditPrompt = ({ table, row, internalEditComponents }) => (
-        <>
-            <DialogTitle variant="h4">Edit {tableName || "Record"}</DialogTitle>
-            <Divider />
-            <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-            >
-                {internalEditComponents} {/* or render custom edit components here */}
-            </DialogContent>
-            <DialogActions>
-                <MRT_EditActionButtons variant="text" table={table} row={row} />
-            </DialogActions>
-        </>
-    )
-
-    const defaultCreatePrompt = ({ table, row, internalEditComponents }) => (
-        <>
-            <DialogTitle variant="h4">Create New {tableName || "Record"}</DialogTitle>
-            <Divider />
-            <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-                {internalEditComponents} {/* or render custom edit components here */}
-            </DialogContent>
-            <DialogActions>
-                <MRT_EditActionButtons variant="text" table={table} row={row} />
-            </DialogActions>
-        </>
-    )
+    const toCreate = () => setCreating(true)
+    const toEdit = (row) => {setEditing(true); setRow(row)}
 
     const defaultOpenDeleteConfirmModal = (row) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
@@ -122,7 +70,7 @@ const useTable = (props) => {
         enableStickyHeader: true,
         createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
         editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-        layoutMode: "grid-nogrow",
+        layoutMode: "grid",
         paginationDisplayMode: 'pages',
         muiSearchTextFieldProps: {
             size: 'small',
@@ -150,6 +98,7 @@ const useTable = (props) => {
                 paddingBottom: ".5rem",
                 boxShadow: "none",
                 border: 0,
+                textTransform: "capitalize",
                 "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
                     position: 'absolute',
                     right: 0,
@@ -197,44 +146,19 @@ const useTable = (props) => {
                 children: 'Error loading data',
             }
             : undefined,
-        displayColumnDefOptions: {
-            'mrt-row-actions': {
-                header: 'Edit', //change "Actions" to "Edit"
-                size: 50,
-            },
-        },
-        /*
-    renderDetailPanel: ({ row }) => (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-            }}
-        >
-            <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4">Pending</Typography>
-            </Box>
-        </Box>
-    ),
-    */
         getRowId: (row) => row.id,
         onCreatingRowCancel: () => { onCreatingRowCancel?.() },
         onEditingRowCancel: () => { onEditingRowCancel?.() },
-        onCreatingRowSave: handleCreate || defaultHandleCreate,
-        onEditingRowSave: handleEdit || defaultHandleSave,
-        renderCreateRowDialogContent: createPrompt || defaultCreatePrompt,
-        renderEditRowDialogContent: editPrompt || defaultEditPrompt,
 
         displayColumnDefOptions: {
             'mrt-row-actions': {
-                header: 'Actions', //change "Actions" to "Edit"
+                header: 'Actions',
                 size: 120,
             },
         },
         renderRowActionMenuItems: ({ row }) => [
 
-            <MenuItem key="edit" onClick={() => table.setEditingRow(row)}>
+            <MenuItem key="edit" onClick={() => toEdit(row.original)}>
                 <ListItemIcon>
                     <EditIcon color='primary' />
                 </ListItemIcon>
@@ -348,15 +272,7 @@ const useTable = (props) => {
                             px: 2,
                             py: 1.5,
                         }}
-                        onClick={() => {
-                            table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-                            //or you can pass in a row object to set default values with the `createRow` helper function
-                            // table.setCreatingRow(
-                            //   createRow(table, {
-                            //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-                            //   }),
-                            // );
-                        }}
+                        onClick={toCreate}
                     >
                         Create New {tableName || "record"}
                     </Button>
@@ -371,9 +287,13 @@ const useTable = (props) => {
         },
     });
 
-    return table
+    return (
+        <>
+            <MaterialReactTable table={table}/>
+            <Prompt open={creating} setOpen={setCreating} title={0} name={tableName} {...{ columns, saveRecord: createRecord }}/>
+            <Prompt open={editing} setOpen={setEditing} title={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }}/>
+        </>
+    )
 };
-
-export default useTable;
 
 

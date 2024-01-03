@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 export const numberReg = /^-?\d+\.?\d*$/
+export const urlReg = /(https?:\/\/[^\s]+)/g;
+export const imageReg = /(data:image\/[^\s]+)/g;
 
 export default function useRecordValidation(columns) {
     const [validators, setValidators] = useState([]);
@@ -12,43 +14,46 @@ export default function useRecordValidation(columns) {
         console.log("validateRecord", record)
         console.log("validateRecordError", validators)
 
-        var r = {}
-        validators.forEach(e => {
-            var t = e(record)
-            console.log("temp", t)
-            r = {
-                ...r,
-                ...t
+        var errorText = {}
+        validators.forEach(validator => {
+            var newErrorText = validator(record)
+            console.log("temp", newErrorText)
+            errorText = {
+                ...errorText,
+                ...newErrorText
             }
         })
-        return r
+        return errorText
     },[validators])
-
+    
     useEffect(() => {
         console.log("setValidators()")
         setValidators([])
+        
+        const getRecordValue = (col, r) => col.accessorFn?.(r) || r[col.accessorKey]
+
         columns.forEach((c) => {
             if (c.input?.required && c.input?.validator) {
                 setValidators(prev => [
                     ...prev,
                     (r) => ({
                         [c.accessorKey]:
-                            !validateRequired(r[c.accessorKey]) ? `${c.header} is Required`
+                            !validateRequired(getRecordValue(c, r)) ? `${c.header} is required`
                                 :
-                                !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : ''
+                                !c.input?.validator(getRecordValue(c, r)) ? c.input?.errorMessage || 'Error' : ''
                     })
                 ])
             }
             else if (c.input?.required) {
                 setValidators(prev => [
                     ...prev,
-                    (r) => ({ [c.accessorKey]: !validateRequired(r[c.accessorKey]) ? `${c.header} is Required` : '' })
+                    (r) => ({ [c.accessorKey]: !validateRequired(getRecordValue(c, r)) ? `${c.header} is Required` : '' })
                 ])
             }
             else if (c.input?.validator) {
                 setValidators(prev => [
                     ...prev,
-                    (r) => ({ [c.accessorKey]: !c.input?.validator(r[c.accessorKey]) ? c.input?.errorMessage || 'Error' : '' })
+                    (r) => ({ [c.accessorKey]: !c.input?.validator(getRecordValue(c, r)) ? c.input?.errorMessage || 'Error' : '' })
                 ])
             }
         })

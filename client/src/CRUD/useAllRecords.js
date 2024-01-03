@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
-import { cacheable, getCache as _getCache } from "./cacheable";
+import { cacheable, getCache as _getCache, clearCache } from "./cacheable";
 import { serverPath } from "./resources";
 
 export function useAllRecords(tableName) {
@@ -32,6 +32,7 @@ export function useAllRecords(tableName) {
     }
 
     useEffect(() => {
+        clearCache(tableName)
         const fetchData = async () => {
             let d = await get()
             console.log(api, d)

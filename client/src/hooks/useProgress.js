@@ -1,12 +1,9 @@
 'use client'
 import { useEffect, useState } from "react"
-import { stateTransitionMixin } from "@/style/TransitionMixin";
-import { Collapse, LinearProgress, Slide } from "@mui/material";
+import { ButtonGroup, LinearProgress, Slide } from "@mui/material";
+import LoadingButton from "@/components/LoadingButton";
 
-const startEvent = new CustomEvent("makingProgress", {detail: true})
-const stopEvent = new CustomEvent("makingProgress", {detail: false})
-
-export function useProgressListener(){
+export function useProgressListener(id = "", fn) {
     const [loading, setLoading] = useState(false)
 
     const onMakingProgress = (e) => {
@@ -14,46 +11,64 @@ export function useProgressListener(){
         setLoading(e.detail)
     }
     useEffect(() => {
-        window.addEventListener("makingProgress", onMakingProgress)
+        window.addEventListener("makingProgress" + id, fn || onMakingProgress) 
         return () => {
-            window.removeEventListener("makingProgress", onMakingProgress)
+            window.removeEventListener("makingProgress" + id, fn || onMakingProgress)
         }
     }, [])
 
-    return {loading}
+    return { loading }
 }
 
-export function useProgress(){
-    
+export function useProgress(id = "") {
+    const startEvent = new CustomEvent("makingProgress" + id, { detail: true })
+    const stopEvent = new CustomEvent("makingProgress" + id, { detail: false })
+
+    const startAsync = async (func) => {
+        start();
+        const startTime = Date.now();
+        const result = await func();
+        const elapsedTime = Date.now() - startTime;
+
+        if (elapsedTime < 1000) {
+            await new Promise((resolve) => setTimeout(resolve, 1000 - elapsedTime));
+        }
+
+        stop();
+        return result;
+    };
     const start = () => window.dispatchEvent(startEvent);
     const stop = () => window.dispatchEvent(stopEvent);
-    return {start, stop}
+    return { start, stop, startAsync }
 }
 
-const CustomProgressBar = stateTransitionMixin({
-    component: LinearProgress,
-    transition: "opacity", 
-    onOpen: {opacity: 1},
-    onClose: {opacity: 0}
-})
-const CustomProgressBarBase = stateTransitionMixin({
-    component: LinearProgress,
-    transition: "opacity", 
-    onOpen: {opacity: 1},
-    onClose: {opacity: 0}
-})
 
 const barHeight = .3
 
-export function ProgressBar(){
-    const { loading } = useProgressListener()
+export function ProgressBar({ id }) {
+    const { loading } = useProgressListener(id)
 
     return (
         <>
-            <Slide direction="down" in={loading} timeout={230}>
-                <LinearProgress sx={{height: barHeight, position: "absolute", top: 0, width: 1}}variant="determinate" value={0} />
+            <Slide direction="down" in={loading} timeout={250}>
+                <LinearProgress sx={{ height: barHeight, position: "absolute", top: 0, width: 1 }} variant="determinate" value={0} />
             </Slide>
-            <CustomProgressBar sx={{height: barHeight}} state={loading} />
+            {loading && <LinearProgress sx={{ height: barHeight}}  />}
         </>
     )
+}
+
+export function ProgressButton({ id, children, ...others }) {
+    const { loading } = useProgressListener(id)
+    return (
+        <ButtonGroup>
+            <LoadingButton
+                loading={loading}
+                {...others}
+            >
+                <span>{children}</span>
+            </LoadingButton>
+        </ButtonGroup>
+    )
+
 }

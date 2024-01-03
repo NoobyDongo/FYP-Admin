@@ -1,114 +1,63 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useMemo } from 'react';
 import {
     useMutation,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
 
-import {
-    Box,
-} from '@mui/material';
-import { products } from './makeData';
-import useTable from '@/components/Table/useTable'
+import { Table as rawTable } from '@/components/Table/Table'
 import { numberReg } from '@/hooks/useRecordValidation';
-import usePrompt from '@/hooks/usePrompt';
 import { useProgress } from '@/hooks/useProgress';
 import { useNotification } from '@/hooks/useNotification';
 import TableWrapper from '@/components/Table/wrapper';
-import { MaterialReactTable } from 'material-react-table';
-import { useAllRecords } from '@/CRUD/useAllRecords';
-import { SelectInput } from '@/components/Table/TableColumnEditField';
+import { toTableColumns } from '@/components/Table/TableColumnEditField';
+import { useAPI, useAPIs } from '@/CRUD/useAPI';
+
 
 function Table() {
-    const tableName = "Product"
+    const tableName = "product"
 
     const onCreatingRowCancel = () => { }
     const onEditingRowCancel = () => { }
 
-    useEffect(() => {
-        //console.log("Table Rendered")
+    console.log("Table rendered")
+
+    const [useCreate, useGet, useUpdate, useDelete] = CRUD({
+        tableName: "product",
+        simple: true,
+        subTable: [
+            { name: "producttype", param: { option: "all", simple: false } },
+            { name: "origin", param: { option: "all", simple: false } },
+        ]
     })
-
-    const [productType, ptLoaded] = useAllRecords("producttype")
-    const [origin, oLoaded] = useAllRecords("origin")
-    
-    useEffect(() => {
-    }, [])
-
-    const [useCreate, useGet, useUpdate, useDelete] = CRUD()
-    const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate();
-    const { data: fetchedRecords = [], isError: isLoadingError, isFetching: isFetchingRecords, isLoading: isLoadingRecords, } = useGet();
-    const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate();
-    const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete();
+    const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate()
+    const { data: fetchedRecords = { product: [], pt: [], o: [] }, isError, isFetching = true, isLoading = true, } = useGet()
+    const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate()
+    const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete()
 
     const columns = useMemo(
-        () => [
+        () => toTableColumns([
             {
                 accessorKey: 'id',
-                header: 'Id',
-                size: 120,
                 enableClickToCopy: true,
             },
-
             {
                 accessorKey: 'image',
-                header: 'Image',
-                size: 180,
                 input: {
                     type: "image",
-                },
-                Cell: ({ row }) => {
-                    return (
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                            }}
-                        >
-                            <Image
-                                alt="avatar"
-                                height={30}
-                                width={30}
-                                src={row.original.image || "/image/avatar.png"}
-                                loading="lazy"
-                                style={{ borderRadius: '50%' }}
-                            />
-                        </Box>
-                    )
-                },
+                }
             },
-
             {
                 accessorKey: 'name',
-                header: 'Name',
+                enableClickToCopy: true,
                 size: 200,
+                display: {
+                    type: "imageText",
+                    accessorKey: 'image'
+                },
                 input: {
                     required: true,
-                },
-                Cell: ({ renderedCellValue, row }) => {
-                    return (
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                            }}
-                        >
-                            <Image
-                                alt="avatar"
-                                height={30}
-                                width={30}
-                                src={row.original.image || "/image/avatar.png"}
-                                loading="lazy"
-                                style={{ borderRadius: '50%' }}
-                            />
-                            {/* using renderedCellValue instead of cell.getValue() preserves filter match highlighting */}
-                            <span>{renderedCellValue}</span>
-                        </Box>
-                    )
                 },
             },
             {
@@ -123,44 +72,39 @@ function Table() {
             {
                 accessorKey: 'price',
                 header: 'Price',
+                enableClickToCopy: true,
                 size: 150,
                 input: {
-                    type: "tel", //no updown arrow this way lol
+                    type: "number",
                     required: true,
                     validator: (value) => value > 0 && numberReg.test(value),
                     errorMessage: "Number format incorrect"
                 },
             },
             {
-                accessorKey: 'producttype',
+                accessorKey: 'productType',
                 header: 'Type',
                 size: 200,
-                ...SelectInput({
-                    group: 2,
-                    optionList: productType,
-                    optionValueAccessorFn: (v) => v?.id,
-                    optionLabelAccessorFn: (v) => v?.name,
+                input: {
+                    type: "select",
+                    simple: true,
+                    optionList: fetchedRecords.producttype,
                     required: true,
-                })
+                    group: 2,
+                }
             },
             {
-                accessorKey: "origin",
-                header: "Origin",
+                accessorKey: 'origin',
                 size: 200,
-                ...SelectInput({
-                    group: 2,
-                    optionList: origin,
-                    optionValueAccessorFn: (v) => v?.id,
-                    optionLabelAccessorFn: (v) => v?.name,
+                input: {
+                    type: "select",
+                    simple: true,
+                    optionList: fetchedRecords.origin,
                     required: true,
-                })
+                    group: 2,
+                }
             }
-
-        ], [ptLoaded && oLoaded],
-    );
-
-    const [createPrompt, handleCreate] = usePrompt({ columns, action: 0, tableName, saveRecord: createRecord })
-    const [editPrompt, handleEdit] = usePrompt({ columns, action: 1, tableName, saveRecord: updateRecord })
+        ]), [!isLoading && fetchedRecords.producttype.length > 0 && fetchedRecords.origin.length > 0])
 
     const openDeleteConfirmModal = (row) => {
         if (window.confirm('Are you sure you want to delete this record?')) {
@@ -168,11 +112,9 @@ function Table() {
         }
     };
 
-    const table = useTable({
-        fetchedRecords,
+    const Table = () => rawTable({
+        fetchedRecords: fetchedRecords.product,
 
-        createPrompt,
-        editPrompt,
         openDeleteConfirmModal,
 
         createRecord,
@@ -181,23 +123,22 @@ function Table() {
         onCreatingRowCancel,
         onEditingRowCancel,
 
-        isLoadingError,
-        isLoadingRecords,
-        isFetchingRecords,
+        isLoadingError: isError,
+        isLoadingRecords: isLoading,
+        isFetchingRecords: isFetching,
         isCreatingRecord,
         isUpdatingRecord,
         isDeletingRecord,
 
         columns,
         tableName,
-        handleCreate,
-        handleEdit,
         initialState: {
             columnVisibility: { image: false }
         }
     })
+    //const EditPrompt = Prompt({ columns, action: 1, tableName, saveRecord: updateRecord })
 
-    return (<MaterialReactTable table={table} />)
+    return (<Table />)
 }
 
 export default function ProductTable() {
@@ -208,46 +149,84 @@ export default function ProductTable() {
     )
 }
 
-function CRUD() {
-
-    const { start, stop } = useProgress()
-    const startAsync = async (func) => {
-        start(); await func(); setTimeout(stop(), 100);
+function GET(tableName, simple) {
+    const callAPI = useAPI(tableName)
+    const { startAsync } = useProgress()
+    function useGet() {
+        return useQuery({
+            queryKey: [tableName],
+            queryFn: async () => {
+                return await startAsync(async () => await callAPI({
+                    option: "all",
+                    simple: simple
+                }))
+            },
+            refetchOnWindowFocus: false,
+        });
     }
-    const newNotification = useNotification()
+    return [useGet]
+}
+
+function CRUD({ tableName, subTable, simple }) {
+
+    const callAPI = useAPI(tableName)
+    const otherAPIs = useAPIs(subTable)
+    const { startAsync } = useProgress(1)
+
+    const { normal: newNotification, error: alertError } = useNotification()
 
     function useCreate() {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (record) => {
-                //send api update request here
-                await startAsync(() => 
-                new Promise((resolve) => setTimeout(resolve, 1000)) 
-                ); //fake api call
+                var rec = await startAsync(async () => {
+                    var t = await callAPI({
+                        option: "add",
+                        method: "POST",
+                        simple: true,
+                        body: record
+                    })
+
+                    return t
+                })
+                return rec
+            },
+            onSuccess: (newRecord) => {
+                console.log("newREcord", newRecord)
+                if (alertError(newRecord))
+                    return
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords
+                    let o = {
+                        ...others, [tableName]: [ ...table, newRecord ],
+                    }
+                    console.log(o)
+                    return o
+                })
                 newNotification("A record has been created", "info")
-                return Promise.resolve();
             },
-            //client side optimistic update
-            onMutate: (newRecord) => {
-                queryClient.setQueryData(['product'], (prevRecords) => [
-                    ...prevRecords,
-                    {
-                        ...newRecord,
-                        id: (Math.random() + 1).toString(36).substring(7),
-                    },
-                ]);
+            onError: (err) => {
+                alertError({ error: err })
             },
-            // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+            //onSettled: () => queryClient.invalidateQueries({ queryKey: [tableName] }), //refetch users after mutation, disabled for demo
         });
     }
 
     function useGet() {
         return useQuery({
-            queryKey: ['product'],
+            queryKey: [tableName],
             queryFn: async () => {
-                //send api request here
-                await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))); //fake api call
-                return Promise.resolve(products);
+                return await startAsync(async () => {
+                    let record = {}
+                    record[tableName] = await callAPI({
+                        option: "all",
+                        simple: simple
+                    })
+                    await Promise.all(otherAPIs.map(async (e) => {
+                        record[e.name] = await e.fn()
+                    }))
+                    return record
+                })
             },
             refetchOnWindowFocus: false,
         });
@@ -257,20 +236,36 @@ function CRUD() {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (record) => {
-                //send api update request here
-                await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))); //fake api call
+                var rec = await startAsync(async () => {
+                    var t = await callAPI({
+                        option: "add",
+                        method: "POST",
+                        simple: true,
+                        body: record
+                    })
+
+                    return t
+                })
+                return rec
+            },
+            onSuccess: (newRecord) => {
+                console.log("newREcord", newRecord)
+                if (alertError(newRecord))
+                    return
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords
+                    let o = {
+                        ...others, [tableName]: table?.map((prevRecord) =>
+                        prevRecord.id === newRecord.id ? newRecord : prevRecord)
+                    }
+                    console.log(o)
+                    return o
+                })
                 newNotification("A record has been edited", "info")
-                return Promise.resolve();
             },
-            //client side optimistic update
-            onMutate: (newRecord) => {
-                queryClient.setQueryData(['product'], (prevRecords) =>
-                    prevRecords?.map((prevRecord) =>
-                        prevRecord.id === newRecord.id ? newRecord : prevRecord,
-                    ),
-                );
+            onError: (err) => {
+                alertError({ error: err })
             },
-            //onSettled: () => queryClient.invalidateQueries({ queryKey: ['product'] }), //refetch users after mutation, disabled for demo
         });
     }
 
@@ -278,17 +273,35 @@ function CRUD() {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (recordId) => {
-                //send api update request here
-                await startAsync(() => new Promise((resolve) => setTimeout(resolve, 1000))); //fake api call
-                return Promise.resolve();
+                var rec = await startAsync(async () => {
+                    var t = await callAPI({
+                        option: `remove/${recordId}`,
+                        method: "DELETE",
+                        simple: false,
+                    })
+                    return t
+                })
+                return rec
             },
-            //client side optimistic update
             onMutate: (recordId) => {
-                queryClient.setQueryData(['product'], (prevRecords) =>
-                    prevRecords?.filter((record) => record.id !== recordId),
-                );
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords
+                    let o = {
+                        ...others, [tableName]: table?.filter((record) => record.id !== recordId)
+                    }
+                    console.log(o)
+                    return o
+                })
             },
-            // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+            onSuccess: (newRecord) => {
+                console.log("newREcord", newRecord)
+                if (alertError(newRecord))
+                    return
+                newNotification("A record has been removed", "info")
+            },
+            onError: (err) => {
+                alertError({ error: err })
+            },
         });
     }
 

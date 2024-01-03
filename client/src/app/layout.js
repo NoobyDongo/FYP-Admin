@@ -1,4 +1,4 @@
-import './globals.css'
+import './globals.scss'
 import '../fonts/Inter-3.19/Inter Web/inter.css'
 
 

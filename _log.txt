@@ -107,3 +107,31 @@ better scrollbar??
 done:
 records in any table can now be fetched with useAllRecords.js
 product table now uses origin and product type from api server.
+
+2/1/2023
+to do:
+user corner
+integrate with backend
+make update work
+refactor!!!
+allow images to be saved on server
+enhance ImageUpload
+issues:
+64bit images are too large to put in requests
+prompt inputs are messed up :-(((
+done:
+records can now be created
+
+3/1/2024
+to do:
+user corner
+refactor!!!
+allow images to be saved on server
+enhance ImageUpload
+issues:
+64bit images are too large to put in requests
+done:
+table columns are now easier to define
+progressIndicators can now be assigned an id
+can do update and delete
+seperated prompt from MaterReactTable due to uncontrollable rendering
