@@ -7,12 +7,12 @@ import {
 } from '@tanstack/react-query';
 
 import { Table as rawTable } from '@/components/Table/Table'
-import { numberReg } from '@/hooks/useRecordValidation';
-import { useProgress } from '@/hooks/useProgress';
-import { useNotification } from '@/hooks/useNotification';
+import { numberReg } from '@/utils/useRecordValidation';
+import { useProgress } from '@/utils/useProgress';
+import { useNotification } from '@/components/Notifications/useNotification';
 import TableWrapper from '@/components/Table/wrapper';
 import { toTableColumns } from '@/components/Table/TableColumnEditField';
-import { useAPI, useAPIs } from '@/CRUD/useAPI';
+import { useAPI, useAPIs } from '@/utils/crud/useAPI';
 
 
 function Table() {
@@ -104,7 +104,7 @@ function Table() {
                     group: 2,
                 }
             }
-        ]), [!isLoading && fetchedRecords.producttype.length > 0 && fetchedRecords.origin.length > 0])
+        ]), [isLoading])
 
     const openDeleteConfirmModal = (row) => {
         if (window.confirm('Are you sure you want to delete this record?')) {
@@ -307,5 +307,3 @@ function CRUD({ tableName, subTable, simple }) {
 
     return [useCreate, useGet, useUpdate, useDelete]
 }
-
-

@@ -3,9 +3,9 @@ import '../fonts/Inter-3.19/Inter Web/inter.css'
 
 
 import { cookies } from 'next/headers'
-import NavWrapper from "../components/Nav/wrapper";
+import NavWrapper from "../components/Navigation/wrapper";
 import { CookiesProvider } from 'next-client-cookies/server';
-import useServerLogin from '@/hooks/useServerLogin';
+import useServerLogin from '@/utils/useServerLogin';
 
 export const metadata = {
   title: 'Create Next App',

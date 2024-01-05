@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
     Button,
     Dialog,
@@ -9,18 +9,15 @@ import {
     Divider,
     Stack,
 } from '@mui/material';
-import { MRT_EditActionButtons } from 'material-react-table';
-import useRecordValidation from '@/hooks/useRecordValidation';
+import useRecordValidation from '@/utils/useRecordValidation';
 import FormEditField from "@/components/Table/TableColumnEditField";
-import { ProgressButton, useProgress } from "../../hooks/useProgress";
+import { ProgressButton, useProgress } from "../../utils/useProgress";
 
 const actions = ["Create New", "Edit"]
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 export default function Prompt(props) {
 
-    const { columns, name, title, setOpen, data } = props
+    const { columns, name, title, close, data } = props
     const { saveRecord, ...others } = props
 
     const [validationErrors, setValidationErrors] = useState({});
@@ -138,7 +135,7 @@ export default function Prompt(props) {
                 }
             </DialogContent>
             <DialogActions sx={{ padding: 3, pt: 1, pb: 2, gap:2 }}>
-                <Button onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={close}>Cancel</Button>
                 <ProgressButton variant="contained" id={2} onClick={handleSave}>Save</ProgressButton>
             </DialogActions>
         </Dialog>

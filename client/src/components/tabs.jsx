@@ -60,31 +60,3 @@ function a11yProps(index) {
         'aria-controls': `simple-tabpanel-${index}`,
     };
 }
-/*
-function example() {
-
-    const [value, setValue] = useState(0);
-    const handleChange = (e, newValue) => {
-        setValue(newValue);
-    };
-
-    return (
-
-        <Box paddingTop={4}>
-            <TabMenu
-                value={value}
-                handleChange={handleChange}
-                tabs={["1", "2", "3", "4", "5"]}
-            />
-            <Box sx={{ flex: "1" }}>
-                <TabPanel value={value} index={0}>
-                    1
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    2
-                </TabPanel>
-            </Box>
-        </Box>
-    )
-}
-*/

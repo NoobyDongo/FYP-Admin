@@ -135,3 +135,14 @@ table columns are now easier to define
 progressIndicators can now be assigned an id
 can do update and delete
 seperated prompt from MaterReactTable due to uncontrollable rendering
+
+4/1/2024
+to do:
+user corner
+refactor!!!
+issues:
+janky image upload logic  
+a difficult decision
+done:
+images can now be uploaded to server
+The image upload component got enhanced, go check it out.

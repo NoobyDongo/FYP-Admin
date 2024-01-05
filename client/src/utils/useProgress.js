@@ -20,12 +20,28 @@ export function useProgressListener(id = "", fn) {
     return { loading }
 }
 
-export function useProgress(id = "") {
-    const startEvent = new CustomEvent("makingProgress" + id, { detail: true })
-    const stopEvent = new CustomEvent("makingProgress" + id, { detail: false })
+export function useRawProgressListener(id = "", start, end) {
+    const onMakingProgress = (e) => {
+        console.log("making progress..................", e.detail)
+        if(e.detail)
+            start()
+        else
+            end()
+    }
+    useEffect(() => {
+        window.addEventListener("makingProgress" + id, onMakingProgress) 
+        return () => {
+            window.removeEventListener("makingProgress" + id, onMakingProgress)
+        }
+    }, [])
+}
 
-    const startAsync = async (func) => {
-        start();
+export function useProgress(id = "") {
+    const startEvent = (sid = id) => new CustomEvent("makingProgress" + sid, { detail: true })
+    const stopEvent = (sid = id) => new CustomEvent("makingProgress" + sid, { detail: false })
+
+    const startAsync = async (func, sid) => {
+        start(sid);
         const startTime = Date.now();
         const result = await func();
         const elapsedTime = Date.now() - startTime;
@@ -34,11 +50,11 @@ export function useProgress(id = "") {
             await new Promise((resolve) => setTimeout(resolve, 1000 - elapsedTime));
         }
 
-        stop();
+        stop(sid);
         return result;
     };
-    const start = () => window.dispatchEvent(startEvent);
-    const stop = () => window.dispatchEvent(stopEvent);
+    const start = (sid) => window.dispatchEvent(startEvent(sid));
+    const stop = (sid) => window.dispatchEvent(stopEvent(sid));
     return { start, stop, startAsync }
 }
 

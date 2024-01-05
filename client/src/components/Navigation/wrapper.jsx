@@ -1,9 +1,9 @@
 'use client'
-import Themed from "@/components/theme";
+import Themed from "@/components/Themed";
 import FadeWrapper from '@/components/FadeWrapper'
 
 import * as React from 'react';
-import useDarkMode from "@/hooks/useDarkmode";
+import useDarkMode from "@/utils/useDarkmode";
 import { Body, CustomDrawer, DrawerHeader, CustomAppbar } from "./CustomAppbar";
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -11,9 +11,9 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import CategoryIcon from '@mui/icons-material/Category';
 import { Box } from "@mui/material";
 
-import { Notifications } from "@/hooks/useNotification";
-import useClientLogin from "@/hooks/useClientLogin";
-import { ProgressBar } from "@/hooks/useProgress";
+import useClientLogin from "@/utils/useClientLogin";
+import { ProgressBar } from "@/utils/useProgress";
+import { Notifications } from "../Notifications/Notifications";
 
 
 export default function NavWrapper({ children }) {

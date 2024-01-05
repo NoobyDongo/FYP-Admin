@@ -114,7 +114,6 @@ export const Table = (props) => {
             },
             style: {
                 overflow: "auto",
-                //height of the sticky header
                 zIndex: table.getState().isFullScreen ? 1200 : undefined,
             },
         }),
@@ -174,7 +173,6 @@ export const Table = (props) => {
 
         ],
         renderBottomToolbar: ({ table }) => {
-
             return (
                 <Paper
                     sx={(theme) => ({
@@ -290,8 +288,8 @@ export const Table = (props) => {
     return (
         <>
             <MaterialReactTable table={table}/>
-            <Prompt open={creating} setOpen={setCreating} title={0} name={tableName} {...{ columns, saveRecord: createRecord }}/>
-            <Prompt open={editing} setOpen={setEditing} title={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }}/>
+            <Prompt open={creating} close={() => setCreating(false)} title={0} name={tableName} {...{ columns, saveRecord: createRecord }}/>
+            <Prompt open={editing} close={() => setEditing(false)} title={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }}/>
         </>
     )
 };

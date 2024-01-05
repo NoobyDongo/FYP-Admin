@@ -20,7 +20,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import { Box, lighten, alpha } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import { useCookies } from "next-client-cookies";
-import { closedTransitionMixin, openCloseTransitionMixin, openedTransitionMixin } from "@/style/TransitionMixin";
+import { closedTransitionMixin, openCloseTransitionMixin, openedTransitionMixin } from "@/utils/styles/TransitionMixin";
 
 export function CustomAppbar({ open, onOpen, onClose }) {
 

@@ -4,7 +4,7 @@ import {
     MenuItem,
     Box,
 } from '@mui/material';
-import ImageUpload from '@/components/ImageUpload';
+import ImageUpload from '@/components/ImageUpload/ImageUpload';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
@@ -40,7 +40,6 @@ function createAccessorFunction(accessorKey) {
 }
 function createInputValueSetter(accessorKey, list) {
     const keys = accessorKey.includes('.') ? accessorKey.split('.') : [accessorKey];
-    console.log(keys)
 
     return (form, value) => {
         const clonedKeys = [...keys];
@@ -53,7 +52,6 @@ function createInputValueSetter(accessorKey, list) {
         }, form);
 
         nestedObject[lastKey] = value;
-        console.log(keys, nestedObject, form, lastKey, value)
 
         return form;
     };
@@ -71,7 +69,7 @@ export function TableColumn(props) {
     const { accessorKey, header: rawHeader, size: rawSize, input, display, ...others } = props
 
     let accessorFn = createAccessorFunction(accessorKey)
-    let inputValueStetter = createInputValueSetter(accessorKey, !input?.simple && input?.optionList)
+    let inputValueStetter = input? createInputValueSetter(accessorKey, !input?.simple && input?.optionList) : null
     let header = rawHeader || accessorKey.charAt(0).toUpperCase() + accessorKey.slice(1)
     let size = rawSize || 120 + header.length * 10
 
@@ -98,53 +96,6 @@ export function TableColumn(props) {
         ...others
     }
 }
-
-
-
-
-/*
-const column = {
-    accessorFn: (value) => value.xx,
-    accessorKey: "test",
-    header: "Test",
-    size: 120,
-    ...others,
-    input: {
-        type: "xx" || "text",
-        valueSetter: (form, value) => form["xx"] = value,
-
-        ...(select && {
-            optionList: list,
-            optionIdAccessor: (option) => option.xx,
-            optionValueAccessor: (option) => option.name,
-
-        })
-    }
-}
-/*
-const ex = {
-    accessorFn: (row) => row.productType?.id,
-    accessorKey: 'productType',
-    header: 'Type',
-    size: 200,
-    ...SelectInput({
-        valueAccessorFn: (row) => row.productType?.name,
-        required: true,
-        group: 2,
-        optionList: producttype,
-        fn: (form, value) => ({ ...form, productType: { ...producttype.find((e) => e.id = value) } }),
-        optionValueAccessorFn: (v) => v?.id,
-        optionLabelAccessorFn: (v) => v?.name,
-        cell: {
-            sx: {
-                textTransform: "capitalize"
-            }
-        },
-        required: true,
-    })
-}
-*/
-
 
 export function TableImageCell(props) {
     const { accessorFn } = props
@@ -214,8 +165,6 @@ export function TableSelectCell(input) {
     let getOptionvalue = (id) => input.optionValueAccessorFn?.(getOption(id)) || getOption(id).name
 
     return {
-        //{input.optionLabelAccessorFn(input.optionList?.find((e) => input.optionValueAccessorFn(e) == cell.getValue()))}
-        //{input.valueAccessorFn(row.original)}
         Cell: ({ cell }) => (
             <Box sx={{ textTransform: "capitalize" }}>
                 {getOptionvalue(cell.getValue())}
@@ -236,23 +185,15 @@ export default function TableColumnEditField(props) {
 
     const onComplete = () => {
         console.log("value", localValue, "oldValue", value)
-        if (col.input.type === "select")
-            console.log(col.input.optionList)
         if (localValue === value) {
             console.log("...no change at all...")
             return null
         }
         saveToParent((form) => col.input.valueSetter(form, localValue))
     }
-    const onTextChange = (e) => {
-        setValue(e.target.value)
-    }
 
-    const onSelectChange = (e) => {
+    const onChange = (e) => {
         setValue(e.target.value)
-        //console.log("event", e.target.value)
-        //saveToParent((form) => valueSetter({}, e.target.value))
-        //onComplete(e)
     }
 
 
@@ -283,10 +224,9 @@ export default function TableColumnEditField(props) {
                 multiline={input.multiline}
                 InputProps={input.InputProps}
                 select={input.optionList?.length >= 1}
-                onChange={input.optionList?.length >= 1 ? onSelectChange : onTextChange}
+                onChange={onChange}
                 onBlurCapture={onComplete}
-                {...(!input.type === "text" && {onBlurCapture:{onComplete}})}
-
+                
                 InputLabelProps={{ shrink: true }}
 
                 error={!!validationErrors?.[key]}

@@ -1,4 +1,3 @@
-'use client'
 import { serverPath } from "./resources";
 
 const dataFn = (api) => async ({ option, method, headers, body, simple }) => {
