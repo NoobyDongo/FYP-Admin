@@ -146,3 +146,13 @@ a difficult decision
 done:
 images can now be uploaded to server
 The image upload component got enhanced, go check it out.
+
+5/1/2024
+to do:
+user corner
+refactor!!!
+merge the imageupload login to the existing form upload logic
+issues:
+a difficult decision
+done:
+imageupload status are now updated via websocket

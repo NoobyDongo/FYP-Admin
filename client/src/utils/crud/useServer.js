@@ -1,6 +1,6 @@
 import { clientServerPath } from "./resources";
 
-const dataFn = (api) => async ({ option, method, headers, body, simple }) => {
+const dataFn = (api) => async ({ option, method, headers, body }) => {
     console.log("Before", api, {
         method: method || 'GET',
         headers: {

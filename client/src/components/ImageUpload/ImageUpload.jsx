@@ -13,7 +13,7 @@ import { useImageUploadListener } from './useImageUpload';
 import axios from 'axios';
 import { useProgress, useProgressListener, useRawProgressListener } from '@/utils/useProgress';
 import DoneIcon from '@mui/icons-material/Done';
-
+import Image from 'next/image';
 
 const crypto = require('crypto');
 
@@ -21,26 +21,6 @@ function generateUniqueHashedString(extra = "") {
     const timestamp = Date.now().toString() + extra;
     const hash = crypto.createHash('sha256').update(timestamp).digest('hex');
     return hash;
-}
-
-const ImageUpload_ = () => {
-    const [selectedImage, setSelectedImage] = useState('');
-    const [filename, setFilename] = useState('');
-    const [directoryName, setDirectoryName] = useState('');
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-            setSelectedImage(reader.result);
-        };
-
-        reader.readAsDataURL(file);
-        setFilename(file.name);
-    };
-
-
 }
 
 const ImageListItemIconWrapper = forwardRef((props, ref) => {
@@ -60,6 +40,7 @@ const ImageListItemIconWrapper = forwardRef((props, ref) => {
         </Box>
     )
 })
+ImageListItemIconWrapper.displayName = "ImageListItemIconWrapper";
 
 function ImageListItem({ image, index, ...others }) {
 
@@ -125,9 +106,9 @@ function ImageListItem({ image, index, ...others }) {
 
                 </div>
             </Stack>
-            <Typography variant="caption" flex={1} inline noWrap overflow="hidden" textOverflow={"ellipsis"}>{image['file'].name}</Typography>
+            <Typography variant="caption" flex={1} inline="true" noWrap overflow="hidden" textOverflow={"ellipsis"}>{image['file'].name}</Typography>
 
-            <IconButton marginLeft="auto" size="small" color="primary" onClick={() => onImageUpdate(index)}><EditIcon /></IconButton>
+            <IconButton ml="auto" size="small" color="primary" onClick={() => onImageUpdate(index)}><EditIcon /></IconButton>
             <IconButton size="small" color="error" onClick={() => onImageRemove(index)}><DeleteIcon /></IconButton>
 
         </Stack>
@@ -138,41 +119,8 @@ export const ImagesUpload = forwardRef((props, ref) => {
     const { maxNumber = 69, size = 250, ...others } = props
     const [images, setImages] = useState([]);
 
-    const { startAsync } = useProgress()
-
     useImperativeHandle(ref, () => ({
-        async uploadImages() {
-            console.log(images)
-            if (images.length < 1)
-                return
-            let dir = await axios.get('/api/image/generateDirectory', {
-                headers: {
-                    Authorization: 'your-secret-key',
-                },
-                params: {
-                    folderName: 'new-folder',
-                }
-            })
-            let directoryName = dir.data.name
-            images.forEach(async (img, i) => {
-
-                await startAsync(async () => {
-                    let body = {
-                        image: img.data,
-                        filename: img.name,
-                        directory: directoryName
-                    }
-                    console.log(directoryName, body, JSON.stringify(body))
-                    const uploadResponse = await fetch('/api/image/upload', {
-                        method: 'POST',
-                        body: JSON.stringify(body),
-                    });
-
-                    const uploadData = await uploadResponse.json();
-                    console.log('Uploaded image link:', uploadData.link);
-                }, img.name)
-            })
-        },
+        getImages(){return images}
     }));
 
     const onChange = (imageList, addUpdateIndex) => {
@@ -292,6 +240,7 @@ export const ImagesUpload = forwardRef((props, ref) => {
         </div>
     );
 })
+ImagesUpload.displayName = "ImagesUpload"
 
 export function ImageUpload(props) {
 
