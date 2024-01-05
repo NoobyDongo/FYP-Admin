@@ -1,3 +1,4 @@
 client/.next
 client/node_modules
-client/public/image/upload
+client/public/image
+!client/public/image/avatar.png
