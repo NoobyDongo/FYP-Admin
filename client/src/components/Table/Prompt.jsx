@@ -1,41 +1,55 @@
 'use client'
 import { useState, useEffect } from "react";
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    Stack,
-} from '@mui/material';
-import useRecordValidation from '@/utils/useRecordValidation';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import Stack from '@mui/material/Stack';
+import useRecordValidation from '@/utils/hooks/useRecordValidation';
 import FormEditField from "@/components/Table/TableColumnEditField";
-import { ProgressButton, useProgress } from "../../utils/useProgress";
+import ProgressButton from "@/components/Progress/ProgressButton";
+import useProgress from "@/utils/hooks/useProgress/useProgress";
+import listenToUpload from "@/app/product/listenToUpload";
+import Collapse from "@mui/material/Collapse";
+import Box from "@mui/material/Box";
+import useProgressListener from "@/utils/hooks/useProgress/useProgressListener";
 
 const actions = ["Create New", "Edit"]
+const gap = 3
 
 export default function Prompt(props) {
 
-    const { columns, name, title, close, data } = props
+    const { columns, name, actioname, onClose, data } = props
     const { saveRecord, ...others } = props
 
     const [validationErrors, setValidationErrors] = useState({});
     const [formData, setForm] = useState({})
-    const [images, setImages] = useState([])
     const [sortedColumns, setColumns] = useState([])
     const validateRecord = useRecordValidation(columns)
-    const { startAsync } = useProgress(2)
+    const { startAsync } = useProgress('promptsave')
+
+    const [disabled, setDisabled] = useState(false)
+    const { loading } = useProgressListener('promptsave')
 
     console.log("Prompt rendered")
 
     const onChange = (fn) => {
-
-        if (fn) {
-            let newForm = fn({ ...formData })
-            console.log(newForm)
-            setForm(newForm)
-        }
+        let newForm = fn({ ...formData })
+        console.log(newForm)
+        setForm(newForm)
+    }
+    const exitForm = () => {
+        if (actioname == 0)
+            clearInput()
+        else
+            setDisabled(false)
+        onClose()
+    }
+    const clearInput = () => {
+        setForm({})
+        setDisabled(false)
     }
 
     useEffect(() => {
@@ -43,49 +57,46 @@ export default function Prompt(props) {
             setForm({ ...data })
     }, [data])
 
+    const sortColumn = () => {
+        const list = [];
+        const filteredArray = [];
+
+        columns.forEach((col, index) => {
+            if (!col.input)
+                return;
+
+            const i = col.input;
+            const group = i.group || 0;
+
+            if (!list[group])
+                list[group] = [];
+
+            const place = i.order || index;
+
+            let targetList = list[group];
+            let currentIndex = place;
+
+            while (targetList[currentIndex]) {
+                currentIndex++
+            }
+
+            targetList[currentIndex] = col;
+        });
+
+        list.forEach((group) => {
+            if (group) {
+                const filteredGroup = group.filter((element) => {
+                    return element !== undefined && element !== null && element !== '';
+                });
+                filteredArray.push(filteredGroup);
+            }
+        });
+        console.log("Columns sorted", filteredArray)
+        setColumns(filteredArray)
+    }
+
     useEffect(() => {
         console.log("Prompt mounted", columns)
-
-        const sortColumn = () => {
-            const list = [];
-            const filteredArray = [];
-
-            columns.forEach((col, index) => {
-                if (!col.input)
-                    return;
-
-                const i = col.input;
-                const group = i.group || 0;
-
-                if (!list[group])
-                    list[group] = [];
-
-                const place = i.order || index;
-
-                let targetList = list[group];
-                let currentIndex = place;
-
-                while (targetList[currentIndex]) {
-                    currentIndex++
-                }
-
-                if (i.type == "image")
-                    images.push({ accessorFn: i.a })
-
-                targetList[currentIndex] = col;
-            });
-
-            list.forEach((group) => {
-                if (group) {
-                    const filteredGroup = group.filter((element) => {
-                        return element !== undefined && element !== null && element !== '';
-                    });
-                    filteredArray.push(filteredGroup);
-                }
-            });
-            console.log("Columns sorted", filteredArray)
-            setColumns(filteredArray)
-        }
         sortColumn()
 
         return () => {
@@ -95,7 +106,7 @@ export default function Prompt(props) {
     }, [columns])
 
     const handleSave = async () => {
-        
+
         console.log("Form data", formData)
 
         const newValidationErrors = validateRecord(formData);
@@ -105,25 +116,35 @@ export default function Prompt(props) {
             return;
         }
         setValidationErrors({})
-        await startAsync(() => saveRecord(formData))
+        listenToUpload(async (data) => startAsync(() => saveRecord(data)), formData, (res) => {
+            console.log("save record result:", res)
+            if (!res.error) {
+                setDisabled(true)
+            }
+        })
+    }
 
-        setForm({})
+    const handleClose = (event, reason) => {
+        if (reason && reason === "backdropClick")
+            return;
     }
 
     return (
-        <Dialog {...others} fullWidth>
-            <DialogTitle variant="h4" sx={{ textTransform: "capitalize" }}>{actions[title]} {name || "Record"}</DialogTitle>
+        <Dialog {...others} onClose={handleClose} fullWidth>
+            <DialogTitle variant="h4" sx={{ textTransform: "capitalize" }}>{actions[actioname]} {name || "Record"}</DialogTitle>
             <Divider />
             <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                sx={{ display: 'flex', flexDirection: 'column', gap: gap, overflowX: "hidden" }}
             >
                 {
                     sortedColumns.map((col, i) => (
-                        <Stack key={i} direction={col.length == 2 ? "row" : "column"} gap={'1rem'}>
+                        <Stack key={i} direction={col.length == 2 ? "row" : "column"} gap={gap}>
                             {
                                 col.map((e, ii) => (
                                     <FormEditField key={ii}
+                                        disabled={disabled || loading}
                                         col={e}
+                                        record={formData}
                                         value={e.accessorFn?.(formData)}
                                         onComplete={onChange}
                                         validationErrors={validationErrors}
@@ -134,9 +155,41 @@ export default function Prompt(props) {
                     ))
                 }
             </DialogContent>
-            <DialogActions sx={{ padding: 3, pt: 1, pb: 2, gap:2 }}>
-                <Button onClick={close}>Cancel</Button>
-                <ProgressButton variant="contained" id={2} onClick={handleSave}>Save</ProgressButton>
+            <DialogActions sx={{ padding: 3, pt: 1, pb: 2 }}>
+                {actioname==0 && <Button disabled={loading}
+                    variant="outlined"
+                    onClick={clearInput}
+                    sx={{ mr: gap / 2 }}
+                >
+                    Clear
+                </Button>}
+                <Button
+                    disabled={loading}
+                    color="secondary"
+                    variant="outlined"
+                    onClick={exitForm}
+                    sx={{ ml: gap }}
+                >
+                    Return
+                </Button>
+                <Collapse style={{
+                    transitionDelay: `${disabled ? 350 : 0}ms`,
+                    display: 'flex',
+                    justifyContent: "flex-end"
+                }}
+                    timeout={disabled ? 700 : 200}
+                    orientation="horizontal"
+                    in={!disabled}
+                    unmountOnExit mountOnEnter>
+                    <Box sx={{ pl: gap, width: 1 }}>
+                        <ProgressButton sx={{ width: 1 }} variant="contained"
+                            disabled={disabled || loading}
+                            id={'promptsave'}
+                            onClick={handleSave}>
+                            Save
+                        </ProgressButton>
+                    </Box>
+                </Collapse>
             </DialogActions>
         </Dialog>
     )

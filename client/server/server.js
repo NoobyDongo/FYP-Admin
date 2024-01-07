@@ -6,7 +6,7 @@ const next = require('next')
 
 
 const dev = process.env.NEXT_PUBLIC_APP_ENV !== 'production'
-console.log("In dev", dev, process.env)
+console.log("In dev mode", dev)
 const hostname = 'localhost'
 const wsPort = 3001
 const serverPort = 3000

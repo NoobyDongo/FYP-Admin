@@ -3,7 +3,7 @@ const { usePathname } = require("next/navigation");
 import { motion } from "framer-motion";
 
 export default function FadeWrapper(props) {
-    const { children, ...other } = props;
+    const { children, ...other } = props
     const pathname = usePathname()
     return (
 

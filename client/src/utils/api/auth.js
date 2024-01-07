@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { headersSkIndicator } from "../config";
+import { headersSkIndicator } from "../../../config";
 
 export async function auth(req, targetKey, func){
   const token = req.headers.get(headersSkIndicator);

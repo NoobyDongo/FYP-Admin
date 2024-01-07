@@ -156,3 +156,35 @@ issues:
 a difficult decision
 done:
 imageupload status are now updated via websocket
+
+6/1/2024
+to do:
+user corner
+refactor!!!
+merge the imageupload login to the existing form upload logic
+done:
+
+7/1/2024
+to do:
+user corner
+authentication
+issues:
+the public folder is static :-/////
+changes made to editprompt's ImagesUpload are not being reset upon closing and opening the same prompt again
+ImagesUpload list item's image is not covering the whole container
+done:
+allowed apis to be chosen individually when using CRUD
+product images can now be edited, adding new images, removing uploaded images
+ImageUpload now becomes ImagesUpload
+    undo redo function is added to ImagesUpload and placed within a menu
+    added indicators to whether the file is alreadly uploaded to server
+    added filesize display for newly added files
+    columns can be mapped to ImagesUpload via TableColumnEditField
+prompts are now better
+    prevented changes during loading and after modifying/creating a record
+    added option to clear prompt's data
+bug fix
+    fixed ImageUpload from overflowing in Y axis in production
+    fixed a bug that prevented the correct image from being removed in ImageUpload
+    moved CRUD logic to base Table, preventing CRUD operations from closing the opened prompt
+    fixed a bug that prevented ImagesUpload's value from being stored upon closing the prompt

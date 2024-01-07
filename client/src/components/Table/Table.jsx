@@ -1,13 +1,12 @@
 'use client'
-import {
-    Box,
-    Button,
-    ListItemIcon,
-    MenuItem,
-    lighten,
-    ListItemText,
-    Paper,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import MenuItem from '@mui/material/MenuItem';
+import { lighten } from "@mui/system/colorManipulator";
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+
 import {
     useMaterialReactTable,
     MRT_GlobalFilterTextField,
@@ -22,27 +21,32 @@ import {
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@emotion/react';
+import {useTheme} from '@emotion/react';
 import Prompt from '@/components/Table/Prompt';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import CRUD from '@/app/product/crud';
 
 export const Table = (props) => {
     const theme = useTheme()
 
     const { onCreatingRowCancel, onEditingRowCancel } = props
-    const { openDeleteConfirmModal } = props
-    const { createRecord, updateRecord, deleteRecord } = props
-    const { columns, initialState, tableName } = props
-    const { fetchedRecords } = props
-    const { isCreatingRecord, isUpdatingRecord, isDeletingRecord } = props
-    const { isFetchingRecords, isLoadingError, isLoadingRecords } = props
+    const { columns: rawColumns, initialState, tableName, crud } = props
 
     const [creating, setCreating] = useState(false)
     const [row, setRow] = useState({})
     const [editing, setEditing] = useState(false)
 
+
     const toCreate = () => setCreating(true)
-    const toEdit = (row) => {setEditing(true); setRow(row)}
+    const toEdit = (row) => { setEditing(true); setRow(row) }
+
+    const [useCreate, useGet, useUpdate, useDelete] = CRUD(crud)
+    const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate()
+    const { data: fetchedRecords = { product: [], pt: [], o: [] }, isError, isFetching = true, isLoading = true, } = useGet()
+    const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate()
+    const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete()
+
+    const columns = useMemo(() => rawColumns(fetchedRecords), [isLoading])
 
     const defaultOpenDeleteConfirmModal = (row) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
@@ -52,7 +56,7 @@ export const Table = (props) => {
 
     const table = useMaterialReactTable({
         columns,
-        data: fetchedRecords,
+        data: fetchedRecords[tableName] || [],
         initialState: {
             ...initialState,
             showColumnFilters: false,
@@ -139,7 +143,7 @@ export const Table = (props) => {
                 outline: "none"
             }
         },
-        muiToolbarAlertBannerProps: isLoadingError
+        muiToolbarAlertBannerProps: isError
             ? {
                 color: 'error',
                 children: 'Error loading data',
@@ -278,18 +282,18 @@ export const Table = (props) => {
             );
         },
         state: {
-            isLoading: isLoadingRecords,
+            isLoading: isLoading,
             isSaving: isCreatingRecord || isUpdatingRecord || isDeletingRecord,
-            showAlertBanner: isLoadingError,
-            showProgressBars: isFetchingRecords || true || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
+            showAlertBanner: isError,
+            showProgressBars: isFetching || true || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
         },
     });
 
     return (
         <>
-            <MaterialReactTable table={table}/>
-            <Prompt open={creating} close={() => setCreating(false)} title={0} name={tableName} {...{ columns, saveRecord: createRecord }}/>
-            <Prompt open={editing} close={() => setEditing(false)} title={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }}/>
+            <MaterialReactTable table={table} />
+            <Prompt open={creating} onClose={() => setCreating(false)} actioname={0} name={tableName} {...{ columns, saveRecord: createRecord }} />
+            <Prompt open={editing} onClose={() => setEditing(false)} actioname={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }} />
         </>
     )
 };

@@ -1,6 +1,7 @@
 'use client'
 
-import { styled, useTheme } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+import useTheme from '@mui/material/styles/useTheme';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -17,7 +18,8 @@ import ListItemText from '@mui/material/ListItemText';
 
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { Box, lighten, alpha } from "@mui/material";
+import Box from '@mui/material/Box';
+import { lighten, alpha } from "@mui/system/colorManipulator";
 import { usePathname, useRouter } from "next/navigation";
 import { useCookies } from "next-client-cookies";
 import { closedTransitionMixin, openCloseTransitionMixin, openedTransitionMixin } from "@/utils/styles/TransitionMixin";

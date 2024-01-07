@@ -1,17 +1,5 @@
-import { serverPath } from "./resources";
-
-const dataFn = (api) => async ({ option, method, headers, body, simple }) => {
-    console.log("Before", api, {
-        method: method || 'GET',
-        headers: {
-            ...headers
-        },
-        ...(body && {
-            body: JSON.stringify(body || {})
-        })
-
-    })
-    let res = await fetch(api + option + (simple ? "/simple" : ""), {
+export const dataFn = (api) => async ({ option, method, headers, body, simple }) => {
+    let reqParam = {
         method: method || 'GET',
         headers: {
             ...headers,
@@ -20,29 +8,28 @@ const dataFn = (api) => async ({ option, method, headers, body, simple }) => {
         ...(body && {
             body: JSON.stringify(body || {})
         })
+    }
+    //console.log("Before", reqParam)
+    let res = await fetch(api + option + (simple ? "/simple" : ""), reqParam)
 
-    })
     let t;
     if (res.headers.get('Content-Type').includes('application/json')) {
         t = await res.json();
     } else {
         t = await res.text();
     }
-    console.log(api, t)
+    console.log("after", api, t)
     return t
 }
 
-function getApi(service) { return serverPath + service + "/" }
-
-export function useAPI(service) {
-    let api = getApi(service)
-    return dataFn(api)
+export function useAPI(path, service) {
+    return dataFn(path + '/' + service + '/')
 }
 
-export function useAPIs(services) {
+export function useAPIs(path, services) {
     let dataFns = []
     services.forEach((service) => {
-        let api = getApi(service.name)
+        let api = path + '/' + service.name + '/'
         dataFns.push({ fn: () => dataFn(api)(service.param), name: service.name })
     })
     return dataFns

@@ -3,17 +3,17 @@ import Themed from "@/components/Themed";
 import FadeWrapper from '@/components/FadeWrapper'
 
 import * as React from 'react';
-import useDarkMode from "@/utils/useDarkmode";
+import useDarkMode from "@/utils/hooks/useDarkmode";
 import { Body, CustomDrawer, DrawerHeader, CustomAppbar } from "./CustomAppbar";
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import CategoryIcon from '@mui/icons-material/Category';
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 
-import useClientLogin from "@/utils/useClientLogin";
-import { ProgressBar } from "@/utils/useProgress";
-import { Notifications } from "../Notifications/Notifications";
+import useClientLogin from "@/utils/hooks/useClientLogin";
+import ProgressBar from "@/components/Progress/ProgressBar";
+import Notifications from "../Notifications/Notifications";
 
 
 export default function NavWrapper({ children }) {
@@ -51,7 +51,7 @@ export default function NavWrapper({ children }) {
 
             {token && location !== "/signin" && <>
                 <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
-                    <ProgressBar id={1}/>
+                    <ProgressBar id={1} />
                 </Box>
                 <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                 <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />

@@ -4,6 +4,8 @@ import * as React from 'react'
 import Tooltip from '@mui/material/Tooltip';
 import MuiButton from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import Collapse from '@mui/material/Collapse';
+import Fade from '@mui/material/Fade';
 
 export const LoadingButton = React.forwardRef(
 	function LoadingButton({ children, loading, ...others }, ref) {
@@ -13,12 +15,16 @@ export const LoadingButton = React.forwardRef(
 				disabled={loading}
 				{...others}
 			>
-				{loading && (
-					<CircularProgress
-						color="inherit"
-						size={16}
-						sx={{mr:1}}
-					/>)}
+				<Collapse orientation='horizontal' in={loading} mountOnEnter unmountOnExit>
+					<Fade in={loading} >
+						<div style={{ height: "100%", paddingRight: 8, display: 'flex', alignItems: "center" }}>
+							<CircularProgress
+								color="inherit"
+								size={16}
+							/>
+						</div>
+					</Fade>
+				</Collapse>
 				{children}
 			</MuiButton>
 		);
@@ -27,11 +33,6 @@ export const LoadingButton = React.forwardRef(
 
 export default React.forwardRef(
 	function Button(props, ref) {
-		if (props.loading) {
-			return (
-				<LoadingButton ref={ref} {...props} />
-			)
-		}
 
 		const {
 			title,

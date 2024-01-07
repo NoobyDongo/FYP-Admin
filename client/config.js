@@ -1,7 +1,10 @@
 export const serverPort = 3000
 export const wsPort = 3001
+export const apiPort= 8080
 export const server = "http://localhost" + ":" + serverPort
+export const serverApi = server + "/api"
 export const ws = "http://localhost" + ":" + wsPort
+export const api = "http://localhost" + ":" + apiPort
 
 export const headersSkIndicator="x-secret-key"
 
@@ -10,7 +13,8 @@ export const uploadImageKey = "9daa2a7fffbea7d6e70c55397cd31628"
 export const makedirKey = "9cb93ea87ed984dcb9677f7510e99956"
 export const makedirOption = {
     create: "create",
-    remove: "remove"
+    remove: "remove",
+    rename: "rename",
 }
 export const imageUploadPath = "public/image/upload"
 export const imageUploadWsKey = {

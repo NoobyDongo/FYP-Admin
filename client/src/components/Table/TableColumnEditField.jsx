@@ -1,28 +1,10 @@
 'use client'
-import {
-    TextField,
-    MenuItem,
-    Box,
-} from '@mui/material';
-import ImageUpload from '@/components/ImageUpload/ImageUpload';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-
-
-function NextImage(props) {
-    const { defaultSrc, src, ...others } = props;
-    const [source, setSource] = useState(src || defaultSrc);
-
-    return (
-        <Image
-            {...others}
-            src={source}
-            onErrorCapture={() => {
-                setSource(defaultSrc);
-            }}
-        />
-    );
-}
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import { ImagesUpload } from '@/components/Image/ImagesUpload';
+import { useEffect, useRef, useState } from 'react';
+import NextImage from '../Image/NextImage';
 
 function createAccessorFunction(accessorKey) {
     const keys = accessorKey.split('.');
@@ -69,7 +51,7 @@ export function TableColumn(props) {
     const { accessorKey, header: rawHeader, size: rawSize, input, display, ...others } = props
 
     let accessorFn = createAccessorFunction(accessorKey)
-    let inputValueStetter = input? createInputValueSetter(accessorKey, !input?.simple && input?.optionList) : null
+    let inputValueStetter = input ? createInputValueSetter(accessorKey, !input?.simple && input?.optionList) : null
     let header = rawHeader || accessorKey.charAt(0).toUpperCase() + accessorKey.slice(1)
     let size = rawSize || 120 + header.length * 10
 
@@ -90,7 +72,7 @@ export function TableColumn(props) {
                 ...(input.type === "select" && TableSelectCell(input)),
             }),
             ...(display && {
-                ...(display.type === "imageText" && TableImageTextCell({ accessorFn: createAccessorFunction(display.accessorKey) }))
+                ...(display.type === "imageText" && TableImageTextCell({ accessorFn: display.accessorFn })),
             })
         }),
         ...others
@@ -125,7 +107,7 @@ export function TableTextCell() {
     return {
         Cell: ({ renderedCellValue }) => {
             return (
-                <Box sx={{textOverflow:"ellipsis", whiteSpace:"nowrap"}} >
+                <Box sx={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }} >
                     <span>{renderedCellValue}</span>
                 </Box>
             )
@@ -151,7 +133,7 @@ export function TableImageTextCell(props) {
                         defaultSrc={"/image/avatar.png"}
                         style={{ borderRadius: '50%' }}
                     />
-                    <span style={{ whiteSpace:"nowrap"}}>{renderedCellValue}</span>
+                    <span style={{ whiteSpace: "nowrap" }}>{renderedCellValue}</span>
                 </Box>
             )
         },
@@ -173,15 +155,66 @@ export function TableSelectCell(input) {
     }
 }
 
+function DefaultTextField(props) {
 
-export default function TableColumnEditField(props) {
+    const { label, name, input, children, value, disabled } = props
+    const { onChange, onComplete } = props
+    const { validationErrors, setValidationErrors } = props
+    const {
+        required = false,
+        type = "text",
+        variant = "outlined",
+        fullWidth = true,
+        multiline,
+        InputProps
+    } = input
+
+    return (
+        <TextField
+            label={label}
+            name={name}
+            required={required}
+            type={type}
+            variant={variant}
+            fullWidth={fullWidth}
+            value={value}
+            multiline={multiline}
+            InputProps={InputProps}
+            onChange={onChange}
+            onBlurCapture={onComplete}
+            disabled={disabled}
+
+            InputLabelProps={{ shrink: true }}
+
+            error={!!validationErrors?.[name]}
+            helperText={validationErrors?.[name]}
+            onFocus={() =>
+                setValidationErrors({
+                    ...validationErrors,
+                    [name]: undefined,
+                })}
+        >
+            {children}
+        </TextField>
+    )
+}
+
+export default function TableColumnEditField(props){
     const { col, validationErrors, setValidationErrors } = props
-    const { onComplete: saveToParent, value } = props
+    const { record } = props
+    const { onComplete: saveToParent, value, disabled } = props
+    const inputComponent = useRef(null)
 
     const [localValue, setValue] = useState()
     useEffect(() => {
+        if(!value)
+            inputComponent.current?.clear()
         setValue(value)
     }, [value])
+
+    const save = (value) => {
+        saveToParent((form) => col.input.valueSetter(form, value))
+    }
 
     const onComplete = () => {
         console.log("value", localValue, "oldValue", value)
@@ -189,7 +222,7 @@ export default function TableColumnEditField(props) {
             console.log("...no change at all...")
             return null
         }
-        saveToParent((form) => col.input.valueSetter(form, localValue))
+        save(localValue)
     }
 
     const onChange = (e) => {
@@ -202,15 +235,33 @@ export default function TableColumnEditField(props) {
 
     var input = col.input
     var key = col.accessorKey
-    if (input.type == "image")
+    
+    if (input.type === "image")
         return (
-            <ImageUpload
-                images={value}
-                maxNumber={1}
-                name={key}
-                onChange={onComplete}
-            ></ImageUpload>
+            <ImagesUpload
+                name={col.header}
+                onChange={(e) => {onChange({target:{value:e}}); save(e)}}
+                value={value}
+                disabled={disabled}
+                ref={inputComponent}
+                link={input.linkFn?.(record)}
+            >
+
+            </ImagesUpload>
         )
+    if (input.type === "text" || input.type === "number")
+        return (
+            <DefaultTextField
+                label={col.header}
+                name={key}
+                input={input}
+                value={localValue || ""}
+                onChange={onChange}
+                onComplete={onComplete}
+                validationErrors={validationErrors}
+                setValidationErrors={setValidationErrors}
+                disabled={disabled}
+            ></DefaultTextField>)
     else
         return (
             <TextField
@@ -226,7 +277,8 @@ export default function TableColumnEditField(props) {
                 select={input.optionList?.length >= 1}
                 onChange={onChange}
                 onBlurCapture={onComplete}
-                
+                disabled={disabled}
+
                 InputLabelProps={{ shrink: true }}
 
                 error={!!validationErrors?.[key]}

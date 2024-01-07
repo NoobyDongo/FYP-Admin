@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "build": "next build",
-    "start": "SET NEXT_PUBLIC_APP_ENV=production& node server.js",
+    "dev": "title Client Server (development) && node server/server.js",
+    "build": "SET ANALYZE=true&& next build",
+    "start": "title Client Server (production) && SET NEXT_PUBLIC_APP_ENV=production&& node server/server.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -17,10 +17,8 @@
     "@mui/x-date-pickers": "latest",
     "@preact/signals-react": "^1.3.8",
     "@tanstack/react-query": "^5.13.4",
-    "axios": "^1.6.4",
     "dayjs": "^1.11.10",
     "framer-motion": "^10.16.4",
-    "jsonwebtoken": "^9.0.2",
     "material-react-table": "^2.x.x",
     "next": "latest",
     "next-client-cookies": "^1.1.0",
@@ -35,6 +33,7 @@
     "socket.io-client": "^4.7.3"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.0.4",
     "eslint": "latest",
     "eslint-config-next": "latest"
   }

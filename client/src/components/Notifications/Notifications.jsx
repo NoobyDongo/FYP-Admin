@@ -3,6 +3,7 @@
 //amazing, helped me to save a lot of time
 import { useEffect } from 'react';
 import { SnackbarProvider, useSnackbar } from 'notistack';
+
 function MyApp() {
     const { enqueueSnackbar } = useSnackbar();
 
@@ -18,7 +19,7 @@ function MyApp() {
     }, [])
 }
 
-export function Notifications() {
+export default function Notifications() {
 
     return (
         <SnackbarProvider maxSnack={3} anchorOrigin={{ horizontal: "right", vertical: "top" }}>

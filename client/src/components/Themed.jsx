@@ -1,7 +1,7 @@
 'use client'
 import { ThemeProvider, alpha, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { blue, red, orange } from '@mui/material/colors';
+import { red, orange } from '@mui/material/colors';
 
 const defaultDarkTheme = createTheme({
   palette: {
@@ -13,7 +13,7 @@ const defaultLightTheme = createTheme({
     mode: 'light',
   }
 });
-const sharedDrawerTheme = (background, color) => ({
+const sharedComponentsTheme = (background, color) => ({
   components: {
     MuiDrawer: {
       styleOverrides: {
@@ -22,7 +22,16 @@ const sharedDrawerTheme = (background, color) => ({
           color: color
         }
       }
-    }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-notchedOutline': {
+            transition: 'border-color 0.25s',
+          },
+        },
+      },
+    },
   }
 })
 const sharedTypographyTheme = {
@@ -33,6 +42,9 @@ const sharedTypographyTheme = {
 const sharedPalette = (shade, defaultTheme) => ({
   primary: {
     main: orange[shade],
+  },
+  secondary:{
+    main: red[shade],
   },
   border: {
     main: alpha(defaultTheme.palette.text.disabled, 0.1)
@@ -83,7 +95,7 @@ const darkTheme = createTheme({
       ...sharedPalette(400, defaultDarkTheme)
     },
     ...sharedOverride(),
-    ...sharedDrawerTheme('black', "white"),
+    ...sharedComponentsTheme('black', "white"),
     ...sharedTypographyTheme,
 });
 const lightSharedPalette = {...sharedPalette(800, defaultLightTheme)}
@@ -93,7 +105,7 @@ const lightTheme = createTheme({
       ...lightSharedPalette
     },
     ...sharedOverride(),
-    ...sharedDrawerTheme(lightSharedPalette.primary.main, "white"),
+    ...sharedComponentsTheme(lightSharedPalette.primary.main, "white"),
     ...sharedTypographyTheme,
 });
   
