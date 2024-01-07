@@ -180,6 +180,7 @@ ImageUpload now becomes ImagesUpload
     added indicators to whether the file is alreadly uploaded to server
     added filesize display for newly added files
     columns can be mapped to ImagesUpload via TableColumnEditField
+    gifs can now be uploaded
 prompts are now better
     prevented changes during loading and after modifying/creating a record
     added option to clear prompt's data
