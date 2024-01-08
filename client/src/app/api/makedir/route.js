@@ -23,7 +23,7 @@ export async function GET(req) {
       } else if (option === makedirOption.rename) {
         const newName = req.nextUrl.searchParams.get("newName");
         if (!newName) return BadRequest("newName is undefined")
-        fs.renameSync(path.join(process.cwd(), targetPath, folderName), path.join(process.cwd(), targetPath, newName))
+        fs.renameSync(path.join(process.cwd(), targetPath, folderName+ ""), path.join(process.cwd(), targetPath, newName+ ""))
         return NextResponse.json({ name: newName }, { status: 200 })
       }
       else {
@@ -47,7 +47,7 @@ const generateUniqueDirectoryName = async (dirpath, folderName) => {
 
 const removeDirectory = (dirpath, folderName) => {
   return new Promise((resolve, reject) => {
-    const directoryPath = path.join(process.cwd(), dirpath, folderName);
+    const directoryPath = path.join(process.cwd(), dirpath, folderName + "");
 
     fs.rmdir(directoryPath, { recursive: true }, (error) => {
       if (error) {
@@ -62,7 +62,7 @@ const removeDirectory = (dirpath, folderName) => {
 
 const createDirectory = (dirpath, folderName) => {
   return new Promise((resolve, reject) => {
-    const directoryPath = path.join(process.cwd(), dirpath, folderName);
+    const directoryPath = path.join(process.cwd(), dirpath, folderName + "");
 
     fs.mkdir(directoryPath, { recursive: true }, (error) => {
       if (error) {

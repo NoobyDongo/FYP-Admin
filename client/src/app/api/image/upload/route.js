@@ -51,7 +51,7 @@ export async function POST(req) {
     console.log('directory:', directory);
     const uniqueFilename = generateUniqueFilename(directoryPath, filename, gif ? "gif" : "webp")
     console.log('uniqueFilename:', uniqueFilename);
-    const relativePath = path.join(directoryPath, directory, uniqueFilename)
+    const relativePath = path.join(directoryPath, directory+ "", uniqueFilename)
     console.log("relativePath", relativePath)
     await new Promise(function (resolve, reject) {
       fs.writeFile(relativePath, buffer, (err) => {

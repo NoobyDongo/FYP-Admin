@@ -1,52 +1,30 @@
-import { api, headersSkIndicator, imageUploadWsKey, makedirKey, makedirOption, productImagePath, server, uploadImageKey, ws, wsKey } from "../../../../../config.js";
-import fs from 'fs';
-import path from 'path';
-import BadRequest from '@/utils/api/response/badRequest.js';
-import Response from '@/utils/api/response/response.js';
-import { dataFn, useAPI } from '@/utils/crud/useAPI.js';
-import InternalError from "@/utils/api/response/internalError.js";
-
-function directoryExists(path) {
-    return fs.existsSync(path);
-}
+import { api, headersSkIndicator, imageUploadWsKey, makedirKey, productImagePath, server, uploadImageKey, ws, wsKey } from "../../../../../config.js"
+import path from 'path'
+import BadRequest from '@/utils/api/response/badRequest.js'
+import Response from '@/utils/api/response/response.js'
+import { dataFn } from '@/utils/crud/useAPI.js'
+import InternalError from "@/utils/api/response/internalError.js"
+import directoryExists from "./directoryExists.js"
+import createDirectory from "./createDirectory.js"
+import removeDirectory from "./removeDirectory.js"
+import renameDirectory from "./renameDirectory.js"
 
 function deleteFilesExcept(folderPath, filenamesToKeep) {
     return new Promise((resolve, reject) => {
         fs.readdir(folderPath, (err, files) => {
-            if (err) reject(err);
+            if (err) reject(err)
 
+            console.log("files", files)
+            console.log("filenamesToKeep", filenamesToKeep)
             const deletePromises = files
-                .filter(file => !filenamesToKeep.includes(file))
-                .map(file => fs.promises.unlink(path.join(folderPath, file)));
+                .filter(file => !filenamesToKeep.some(f => f.name === file))
+                .map(file => fs.promises.unlink(path.join(folderPath, file)))
 
             Promise.all(deletePromises)
                 .then(() => resolve())
-                .catch(reject);
-        });
-    });
-}
-
-async function manageDirectory(option, directoryName, newDirectoryName, directoryPath) {
-    return (await (await fetch(`${server}/api/makedir?` + new URLSearchParams({
-        option: option,
-        folderName: directoryName,
-        path: directoryPath,
-        ...(newDirectoryName && {newName: newDirectoryName})
-    }), {
-        headers: { [headersSkIndicator]: makedirKey }
-    })).json())
-}
-
-async function createDirectory(directoryName, directoryPath) {
-    return await manageDirectory(makedirOption.create, directoryName, null, directoryPath)
-}
-
-async function removeDirectory(directoryName, directoryPath) {
-    return await manageDirectory(makedirOption.remove, directoryName, null, directoryPath)
-}
-
-async function renameDirectory(directoryName, newDirectoryName, directoryPath) {
-    return await manageDirectory(makedirOption.rename, directoryName, newDirectoryName, directoryPath)
+                .catch(reject)
+        })
+    })
 }
 
 export async function POST(req) {
@@ -59,29 +37,29 @@ export async function POST(req) {
         let requireNewFolder = false
         let directoryName = form.id || ""
 
-        if (images?.length > 0) {
-            let productDirectory = path.join(process.cwd(), productImagePath, directoryName)
-            console.log(productDirectory)
+        let productDirectory = path.join(process.cwd(), productImagePath, directoryName + "")
+        console.log(productDirectory)
 
-            requireNewFolder = !form.id || !directoryExists(productDirectory)
-            let savedImages = []
-            let unsavedImages = images
+        requireNewFolder = !form.id || !directoryExists(productDirectory)
+        let savedImages = images.filter(img => img.id)
 
-            if (requireNewFolder) {
-                directoryName = (await createDirectory(directoryName, productImagePath, makedirKey)).name
-                console.log("new directory created", directoryName)
-            } else {
-                savedImages = images.filter(img => img.id);
-                unsavedImages = images.filter(img => !img.id);
-                await deleteFilesExcept(productDirectory, savedImages)
-                console.log("unwanted images deleted")
-            }
-
-            await Promise.all(unsavedImages.map(async (img, index) => {
-                form.images[index] = await uploadImage(img, directoryName, socket)
-            }))
-            console.log("images uploaded", form.images)
+        if (requireNewFolder) {
+            directoryName = (await createDirectory(directoryName, productImagePath, makedirKey)).name
+            console.log("new directory created", directoryName)
+        } else {
+            //console.log("unwanted images deleted", savedImages, unsavedImages)
+            await deleteFilesExcept(productDirectory, savedImages)
         }
+
+        await Promise.all(images.map(async (img, index) => {
+            if (img.data) {
+                let image = await uploadImage(img, directoryName, socket)
+                console.log("New image uploaded", image)
+                form.images[index] = image
+            }
+        }))
+        console.log("images uploaded", form.images)
+
         let productApi = dataFn(api + '/' + "product" + '/')
         let response = await productApi({
             option: "add",
@@ -106,7 +84,35 @@ export async function POST(req) {
         console.log(error)
         return InternalError(error)
     }
-};
+}
+
+export async function DELETE(req) {
+    try {
+        const { id } = await req.json()
+        if (!id) {
+            return BadRequest("id is undefined")
+        }
+        let productApi = dataFn(api + '/' + "product" + '/')
+        let response = await productApi({
+            option: "remove/" + id,
+            method: "DELETE",
+            simple: false,
+        })
+        console.log("response from product api", response)
+        if (response === "deleted"){
+            if (directoryExists(path.join(process.cwd(), productImagePath, id + ""))) {
+                let res = await removeDirectory(id, productImagePath, makedirKey)
+                console.log(res)
+            }
+            return Response({id: id})
+        }
+        else
+            return InternalError({ error: "Failed to delete record" })
+    } catch (error) {
+        console.log(error)
+        return InternalError(error)
+    }
+}
 
 async function uploadImage(img, directoryName, socket) {
     let body = {
@@ -131,9 +137,9 @@ async function uploadImage(img, directoryName, socket) {
         method: 'POST',
         headers: { [headersSkIndicator]: uploadImageKey },
         body: JSON.stringify(body),
-    });
+    })
 
-    const uploadData = await uploadResponse.json();
+    const uploadData = await uploadResponse.json()
 
     body = {
         socket: socket,

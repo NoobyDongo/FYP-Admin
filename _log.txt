@@ -189,3 +189,16 @@ bug fix
     fixed a bug that prevented the correct image from being removed in ImageUpload
     moved CRUD logic to base Table, preventing CRUD operations from closing the opened prompt
     fixed a bug that prevented ImagesUpload's value from being stored upon closing the prompt
+
+8/1/2024
+to do:
+user corner
+authentication
+done:
+bug fix
+    fixed a bug that caused updates to the wrong image
+    fixed a bug that prevented the removal of image when the imageList is empty
+    fixed a bug that caused the wrong image to be deleted
+    prevented the path function from freaking out when it sees a numeric (product id) value in its params :-((
+the client server is now hosting product images, get them via /api/image/product/{id}/{filename}
+routing record deletion requests to client server, so that related images can be deleted

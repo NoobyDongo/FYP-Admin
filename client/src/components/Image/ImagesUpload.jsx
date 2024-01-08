@@ -62,6 +62,7 @@ function ImageListItem({ disabled, image, index, link, ...others }) {
 
     const onUploadingStart = (e) => {
         ImageWrapper.current.style.borderWidth = 0
+        ImageWrapper.current.style.padding = 2
         uploadIconWrapper.current.style.opacity = 1
         uploadingIcon.current.style.opacity = 1
     }
@@ -82,14 +83,14 @@ function ImageListItem({ disabled, image, index, link, ...others }) {
                 flexShrink: 0
             }}>
             <Stack ref={ImageWrapper} sx={(theme) => ({
-                border: 2,
                 margin: .2,
-                borderColor: "transparent",
+                border: 2,
+                borderColor:'transparent',
                 outline: 2,
                 outlineColor: image['data'] ? theme.palette.primary.main : theme.palette.action.disabled,
                 borderRadius: "50%",
                 overflow: "hidden",
-                alignContent: "center",
+                alignItems: "center",
                 justifyContent: "center",
                 height: 35, width: 35,
                 marginRight: .8,
@@ -97,9 +98,10 @@ function ImageListItem({ disabled, image, index, link, ...others }) {
                 userSelect: "none",
             })}>
                 <img src={image['data'] || link + image['name']} alt="" style={{
-                    height: "101%", width: "101%",
+                    height: "100%", width: "100%",
+                    borderRadius: "50%",
                     objectFit: "cover",
-                    objectPosition: "center"
+                    objectPosition: "center",
                 }} />
                 <div ref={uploadIconWrapper} style={{
                     opacity: 0,
@@ -171,30 +173,7 @@ const IconButtonWithTooltip = ({ label, disabled, onClick, children, ...other })
     );
 };
 
-export const ImagesUpload = forwardRef((props, ref) => {
-    const { maxNumber = 69, size = 250, onChange: changeParent } = props
-    const simpleMode = maxNumber <= 1
-    const { name = 'images', required = false, disabled = false } = props
-    const { value = simpleMode ? {} : [], ...others } = props
-    const { link = "" } = props
-    const [images, setImages] = useState([]);
-
-    const history = useRef([value]);
-    const pointer = useRef(history.current.length - 1);
-
-    useImperativeHandle(ref, () => ({
-        getImages() { return simpleMode ? images[0] : images },
-        clear() {
-            setImages(simpleMode ? {} : [])
-            history.current = [simpleMode ? {} : []]
-            pointer.current = 0
-        },
-        undo,
-        redo,
-    }));
-    const numUndo = () => pointer.current
-    const numRedo = () => history.current.length - pointer.current - 1
-    /*
+/*
         const addToHistory = (value) => {
             if (JSON.stringify(value) !== JSON.stringify(history.current[pointer.current])) {
                 history.current = history.current.slice(0, pointer.current + 1);
@@ -204,12 +183,19 @@ export const ImagesUpload = forwardRef((props, ref) => {
         }
     */
 
-    const addToHistory = (value) => {
-        console.log("history", pointer.current, history.current)
-        const newValue = value.map(image => image.data); // replace 'data' with the actual property that holds the image data
-        const currentValue = history.current[pointer.current].map(image => image.data); // replace 'data' with the actual property that holds the image data
+const useHistory = (initialValue, valueSetter, comparator) => {
+    const history = useRef([initialValue]);
+    const pointer = useRef(history.current.length - 1);
 
-        if (newValue.length !== currentValue.length || newValue.some((image, index) => image !== currentValue[index])) {
+    const numUndo = () => pointer.current
+    const numRedo = () => history.current.length - pointer.current - 1
+
+    const add = (value) => {
+        console.log("history", pointer.current, history.current)
+        const newValue = comparator(value)
+        const currentValue = comparator(history.current[pointer.current])
+
+        if (newValue.length !== currentValue.length || newValue.some((value, index) => value !== currentValue[index])) {
             history.current = history.current.slice(0, pointer.current + 1);
             history.current.push(value);
             pointer.current++;
@@ -221,7 +207,7 @@ export const ImagesUpload = forwardRef((props, ref) => {
         console.log("history", pointer.current, history.current)
         if (pointer.current > 0) {
             pointer.current--;
-            setImages(history.current[pointer.current]);
+            valueSetter(history.current[pointer.current]);
         }
     };
 
@@ -229,9 +215,33 @@ export const ImagesUpload = forwardRef((props, ref) => {
         console.log("history", pointer.current, history.current)
         if (pointer.current < history.current.length - 1) {
             pointer.current++;
-            setImages(history.current[pointer.current]);
+            valueSetter(history.current[pointer.current]);
         }
     };
+
+    return { history, pointer, add, undo, redo, numUndo, numRedo }
+}
+
+export const ImagesUpload = forwardRef((props, ref) => {
+    const { maxNumber = 69, size = 250, onChange: changeParent } = props
+    const simpleMode = maxNumber <= 1
+    const { name = 'images', required = false, disabled = false } = props
+    const { value = simpleMode ? {} : [], ...others } = props
+    const { link = "" } = props
+    const [images, setImages] = useState([]);
+
+
+    useImperativeHandle(ref, () => ({
+        getImages() { return simpleMode ? images[0] : images },
+        clear() {
+            setImages(simpleMode ? {} : [])
+            history.current = [simpleMode ? {} : []]
+            pointer.current = 0
+        }
+    }));
+
+    const { history, pointer, add: addToHistory, undo, redo, numUndo, numRedo } = useHistory(value, setImages, (value) => value.map((image) => image['data'] || image['name']))
+
 
     useEffect(() => {
         setImages(value)
@@ -249,20 +259,6 @@ export const ImagesUpload = forwardRef((props, ref) => {
 
         addToHistory(imageList)
     };
-
-    const customOnImageUpload = (onImageUpload, imageList, e) => {
-        console.log(imageList, e)
-        onImageUpload(e)
-    }
-    const customOnImageRemove = (onImageRemove, imageList, index) => {
-        console.log(imageList, index)
-        onImageRemove(index)
-    }
-
-    const customOnImageRemoveAll = (e, onImageRemoveAll) => {
-
-        onImageRemoveAll(e)
-    }
 
     const customUI = useCallback(({
         imageList,
@@ -319,7 +315,7 @@ export const ImagesUpload = forwardRef((props, ref) => {
                         <FileUploadOutlinedIcon sx={{ height: .5, width: .5, }} />
                         <Typography variant="body2">{others.imagePlaceholder || "Drag and Drop here"}</Typography>
                         <div style={{ width: "100%", height: "100%", position: "absolute" }} {...dragProps} draggable="true"></div>
-                        <Button disabled={disabled} onClick={(e) => customOnImageUpload(onImageUpload, imageList, e)} sx={{ mt: 2, borderRadius: 1 }} variant="outlined">Browse</Button>
+                        <Button disabled={disabled} onClick={onImageUpload} sx={{ mt: 2, borderRadius: 1 }} variant="outlined">Browse</Button>
 
                     </Box>
 

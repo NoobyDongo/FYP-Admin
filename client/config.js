@@ -1,10 +1,9 @@
-export const serverPort = 3000
-export const wsPort = 3001
-export const apiPort= 8080
-export const server = "http://localhost" + ":" + serverPort
-export const serverApi = server + "/api"
-export const ws = "http://localhost" + ":" + wsPort
-export const api = "http://localhost" + ":" + apiPort
+export const {hostname, serverPort, wsPort, apiPort, authServerPort, wsKey} = require('./server.config')
+
+export const server = `http://${hostname}:${serverPort}`
+export const serverApi = `${server}/api`
+export const ws = `http://${hostname}:${wsPort}`
+export const api = `http://${hostname}:${apiPort}`
 
 export const headersSkIndicator="x-secret-key"
 
@@ -22,4 +21,3 @@ export const imageUploadWsKey = {
     end: "endImageUpload"
 }
 export const productImagePath = "public/image/product"
-export const wsKey = "5093258a6fc320f715eab0543cea2a76"

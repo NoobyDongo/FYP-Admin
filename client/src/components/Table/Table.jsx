@@ -21,7 +21,7 @@ import {
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {useTheme} from '@emotion/react';
+import { useTheme } from '@emotion/react';
 import Prompt from '@/components/Table/Prompt';
 import { useMemo, useState } from 'react';
 import CRUD from '@/app/product/crud';
@@ -29,7 +29,6 @@ import CRUD from '@/app/product/crud';
 export const Table = (props) => {
     const theme = useTheme()
 
-    const { onCreatingRowCancel, onEditingRowCancel } = props
     const { columns: rawColumns, initialState, tableName, crud } = props
 
     const [creating, setCreating] = useState(false)
@@ -49,7 +48,7 @@ export const Table = (props) => {
     const columns = useMemo(() => rawColumns(fetchedRecords), [isLoading])
 
     const defaultOpenDeleteConfirmModal = (row) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
+        if (window.confirm('Are you sure you want to delete this record?')) {
             deleteRecord(row.original.id);
         }
     };
@@ -150,8 +149,6 @@ export const Table = (props) => {
             }
             : undefined,
         getRowId: (row) => row.id,
-        onCreatingRowCancel: () => { onCreatingRowCancel?.() },
-        onEditingRowCancel: () => { onEditingRowCancel?.() },
 
         displayColumnDefOptions: {
             'mrt-row-actions': {
@@ -168,7 +165,7 @@ export const Table = (props) => {
                 <ListItemText primary="Edit" />
             </MenuItem>,
 
-            <MenuItem key="delete" onClick={() => (openDeleteConfirmModal || defaultOpenDeleteConfirmModal)(row)}>
+            <MenuItem key="delete" onClick={() => (defaultOpenDeleteConfirmModal)(row)}>
                 <ListItemIcon>
                     <DeleteIcon color='error' />
                 </ListItemIcon>
@@ -231,7 +228,7 @@ export const Table = (props) => {
                             color: theme.palette.primary.main,
                             fontSize: 16, marginLeft: 8
                         }}>
-                            {fetchedRecords.length}</span>
+                            {fetchedRecords[tableName]?.length || 0}</span>
                     </Box>
                     <MRT_TablePagination table={table} />
                 </Paper>

@@ -43,8 +43,10 @@ export default function Prompt(props) {
     const exitForm = () => {
         if (actioname == 0)
             clearInput()
-        else
+        else{
             setDisabled(false)
+            setForm(data)
+        }
         onClose()
     }
     const clearInput = () => {

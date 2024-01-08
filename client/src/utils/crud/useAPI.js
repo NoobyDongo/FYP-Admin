@@ -9,7 +9,7 @@ export const dataFn = (api) => async ({ option, method, headers, body, simple })
             body: JSON.stringify(body || {})
         })
     }
-    //console.log("Before", reqParam)
+    console.log("Before", body)
     let res = await fetch(api + option + (simple ? "/simple" : ""), reqParam)
 
     let t;

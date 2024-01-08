@@ -10,9 +10,6 @@ import { serverApi } from '../../../config';
 function Table() {
     const tableName = "product"
 
-    const onCreatingRowCancel = () => { }
-    const onEditingRowCancel = () => { }
-
     console.log("Table rendered")
 
     const serverAPI = useAPI(serverApi + "/record", tableName)
@@ -25,7 +22,7 @@ function Table() {
             accessorKey: 'images',
             input: {
                 type: "image",
-                linkFn: (record) => `/image/product/${record.id}/`,
+                linkFn: (record) => `/api/image/product/${record.id}/`,
             }
         },
         {
@@ -34,7 +31,7 @@ function Table() {
             size: 200,
             display: {
                 type: "imageText",
-                accessorFn: (record) => `/image/product/${record.id}/${record.images?.[0]?.name}`
+                accessorFn: (record) => record.images?.length > 0 ? `/api/image/product/${record.id}/${record.images[0].name}` : null
             },
             input: {
                 required: true,
@@ -88,7 +85,6 @@ function Table() {
     ])
 
     const Table = () => rawTable({
-
         crud: {
             tableName: "product",
             simple: true,
@@ -104,11 +100,12 @@ function Table() {
                 update: serverAPI,
                 updateOption: "",
                 updateSimple: false,
+
+                delete: serverAPI,
+                deleteOption: "/",
+                deleteSimple: false,
             }
         },
-
-        onCreatingRowCancel,
-        onEditingRowCancel,
 
         columns,
         tableName,
