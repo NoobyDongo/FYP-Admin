@@ -4,15 +4,14 @@ import {
     useQuery,
     useQueryClient
 } from '@tanstack/react-query';
-import useProgress from "@/utils/hooks/useProgress/useProgress";
+import useProgress from "@/components/Progress/useProgress/useProgress";
 import { useNotification } from '@/components/Notifications/useNotification';
 import { useAPI, useAPIs } from '@/utils/crud/useAPI';
-import { api } from '../../../config';
 
 export default function CRUD({ tableName, subTable, simple, methods }) {
 
-    const callAPI = useAPI(api, tableName);
-    const otherAPIs = useAPIs(api, subTable);
+    const callAPI = useAPI('api/record/api', tableName);
+    const otherAPIs = useAPIs('api/record/api', subTable);
     const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods;
     const { createSimple = true, getSimple = true, updateSimple = true, deleteSimple = true } = methods;
     const { createOption = "add", getOption = "all", updateOption = "add", deleteOption } = methods;

@@ -3,9 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import MenuItem from '@mui/material/MenuItem';
-import { lighten } from "@mui/system/colorManipulator";
 import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
 
 import {
     useMaterialReactTable,
@@ -19,12 +17,12 @@ import {
     MaterialReactTable,
 } from 'material-react-table';
 
+import { useTheme } from '@emotion/react';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@emotion/react';
 import Prompt from '@/components/Table/Prompt';
 import { useMemo, useState } from 'react';
-import CRUD from '@/app/product/crud';
+import CRUD from '@/utils/crud/crud';
 
 export const Table = (props) => {
     const theme = useTheme()
@@ -79,9 +77,6 @@ export const Table = (props) => {
             size: 'small',
             variant: 'outlined',
         },
-        muiEditRowDialogProps: {
-
-        },
         muiPaginationProps: {
             sx: {
                 pd: 0,
@@ -102,6 +97,7 @@ export const Table = (props) => {
                 boxShadow: "none",
                 border: 0,
                 textTransform: "capitalize",
+                backgroundColor: "transparent",
                 "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
                     position: 'absolute',
                     right: 0,
@@ -109,7 +105,6 @@ export const Table = (props) => {
             }
         },
         muiTablePaperProps: ({ table }) => ({
-            //not sx
             elevation: theme.palette.mode == "dark" ? 1 : 0,
             sx: {
                 transition: 'none',
@@ -123,6 +118,7 @@ export const Table = (props) => {
         muiTableHeadRowProps: {
             sx: {
                 borderBottom: 1,
+                backgroundColor: "transparent",
                 borderColor: theme.palette.border.main
             }
         },
@@ -142,6 +138,14 @@ export const Table = (props) => {
                 outline: "none"
             }
         },
+        muiTableContainerProps: ({ table }) => ({
+            sx: {
+                overflow: table.getState().isLoading ? "hidden" : "auto",
+                "&>.MuiBox-root": {
+                    backgroundColor: "transparent",
+                }
+            }
+        }),
         muiToolbarAlertBannerProps: isError
             ? {
                 color: 'error',
@@ -175,7 +179,7 @@ export const Table = (props) => {
         ],
         renderBottomToolbar: ({ table }) => {
             return (
-                <Paper
+                <Box
                     sx={(theme) => ({
                         px: 2,
                         py: 1.5,
@@ -231,7 +235,7 @@ export const Table = (props) => {
                             {fetchedRecords[tableName]?.length || 0}</span>
                     </Box>
                     <MRT_TablePagination table={table} />
-                </Paper>
+                </Box>
             );
         },
         renderTopToolbar: ({ table }) => {
@@ -239,7 +243,7 @@ export const Table = (props) => {
             return (
                 <Box
                     sx={(theme) => ({
-                        backgroundColor: lighten(theme.palette.background.default, 0.05),
+                        //backgroundColor: lighten(theme.palette.background.default, 0.05),
                         padding: 2,
                         display: 'flex',
                         alignItems: "center",

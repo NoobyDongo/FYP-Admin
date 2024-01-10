@@ -1,29 +1,85 @@
 'use client'
 
-import { useTheme } from "@emotion/react";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Box, Button, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import { useCookies } from 'next-client-cookies';
-import { useRouter } from "next/navigation";
+import { useTheme } from "@emotion/react"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
+import { Box, Button, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material"
+import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import axios from 'axios'
+import useProgress from "@/components/Progress/useProgress/useProgress"
+import ProgressButton from "@/components/Progress/ProgressButton"
+import useRecordValidation from "@/utils/hooks/useRecordValidation"
+import FormEditField, { toTableColumns } from "@/components/Table/TableColumnEditField";
+import useProgressListener from "@/components/Progress/useProgress/useProgressListener"
+import { useNotification } from "@/components/Notifications/useNotification"
 
 export default function LoginForm(props) {
     const theme = useTheme()
 
-    const [showPassword, setShowPassword] = useState(false);
+    const [form, setForm] = useState({})
+    const { startAsync } = useProgress("signin")
+    const { loading } = useProgressListener('signin')
+    const { error: displayError, normal: displayNotes } = useNotification()
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    console.log("Form rendered")
 
-    const handleMouseUpPassword = (event) => {
-        event.preventDefault();
-    };
-
-    const cookies = useCookies()
-    const router = useRouter()
-    const signin = async() => {
-        cookies.set("token", "value")
-        router.push("/")
+    const onChange = (fn) => {
+        let newForm = fn({ ...form })
+        console.log(newForm)
+        setForm(newForm)
     }
+    const router = useRouter()
+
+    const signin = async () => {
+        if (validateRecord(form)) {
+            await startAsync(async () => {
+                try {
+                    const response = await axios.post('/api/login', form)
+                    console.log("Response:", response)
+                    return response.data.valid
+                } catch (error) {
+                    displayError({ error: "Login Request Failed" })
+                    // The request failed, you can handle the error here.
+                    console.error(error)
+                }
+            }).then((valid) => {
+                if (valid) {
+                    displayNotes("Login Successful", "success")
+                    
+                    setTimeout(() => {
+                        let page = localStorage.getItem('lastVisitedPage') || "/"
+                        router.push(page)
+                    }, 1000)
+                } else {
+                    displayError({ error: "Invalid Username or Password" })
+                }
+            })
+        }
+
+    }
+
+    const columns = useMemo(() => toTableColumns([
+        {
+            header: "Username",
+            accessorKey: 'username',
+            input: {
+                type: "text",
+                required: true,
+                labelShrink: false,
+            }
+        },
+        {
+            header: "Password",
+            accessorKey: 'password',
+            input: {
+                type: "text",
+                required: true,
+                labelShrink: false,
+            }
+        },
+    ]), [])
+    const [validationErrors, setValidationErrors, validateRecord] = useRecordValidation(columns)
+
 
     return (
         <Box
@@ -39,54 +95,25 @@ export default function LoginForm(props) {
 
                 <Stack gap={3} sx={{ padding: 3, height: 1 }}>
                     <Stack gap={3}>
-
-
-                        <TextField
-                            label="Username/Email"
-                            variant="outlined"
-                            type="text"
-                            onChange={(e) => setValue(e)}
-                            fullWidth
-
-                            InputProps={{
-                                disableUnderline: true
-                            }}
-                        />
-                        <TextField
-                            label="Username/Email"
-                            variant="outlined"
-                            type="text"
-                            onChange={(e) => setValue(e)}
-                            fullWidth
-
-                            InputProps={{
-                                endAdornment:
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={handleClickShowPassword}
-                                            onMouseUp={handleMouseUpPassword}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-
-                            }}
-                        />
-
-                    </Stack>
-                    <Stack direction="row" gap={2}>
-                        <Link href="#" underline="hover">Forgot Password?</Link>
-                        <Link href="#" underline="hover">New User?</Link>
+                        {
+                            columns.map((e, i) => (
+                                <FormEditField key={i}
+                                    disabled={loading}
+                                    col={e}
+                                    record={form}
+                                    value={e.accessorFn?.(form)}
+                                    onComplete={onChange}
+                                    validationErrors={validationErrors}
+                                    setValidationErrors={setValidationErrors} />
+                            ))
+                        }
                     </Stack>
                     <Stack direction="row" gap={2} sx={{
                         justifyContent: "flex-end",
                         alignItems: "center",
                         marginTop: 10,
                     }}>
-                        <Button> Cancel</Button>
-                        <Button variant="contained" onClick={signin}>Login</Button>
+                        <ProgressButton id="signin" variant="outlined" onClick={signin}>Login</ProgressButton>
                     </Stack>
                 </Stack>
 

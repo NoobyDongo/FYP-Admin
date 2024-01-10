@@ -202,3 +202,24 @@ bug fix
     prevented the path function from freaking out when it sees a numeric (product id) value in its params :-((
 the client server is now hosting product images, get them via /api/image/product/{id}/{filename}
 routing record deletion requests to client server, so that related images can be deleted
+
+10/1/2024
+to do:
+user corner
+input type: password
+improve table and product
+product type and origin
+done:
+bug fix
+    api/record/product finally found its fs
+    prevented api/makedir from freaking out when removing a non-existing directory
+UI improvement
+    tabMenu overhaul
+    removed the bg color of the top appbar
+    table now blends in with the background
+    darker prompts with blurred backdrop
+    working location indicator
+new fearure
+    working login form
+    user no longer directly interact with backend api
+    authentication when calling apis

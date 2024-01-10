@@ -1,10 +1,14 @@
 'use client'
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
-import { ImagesUpload } from '@/components/Image/ImagesUpload';
+import ImagesUpload from '@/components/Image/ImagesUpload';
 import { useEffect, useRef, useState } from 'react';
 import NextImage from '../Image/NextImage';
+import Visibility from "@mui/icons-material/Visibility"
+import VisibilityOff from "@mui/icons-material/VisibilityOff"
+import Box from "@mui/material/Box"
+import InputAdornment from "@mui/material/InputAdornment"
+import IconButton from "@mui/material/IconButton"
 
 function createAccessorFunction(accessorKey) {
     const keys = accessorKey.split('.');
@@ -166,7 +170,8 @@ function DefaultTextField(props) {
         variant = "outlined",
         fullWidth = true,
         multiline,
-        InputProps
+        InputProps,
+        labelShrink,
     } = input
 
     return (
@@ -184,36 +189,71 @@ function DefaultTextField(props) {
             onBlurCapture={onComplete}
             disabled={disabled}
 
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{ shrink: !labelShrink }}
 
             error={!!validationErrors?.[name]}
             helperText={validationErrors?.[name]}
-            onFocus={() =>
-                setValidationErrors({
-                    ...validationErrors,
-                    [name]: undefined,
-                })}
+            onFocus={() => {
+                if (validationErrors?.[name])
+                    setValidationErrors({
+                        ...validationErrors,
+                        [name]: undefined,
+                    })
+            }}
         >
             {children}
         </TextField>
     )
 }
 
-export default function TableColumnEditField(props){
+function PasswordTextField(props) {
+
+    const [showPassword, setShowPassword] = useState(false)
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show)
+    const handleMouseUpPassword = (event) => {
+        event.preventDefault()
+    }
+
+    return (
+        <TextField
+            {...props}
+            type={showPassword ? "text" : "password"}
+            InputProps={{
+                endAdornment:
+                    <InputAdornment position="end">
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseUp={handleMouseUpPassword}
+                            edge="end"
+                        >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                    </InputAdornment>
+            }}
+        >
+            {children}
+        </TextField>
+    )
+}
+
+export default function TableColumnEditField(props) {
     const { col, validationErrors, setValidationErrors } = props
+    const { input, accessorKey: key } = col
     const { record } = props
     const { onComplete: saveToParent, value, disabled } = props
     const inputComponent = useRef(null)
 
     const [localValue, setValue] = useState()
     useEffect(() => {
-        if(!value)
+        if (!value)
             inputComponent.current?.clear()
         setValue(value)
     }, [value])
 
     const save = (value) => {
-        saveToParent((form) => col.input.valueSetter(form, value))
+        saveToParent((form) => input.valueSetter(form, value))
     }
 
     const onComplete = () => {
@@ -230,17 +270,13 @@ export default function TableColumnEditField(props){
     }
 
 
-    if (!col.input)
+    if (!input)
         return
-
-    var input = col.input
-    var key = col.accessorKey
-    
     if (input.type === "image")
         return (
             <ImagesUpload
                 name={col.header}
-                onChange={(e) => {onChange({target:{value:e}}); save(e)}}
+                onChange={(e) => { onChange({ target: { value: e } }); save(e) }}
                 value={value}
                 disabled={disabled}
                 ref={inputComponent}

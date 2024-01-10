@@ -6,7 +6,8 @@ export const urlReg = /(https?:\/\/[^\s]+)/g;
 export const imageReg = /(data:image\/[^\s]+)/g;
 
 export default function useRecordValidation(columns) {
-    const [validators, setValidators] = useState([]);
+    const [validationErrors, setValidationErrors] = useState({})
+    const [validators, setValidators] = useState([])
 
     const validateRequired = (value) => value !== undefined && (value > 0 || !!value.length);
 
@@ -23,7 +24,14 @@ export default function useRecordValidation(columns) {
                 ...newErrorText
             }
         })
-        return errorText
+        console.log("Error", errorText)
+        if (Object.values(errorText).some((error) => error)) {
+            setValidationErrors(errorText);
+            return false;
+        }
+        setValidationErrors({})
+        return true;
+        
     },[validators])
     
     useEffect(() => {
@@ -59,5 +67,5 @@ export default function useRecordValidation(columns) {
         })
     }, [columns])
 
-    return validateRecord
+    return [validationErrors, setValidationErrors, validateRecord]
 }

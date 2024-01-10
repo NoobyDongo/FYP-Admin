@@ -3,8 +3,8 @@ import { Table as rawTable } from '@/components/Table/Table'
 import { numberReg } from '@/utils/hooks/useRecordValidation';
 import TableWrapper from '@/components/Table/_wrapper';
 import { toTableColumns } from '@/components/Table/TableColumnEditField';
-import { useAPI } from '@/utils/crud/useAPI';
-import { serverApi } from '../../../config';
+import { dataFn } from '@/utils/crud/useAPI';
+import { serverApi } from '../../config';
 
 
 function Table() {
@@ -12,7 +12,7 @@ function Table() {
 
     console.log("Table rendered")
 
-    const serverAPI = useAPI(serverApi + "/record", tableName)
+    const serverAPI = dataFn(serverApi + "/record/" + tableName)
     const columns = (fetchedRecords) => toTableColumns([
         {
             accessorKey: 'id',

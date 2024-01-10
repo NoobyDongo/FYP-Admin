@@ -14,6 +14,7 @@ import Box from "@mui/material/Box";
 import useClientLogin from "@/utils/hooks/useClientLogin";
 import ProgressBar from "@/components/Progress/ProgressBar";
 import Notifications from "../Notifications/Notifications";
+import Fade from "@mui/material/Fade";
 
 
 export default function NavWrapper({ children }) {
@@ -26,58 +27,62 @@ export default function NavWrapper({ children }) {
         [
             {
                 name: "dashboard",
-                link: "",
+                link: "/",
                 icon: <DashboardIcon />
             },
             {
                 name: "account",
-                link: "profile",
+                link: "/profile",
                 icon: <ManageAccountsIcon />
             },
         ],
         [
             {
                 name: "manage products",
-                link: "product",
+                link: "/product",
                 icon: <CategoryIcon />
             }
         ]
     ]
 
-    const [token, location] = useClientLogin()
+    const [valid, location, notValid] = useClientLogin()
 
     return (
         <Themed darkmode={darkmode}>
 
-            {token && location !== "/signin" && <>
-                <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
-                    <ProgressBar id={1} />
-                </Box>
-                <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
-                <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />
-
-                <Notifications />
+            {!notValid && location !== "/signin" && <>
+                <Fade in={valid} mountOnEnter unmountOnExit>
+                    <div>
+                        <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
+                            <ProgressBar id={1} />
+                        </Box>
+                        <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
+                        <CustomDrawer optionLists={optionLists} toggleDarkMode={toggleDarkMode} open={open} />
+                    </div>
+                </Fade>
 
                 <Body open={open} className="test-body">
                     <DrawerHeader />
                     <Box id="pageContainer" sx={{ px: 4, }}>
-                        <FadeWrapper>
+                        <FadeWrapper key={location}>
                             {children}
                         </FadeWrapper>
                     </Box>
                 </Body>
             </>}
 
-            {(!token && location === "/signin") &&
+            {(!valid && location === "/signin") &&
                 <FadeWrapper>
                     {children}
                 </FadeWrapper>}
 
-            {!token && location !== "/signin" &&
+            {!valid && location !== "/signin" &&
                 <Box sx={(theme) => ({ backgroundColor: theme.palette.background.default, zIndex: 10000, width: 1, height: 1 })}>
 
                 </Box>
             }
+
+            <Notifications />
         </Themed>
     )
 }

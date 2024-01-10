@@ -20,7 +20,8 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import WorkIcon from '@mui/icons-material/Work';
 import PunchClockIcon from '@mui/icons-material/PunchClock';
-import { TabMenu, TabPanel } from '@/components/Tabs';
+import TabPanel from '@/components/Tabs/TabPanel';
+import TabMenu from '@/components/Tabs/TabMenu';
 import { Circle } from '@mui/icons-material';
 import { motion } from "framer-motion";
 

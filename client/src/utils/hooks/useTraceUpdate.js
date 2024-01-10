@@ -1,5 +1,4 @@
 //Thx to https://stackoverflow.com/a/51082563, Jacob Rask
-
 import { useRef, useEffect } from "react";
 
 export default function useTraceUpdate(props) {

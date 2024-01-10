@@ -1,25 +1,10 @@
-import { auth } from '@/utils/api/auth';
-import { uploadImageKey } from '../../../../../config';
+import { authServer } from '@/utils/api/authServer';
+import { imageUploadKey } from '../../../../config';
 import fs from 'fs';
-import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import path from 'path';
 import sharp from 'sharp';
-
-function generateUniqueFilename(directory, filename, ext) {
-  let uniqueFilename = `${filename}.${ext}`;
-
-  while (fs.existsSync(path.join(directory, uniqueFilename))) {
-    // Generate a new unique filename using a SHA-256 hash
-    const hash = crypto.createHash('sha256');
-    hash.update(Date.now().toString());
-    const hashedFilename = hash.digest('hex');
-
-    uniqueFilename = `${hashedFilename}.${ext}`;
-  }
-
-  return uniqueFilename;
-}
+import generateUniqueFilename from '../../../../../server/util/hash/_generateUniqueFilename';
 
 //function to convert image buffer to webp
 async function toWebp(buffer) {
@@ -37,7 +22,7 @@ function isGif(base64Image) {
 }
 
 export async function POST(req) {
-  return await auth(req, uploadImageKey, async () => {
+  return await authServer(req, imageUploadKey, async () => {
     const { image, filename, path: directoryPath, directory } = await req.json()
     const imageData = image.replace(/^data:image\/\w+;base64,/, '')
 

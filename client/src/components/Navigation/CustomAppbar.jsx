@@ -19,29 +19,48 @@ import ListItemText from '@mui/material/ListItemText';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import Box from '@mui/material/Box';
-import { lighten, alpha } from "@mui/system/colorManipulator";
 import { usePathname, useRouter } from "next/navigation";
-import { useCookies } from "next-client-cookies";
 import { closedTransitionMixin, openCloseTransitionMixin, openedTransitionMixin } from "@/utils/styles/TransitionMixin";
+import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import axios from 'axios';
+
+const changeLocationEvent = (e) => new CustomEvent("changeLocation", { detail: e })
+
+export function DynamicText({event}) {
+    const [text, setText] = useState("{Placeholder}")
+    
+    const handleEvent = (e) => {
+        setText(e.detail.text)
+        console.log('location.change')
+    }
+
+    useEffect(() => {
+        window.addEventListener(event, handleEvent)
+        return () => {
+            window.removeEventListener(event, handleEvent)
+        }
+    }, [event])
+
+    return <>{text}</>
+}
 
 export function CustomAppbar({ open, onOpen, onClose }) {
 
-    const cookies = useCookies()
     const router = useRouter()
-    const signout = () => {
-        cookies.set("token", "")
-        router.push("/signin")
+    const signout = async () => {
+        console.log(Cookies)
+        await axios.get('/api/logout');
+        router.push('/signin'); // redirect the user to the sign-in page
     }
 
     return (
-        <AppBar position="fixed" open={open} sx={{
-
-        }}>
+        <AppBar elevation={0} position="fixed" open={open}>
             <Toolbar style={{ padding: 0, paddingRight: 16 }}>
                 <DrawerHeader open={open} />
                 <AppBarIcon>
                     <IconButton
-                        color="logo"
+                        color="primary"
                         aria-label="open drawer"
                         edge="start"
                         sx={{
@@ -56,8 +75,8 @@ export function CustomAppbar({ open, onOpen, onClose }) {
                     </IconButton>
                 </AppBarIcon>
 
-                <Typography variant="h6" fontWeight={600} noWrap component="div">
-                    {"{Placeholder}"}
+                <Typography variant="h6" color="primary" textTransform="uppercase" fontWeight={600} noWrap component="div">
+                    <DynamicText event="changeLocation" />
                 </Typography>
 
                 <IconButton
@@ -122,6 +141,7 @@ export const DrawerHeader = styled('div', { shouldForwardProp: (prop) => prop !=
     alignItems: 'center',
     justifyContent: 'flex-end',
     // necessary for content to be below app bar
+    paddingTop: theme.spacing(1),
     minHeight: 64,
     boxSizing: 'border-box',
     transition: theme.transitions.create(['width'], {
@@ -141,10 +161,10 @@ export const DrawerHeader = styled('div', { shouldForwardProp: (prop) => prop !=
 }));
 const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open', })(
     ({ theme, open }) => ({
+        paddingTop: theme.spacing(.5),
         zIndex: theme.zIndex.drawer - 1,
         ...(theme.palette.mode == 'dark' && {
-            backdropFilter: "blur(50px) saturate(150%) brightness(90%)",
-            background: alpha(lighten(theme.palette.background.default, .1), .4),
+            backdropFilter: "blur(50px) saturate(150%) brightness(100%)"
         }),
         ...openCloseTransitionMixin({ theme, open, transition: ['width', 'margin'] })
     })
@@ -175,15 +195,15 @@ export const Body = styled(Box, { shouldForwardProp: (prop) => prop !== 'open' }
 const CustomListItemIcon = styled(ListItemIcon, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     minWidth: 0,
     justifyContent: 'center',
-    ...openCloseTransitionMixin({ theme, open, transition:"margin"})
+    ...openCloseTransitionMixin({ theme, open, transition: "margin" })
 }))
 const CustomListItemText = styled(ListItemText, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     textTransform: "capitalize",
-    ...openCloseTransitionMixin({theme, open, transition:"margin"})
+    ...openCloseTransitionMixin({ theme, open, transition: "margin" })
 }))
 const CustomListItemButton = styled(ListItemButton, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     justifyContent: open ? 'initial' : 'center',
-    ...openCloseTransitionMixin({theme, open, transition:"padding"})
+    ...openCloseTransitionMixin({ theme, open, transition: "padding" })
 }))
 
 
@@ -191,7 +211,19 @@ function ListOption(props) {
     const { e, open, ...others } = props
     const pathname = usePathname()
     const theme = useTheme()
-    console.log(pathname, e.link, e.name)
+
+    let active = pathname === e.link
+
+    const onClick = () => {
+        if(e.link)
+            window.dispatchEvent(changeLocationEvent({ text: e.name }))
+        e.func?.()
+    }
+
+    useEffect(() => {
+        if (active)
+            window.dispatchEvent(changeLocationEvent({ text: e.name }))
+    }, [])
 
     return (
         <ListItem disablePadding sx={{ display: 'block' }} {...others}>
@@ -200,12 +232,12 @@ function ListOption(props) {
                     minHeight: 48,
                     px: open ? 1.5 : 2.5,
                 }}
-                onClick={e.func}
+                onClick={onClick}
             >
                 <CustomListItemIcon
                     sx={{
                         mr: open ? 1 : '0',
-                        color: pathname == "/" + e.link ? theme.palette.logo.main : ""
+                        color: active ? theme.palette.logo.main : ""
                     }}
                 >
                     {e.icon}
@@ -234,7 +266,7 @@ export function CustomDrawer(props) {
     const Router = useRouter();
 
     const GoTo = (e) => {
-        Router.push("/" + e)
+        Router.push(e.link || "")
     }
 
     return (
@@ -276,7 +308,7 @@ export function CustomDrawer(props) {
                         <List>
                             {e.map((ee, ii) => {
                                 if (!ee.func)
-                                    ee.func = () => GoTo(ee.link || "")
+                                    ee.func = () => GoTo(ee)
                                 return (
                                     <ListOption key={ii} open={open} e={ee} />
                                 )

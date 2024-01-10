@@ -1,6 +1,6 @@
 'use client';
 import { LinearProgress, Slide } from "@mui/material";
-import useProgressListener from "../../utils/hooks/useProgress/useProgressListener";
+import useProgressListener from "./useProgress/useProgressListener";
 
 const barHeight = 0.3;
 

@@ -13,47 +13,97 @@ const defaultLightTheme = createTheme({
     mode: 'light',
   }
 });
-const sharedComponentsTheme = (background, color) => ({
-  components: {
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: background,
-          color: color
-        }
-      }
-    },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-notchedOutline': {
-            transition: 'border-color 0.25s',
+const sharedComponentsTheme = (theme, sharedPalette) => {
+
+  let darkMode = theme.palette.mode === 'dark'
+  let background = theme.palette.background.default
+  return ({
+    components: {
+      MuiDialog: {
+        styleOverrides: {
+          root: {
+            '& .MuiBackdrop-root': {
+              backgroundColor: 'rgba(0, 0, 0, 0.5)', // Change the opacity here
+              backdropFilter: 'blur(2px) brightness(0.5) saturate(1.2) contrast(1.2)',
+            },
           },
         },
       },
-    },
-  }
-})
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: "none",
+            backgroundColor: darkMode ? background : sharedPalette.primary.main,
+            color: theme.palette.text.primary
+          }
+        }
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundImage: "none",
+            backgroundColor: background,
+            color: theme.palette.text.primary
+          }
+        }
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: sharedPalette.input.label.main,
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-notchedOutline': {
+              transition: 'border-color 0.25s',
+              borderColor: sharedPalette.input.border.main,
+            },
+            '&.Mui-disabled  .MuiOutlinedInput-notchedOutline ': {
+              borderColor: sharedPalette.input.border.secondary,
+            },
+          },
+        },
+      },
+    }
+  })
+}
 const sharedTypographyTheme = {
   typography: {
     "fontFamily": "Inter"
-   }
+  }
 }
-const sharedPalette = (shade, defaultTheme) => ({
-  primary: {
-    main: orange[shade],
-  },
-  secondary:{
-    main: red[shade],
-  },
-  border: {
-    main: alpha(defaultTheme.palette.text.disabled, 0.1)
-  },
-  logo:{
-    main: defaultTheme.palette.mode == "light"? "#FFFFFF" : orange[500],
-    secondary: defaultTheme.palette.mode == "light"? "#FFFFFF" : orange[700],
-  },
-})
+const sharedPalette = (shade, defaultTheme) => {
+
+  let darkMode = defaultTheme.palette.mode === 'dark'
+  return ({
+    primary: {
+      main: orange[shade],
+    },
+    secondary: {
+      main: red[500],
+    },
+    input:{
+      border: {
+        main: alpha(defaultTheme.palette.text.disabled, 0.1),
+        secondary: alpha(defaultTheme.palette.text.disabled, 0)
+      },
+      label:{
+        main: defaultTheme.palette.text.primary
+      }
+    },
+    border: {
+      main: alpha(defaultTheme.palette.text.disabled, 0.1)
+    },
+    logo: {
+      main: darkMode? orange[500] : "#FFFFFF",
+      secondary:  darkMode? orange[700] : "#FFFFFF",
+      contrast: darkMode? "#FFFFFF" : "#000000",
+    },
+  })
+}
 //does not work!!!
 const sharedOverride = () => ({
   overrides: {
@@ -89,32 +139,33 @@ const sharedOverride = () => ({
   },
 })
 
+const darkSharedPalette = { ...sharedPalette(400, defaultDarkTheme) }
 const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-      ...sharedPalette(400, defaultDarkTheme)
-    },
-    ...sharedOverride(),
-    ...sharedComponentsTheme('black', "white"),
-    ...sharedTypographyTheme,
+  palette: {
+    mode: 'dark',
+    ...darkSharedPalette,
+  },
+  ...sharedOverride(),
+  ...sharedComponentsTheme(defaultDarkTheme, darkSharedPalette),
+  ...sharedTypographyTheme,
 });
-const lightSharedPalette = {...sharedPalette(800, defaultLightTheme)}
+const lightSharedPalette = { ...sharedPalette(800, defaultLightTheme) }
 const lightTheme = createTheme({
-    palette: {
-      mode: 'light',
-      ...lightSharedPalette
-    },
-    ...sharedOverride(),
-    ...sharedComponentsTheme(lightSharedPalette.primary.main, "white"),
-    ...sharedTypographyTheme,
+  palette: {
+    mode: 'light',
+    ...lightSharedPalette
+  },
+  ...sharedOverride(),
+  ...sharedComponentsTheme(defaultLightTheme, lightSharedPalette),
+  ...sharedTypographyTheme,
 });
-  
-export default function Themed({darkmode, children}){
 
-    return(
-        <ThemeProvider theme={darkmode? darkTheme : lightTheme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-    )
+export default function Themed({ darkmode, children }) {
+
+  return (
+    <ThemeProvider theme={darkmode ? darkTheme : lightTheme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  )
 }

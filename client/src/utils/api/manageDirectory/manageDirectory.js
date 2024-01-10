@@ -1,12 +1,12 @@
-import { headersSkIndicator, makedirKey, server } from "../../../../../config.js";
+import { skIndicator, dirKey, server } from "../../../config.js";
 
 export default async function manageDirectory(option, directoryName, newDirectoryName, directoryPath) {
-    return (await (await fetch(`${server}/api/makedir?` + new URLSearchParams({
+    return (await (await fetch(`${server}/api/dir?` + new URLSearchParams({
         option: option,
         folderName: directoryName,
         path: directoryPath,
         ...(newDirectoryName && { newName: newDirectoryName })
     }), {
-        headers: { [headersSkIndicator]: makedirKey }
+        headers: { [skIndicator]: dirKey }
     })).json());
 }

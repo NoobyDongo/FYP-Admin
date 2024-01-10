@@ -17,16 +17,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import ReactImageUploading from 'react-images-uploading';
-import useRawProgressListener from "@/utils/hooks/useProgress/useRawProgressListener";
+import useRawProgressListener from "@/components/Progress/useProgress/useRawProgressListener";
 import DoneIcon from '@mui/icons-material/Done';
 import Image from 'next/image';
 import bytesToSize from '@/utils/bytesToSize';
-import generateHashedString from '@/utils/generateHashedString';
-import OutlinedDiv from './OutlinedDiv';
+import generateUniqueHashedString from '@/utils/hash/generateUniqueHashedString';
+import OutlinedDiv from '../OutlinedDiv';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import useHistory from './useHistory';
 
 const ImageListItemIconWrapper = forwardRef((props, ref) => {
     const { children, sx, ...others } = props
@@ -173,56 +174,7 @@ const IconButtonWithTooltip = ({ label, disabled, onClick, children, ...other })
     );
 };
 
-/*
-        const addToHistory = (value) => {
-            if (JSON.stringify(value) !== JSON.stringify(history.current[pointer.current])) {
-                history.current = history.current.slice(0, pointer.current + 1);
-                history.current.push(value);
-                pointer.current++;
-            }
-        }
-    */
-
-const useHistory = (initialValue, valueSetter, comparator) => {
-    const history = useRef([initialValue]);
-    const pointer = useRef(history.current.length - 1);
-
-    const numUndo = () => pointer.current
-    const numRedo = () => history.current.length - pointer.current - 1
-
-    const add = (value) => {
-        console.log("history", pointer.current, history.current)
-        const newValue = comparator(value)
-        const currentValue = comparator(history.current[pointer.current])
-
-        if (newValue.length !== currentValue.length || newValue.some((value, index) => value !== currentValue[index])) {
-            history.current = history.current.slice(0, pointer.current + 1);
-            history.current.push(value);
-            pointer.current++;
-        }
-        console.log("new history", pointer.current, history.current)
-    }
-
-    const undo = () => {
-        console.log("history", pointer.current, history.current)
-        if (pointer.current > 0) {
-            pointer.current--;
-            valueSetter(history.current[pointer.current]);
-        }
-    };
-
-    const redo = () => {
-        console.log("history", pointer.current, history.current)
-        if (pointer.current < history.current.length - 1) {
-            pointer.current++;
-            valueSetter(history.current[pointer.current]);
-        }
-    };
-
-    return { history, pointer, add, undo, redo, numUndo, numRedo }
-}
-
-export const ImagesUpload = forwardRef((props, ref) => {
+const ImagesUpload = forwardRef((props, ref) => {
     const { maxNumber = 69, size = 250, onChange: changeParent } = props
     const simpleMode = maxNumber <= 1
     const { name = 'images', required = false, disabled = false } = props
@@ -249,7 +201,7 @@ export const ImagesUpload = forwardRef((props, ref) => {
 
     const onChange = (imageList, addUpdateIndex) => {
         addUpdateIndex?.forEach((i) => {
-            imageList[i].name = generateHashedString(i)
+            imageList[i].name = generateUniqueHashedString(i)
             imageList[i].isUploading = false
             imageList[i].size = bytesToSize(imageList[i].file.size)
         })
@@ -280,11 +232,11 @@ export const ImagesUpload = forwardRef((props, ref) => {
                 ...(!disabled && {
                     '& .MuiOutlinedInput-notchedOutline, .MuiOutlinedInput-notchedOutline.Mui-focused': {
                         borderWidth: `${isDragging ? 2 : 1}px !important`,
-                        borderColor: `${isDragging ? theme.palette.primary.main : theme.palette.action.disabled} !important`,
+                        borderColor: `${isDragging ? theme.palette.primary.main : theme.palette.input.border.main} !important`,
                     },
 
                     '& .MuiFormLabel-root': {
-                        color: `${isDragging ? theme.palette.primary.main : theme.palette.text.secondary} !important`
+                        color: `${isDragging ? theme.palette.primary.main : theme.palette.input.label.main} !important`
                     },
                 })
 
@@ -393,6 +345,7 @@ export const ImagesUpload = forwardRef((props, ref) => {
     );
 })
 ImagesUpload.displayName = "ImagesUpload"
+export default ImagesUpload;
 
 function HoverButtonGroup({ children }) {
 
@@ -407,7 +360,7 @@ function HoverButtonGroup({ children }) {
             right: 24,
             borderRadius: 30,
             border: 1,
-            borderColor: theme.palette.action.disabled,
+            borderColor: theme.palette.input.border.main,
             px: .25,
             py: .25,
         })}>

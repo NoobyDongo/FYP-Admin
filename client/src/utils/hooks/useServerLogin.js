@@ -1,5 +1,4 @@
-import { cookies as useCookies } from 'next/headers';
-import { headers } from "next/headers";
+import { headers, cookies as useCookies } from 'next/headers';
 
 export default function useServerLogin() {
     const cookies = useCookies()

@@ -10,27 +10,27 @@ import Stack from '@mui/material/Stack';
 import useRecordValidation from '@/utils/hooks/useRecordValidation';
 import FormEditField from "@/components/Table/TableColumnEditField";
 import ProgressButton from "@/components/Progress/ProgressButton";
-import useProgress from "@/utils/hooks/useProgress/useProgress";
-import listenToUpload from "@/app/product/listenToUpload";
+import useProgress from "@/components/Progress/useProgress/useProgress";
+import listenToUpload from "@/utils/listenToUpload";
 import Collapse from "@mui/material/Collapse";
 import Box from "@mui/material/Box";
-import useProgressListener from "@/utils/hooks/useProgress/useProgressListener";
+import useProgressListener from "@/components/Progress/useProgress/useProgressListener";
 
 const actions = ["Create New", "Edit"]
-const gap = 3
+const gap = 3.5
+const padding = 3.5
 
 export default function Prompt(props) {
 
     const { columns, name, actioname, onClose, data } = props
     const { saveRecord, ...others } = props
 
-    const [validationErrors, setValidationErrors] = useState({});
+    const [validationErrors, setValidationErrors, validateRecord] = useRecordValidation(columns)
     const [formData, setForm] = useState({})
     const [sortedColumns, setColumns] = useState([])
-    const validateRecord = useRecordValidation(columns)
-    const { startAsync } = useProgress('promptsave')
-
+    
     const [disabled, setDisabled] = useState(false)
+    const { startAsync } = useProgress('promptsave')
     const { loading } = useProgressListener('promptsave')
 
     console.log("Prompt rendered")
@@ -43,7 +43,8 @@ export default function Prompt(props) {
     const exitForm = () => {
         if (actioname == 0)
             clearInput()
-        else{
+        else {
+            setValidationErrors({})
             setDisabled(false)
             setForm(data)
         }
@@ -52,6 +53,7 @@ export default function Prompt(props) {
     const clearInput = () => {
         setForm({})
         setDisabled(false)
+        setValidationErrors({})
     }
 
     useEffect(() => {
@@ -111,19 +113,14 @@ export default function Prompt(props) {
 
         console.log("Form data", formData)
 
-        const newValidationErrors = validateRecord(formData);
-        console.log("Error", newValidationErrors)
-        if (Object.values(newValidationErrors).some((error) => error)) {
-            setValidationErrors(newValidationErrors);
-            return;
-        }
-        setValidationErrors({})
-        listenToUpload(async (data) => startAsync(() => saveRecord(data)), formData, (res) => {
-            console.log("save record result:", res)
-            if (!res.error) {
-                setDisabled(true)
-            }
-        })
+        if(validateRecord(formData))
+        
+            listenToUpload(async (data) => startAsync(() => saveRecord(data)), formData, (res) => {
+                console.log("save record result:", res)
+                if (!res.error) {
+                    setDisabled(true)
+                }
+            })
     }
 
     const handleClose = (event, reason) => {
@@ -132,11 +129,21 @@ export default function Prompt(props) {
     }
 
     return (
-        <Dialog {...others} onClose={handleClose} fullWidth>
-            <DialogTitle variant="h4" sx={{ textTransform: "capitalize" }}>{actions[actioname]} {name || "Record"}</DialogTitle>
+        <Dialog
+            PaperComponent={Box}
+            PaperProps={{
+                sx: (theme) => ({
+                    border: 1,
+                    borderColor: theme.palette.divider,
+                    borderRadius: 1,
+                    backgroundColor: theme.palette.background.default,
+                })
+            }}
+            {...others} onClose={handleClose} fullWidth>
+            <DialogTitle variant="h5" sx={{ textTransform: "capitalize", userSelect: "none", px: padding }}>{actions[actioname]} {name || "Record"}</DialogTitle>
             <Divider />
             <DialogContent
-                sx={{ display: 'flex', flexDirection: 'column', gap: gap, overflowX: "hidden" }}
+                sx={{ display: 'flex', flexDirection: 'column', gap: gap, overflowX: "hidden", px: padding }}
             >
                 {
                     sortedColumns.map((col, i) => (
@@ -157,8 +164,8 @@ export default function Prompt(props) {
                     ))
                 }
             </DialogContent>
-            <DialogActions sx={{ padding: 3, pt: 1, pb: 2 }}>
-                {actioname==0 && <Button disabled={loading}
+            <DialogActions sx={{ padding: padding, pt: 1, pb: 2 }}>
+                {actioname == 0 && <Button disabled={loading}
                     variant="outlined"
                     onClick={clearInput}
                     sx={{ mr: gap / 2 }}
