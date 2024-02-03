@@ -27,7 +27,6 @@ const inventoryproduct = reformat({
         {
             accessorKey: 'quantity',
             enableClickToCopy: true,
-            size: 150,
             input: {
                 type: "number",
                 required: true,
@@ -39,7 +38,6 @@ const inventoryproduct = reformat({
             accessorKey: 'restock',
             header: "Restock Quantity",
             enableClickToCopy: true,
-            size: 150,
             input: {
                 type: "number",
                 required: true,

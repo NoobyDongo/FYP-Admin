@@ -99,7 +99,7 @@ const useCustomTableProps = (props = {}) => {
         disableTopToolbar,
         disableBottomToolbar,
         rowCount = 0,
-        noRecord = false,
+        noRecord : inNoRecord = false,
         isLoading = true,
         createTitle = 'Create New Record',
         toEdit = () => { console.log('Edit not implemented') },
@@ -111,6 +111,11 @@ const useCustomTableProps = (props = {}) => {
     let scale = mini ? .8 : 1
     let iconScale = mini ? 1.1 : 1.2
     let noRow = rowCount < 1
+
+    const [noRecord, setNoRecord] = React.useState(inNoRecord)
+    React.useEffect(() => {
+        setNoRecord(inNoRecord)
+    },[inNoRecord])
 
     const muiTableBodyProps = React.useMemo(() => ({
         ...(noRow && !isLoading && {
@@ -179,6 +184,7 @@ const useCustomTableProps = (props = {}) => {
                     '&>thead': {
                         '&>tr': {
                             borderBottom: 1,
+                            userSelect: noRow && noRecord ? 'none' : 'auto',
                             opacity: noRow && noRecord ? 0 : 1,
                             borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
                             transitionProperty: 'opacity, border-color',
@@ -436,7 +442,7 @@ const useCustomTableProps = (props = {}) => {
             <Box
                 sx={{
                     //backgroundColor: lighten(theme.palette.background.default, 0.05),
-                    pb: 1.5,
+                    pb: 2.5,
                     pl: mini ? 0 : 1 * scale,
                     pt: table.getState().isFullScreen ? 1 : 0,
                     display: 'flex',

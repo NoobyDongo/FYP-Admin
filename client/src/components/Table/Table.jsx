@@ -132,7 +132,6 @@ const RawTable = (props) => {
         initialState,
         setPagination,
         rowCount,
-        disableTopToolbar: true,
         enableSelection,
         toCreate,
         toEdit,
@@ -142,10 +141,17 @@ const RawTable = (props) => {
         mini,
     })
 
+    const [isFullScreen, setIsFullScreen] = React.useState(false)
+
     const table = useMaterialReactTable({
         columns: columns,
         data: data,
         ...tableProps,
+
+        enableTopToolbar: isFullScreen,
+        ...isFullScreen && {
+            renderTopToolbar
+        },
 
         ...(!fetchAll && {
             manualPagination: true,
@@ -157,6 +163,7 @@ const RawTable = (props) => {
             onColumnVisibilityChange: setColumnVisibility,
             onColumnFiltersChange: setColumnFilters,
             onGlobalFilterChange: setGlobalFilter,
+            onIsFullScreenChange: setIsFullScreen,
             onSortingChange: setSorting,
         }),
 
@@ -173,6 +180,7 @@ const RawTable = (props) => {
                 sorting,
                 columnVisibility,
             }),
+            isFullScreen,
 
             //showGlobalFilter: !noRecord && showSearchBar,
             isLoading: isLoading,

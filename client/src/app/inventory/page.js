@@ -34,8 +34,7 @@ export default function Home() {
 
   return (
     <>
-      <TableContainer>
-        {menu}
+      <TableContainer sx={{pt: 1}}>
         <div className="tabpanel">
           <Table />
         </div>
