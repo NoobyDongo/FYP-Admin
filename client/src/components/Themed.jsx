@@ -1,5 +1,5 @@
 'use client'
-import { ThemeProvider, alpha, createTheme } from '@mui/material/styles';
+import { ThemeProvider, alpha, createTheme, lighten, darken } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { red, orange } from '@mui/material/colors';
 
@@ -16,15 +16,58 @@ const defaultLightTheme = createTheme({
 const sharedComponentsTheme = (theme, sharedPalette) => {
 
   let darkMode = theme.palette.mode === 'dark'
-  let background = theme.palette.background.default
+  let background = sharedPalette.background.default
   return ({
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            '& ::-webkit-scrollbar': {
+              width: '0.8em',
+              height: '0.8em',
+              background: 'transparent',
+            },
+            '& ::-webkit-scrollbar-corner': {
+              backgroundColor: sharedPalette.scrollBar.secondary,
+            },
+            '& ::-webkit-scrollbar-thumb': {
+              backgroundClip: 'content-box',
+              backgroundColor: sharedPalette.scrollBar.main,
+              borderRadius: 8,
+              border: `3px solid transparent`,
+            },
+            '*': {
+              scrollbarColor: `${sharedPalette.scrollBar.main} ${sharedPalette.scrollBar.secondary}`,
+              scrollBehavior: 'smooth',
+              scrollbarTransition: "smooth",
+              scrollbarWidth: 'thin',
+            },
+          },
+        },
+      },
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: background,
+            backgroundImage: "none !important",
+            boxShadow: 'none',
+            border: `1px solid ${sharedPalette.border.main}`,
+          },
+        },
+      },
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            color: theme.palette.text.primary,
+            backgroundColor: background,
+          },
+        },
+      },
       MuiDialog: {
         styleOverrides: {
           root: {
             '& .MuiBackdrop-root': {
-              backgroundColor: 'rgba(0, 0, 0, 0.5)', // Change the opacity here
-              backdropFilter: 'blur(2px) brightness(0.5) saturate(1.2) contrast(1.2)',
+              backdropFilter: 'blur(1px) brightness(0.8)',
             },
           },
         },
@@ -54,11 +97,29 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
           },
         },
       },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            zIndex: 10,
+            cursor: 'default',
+          },
+        },
+      },
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
+            '& .MuiInput-underline::before':{
+              borderColor: sharedPalette.input.border.main,
+            },
+            '&.Mui-disabled .MuiInput-underline::before':{
+              borderColor: sharedPalette.input.border.secondary,
+            },
             '& .MuiOutlinedInput-notchedOutline': {
-              transition: 'border-color 0.25s',
+              zIndex: 10,
+              transition: 'border-color 100ms',
               borderColor: sharedPalette.input.border.main,
             },
             '&.Mui-disabled  .MuiOutlinedInput-notchedOutline ': {
@@ -71,13 +132,16 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
   })
 }
 const sharedTypographyTheme = {
-  typography: {
+  typography: {    
+    fontSize: 13, 
     "fontFamily": "Inter"
   }
 }
 const sharedPalette = (shade, defaultTheme) => {
 
   let darkMode = defaultTheme.palette.mode === 'dark'
+  let background = darken(defaultTheme.palette.background.default, darkMode? .15 : .000)
+  let paper = darken(defaultTheme.palette.background.paper, darkMode? .15 : 0)
   return ({
     primary: {
       main: orange[shade],
@@ -85,58 +149,35 @@ const sharedPalette = (shade, defaultTheme) => {
     secondary: {
       main: red[500],
     },
-    input:{
+    scrollBar: {
+      main: darkMode ? lighten(background, .05) : darken(background, .15),
+      secondary: background,
+    },
+    input: {
       border: {
         main: alpha(defaultTheme.palette.text.disabled, 0.1),
         secondary: alpha(defaultTheme.palette.text.disabled, 0)
       },
-      label:{
+      label: {
         main: defaultTheme.palette.text.primary
       }
+    },
+    background: {
+      default: background,
+      paper: paper,
     },
     border: {
       main: alpha(defaultTheme.palette.text.disabled, 0.1)
     },
     logo: {
-      main: darkMode? orange[500] : "#FFFFFF",
-      secondary:  darkMode? orange[700] : "#FFFFFF",
-      contrast: darkMode? "#FFFFFF" : "#000000",
+      main: darkMode ? orange[500] : "#FFFFFF",
+      secondary: darkMode ? orange[700] : "#FFFFFF",
+      contrast: darkMode ? "#FFFFFF" : "#000000",
     },
   })
 }
 //does not work!!!
 const sharedOverride = () => ({
-  overrides: {
-    MuiCssBaseline: {
-      "@global": {
-        "*": {
-          "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-            backgroundColor: "black",
-            width: "1rem",
-            height: "1rem",
-          },
-          "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
-            borderRadius: 8,
-            backgroundColor: "black",
-            minHeight: 24,
-            border: "3px solid black",
-          },
-          "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus": {
-            backgroundColor: "black",
-          },
-          "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active": {
-            backgroundColor: "#959595",
-          },
-          "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: "#959595",
-          },
-          "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
-            backgroundColor: "#2b2b2b",
-          },
-        },
-      },
-    },
-  },
 })
 
 const darkSharedPalette = { ...sharedPalette(400, defaultDarkTheme) }

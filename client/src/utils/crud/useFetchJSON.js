@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import React from "react";
 
 //https://stackoverflow.com/a/57203332 from T.J. Crowder
-export function useFetchJSON(url, init, deps) {
+export default (url, init, deps) => {
     // Allow the user to leave off `init` even if they include `deps`
     if (typeof deps == "undefined" && Array.isArray(init)) {
         deps = init;
@@ -14,12 +14,12 @@ export function useFetchJSON(url, init, deps) {
                 "array instead."
         );
     }
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState(undefined);
-    const [error, setError] = useState(undefined);
+    const [loading, setLoading] = React.useState(true);
+    const [data, setData] = React.useState(undefined);
+    const [error, setError] = React.useState(undefined);
     
 
-    useEffect(() => {
+    React.useEffect(() => {
         setLoading(true);
         setData(undefined);
         setError(undefined);

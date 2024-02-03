@@ -1,12 +1,14 @@
 'use client'
-import { useEffect, useState } from "react";
-import { cacheable, getCache as _getCache, clearCache } from "./cacheable";
+import React from "react";
+import cacheable from "../cache/cacheable";
+import clearCache from "../cache/clearCache";
+import _getCache from "../cache/getCache";
 import { serverPath } from "./resources";
 
-export function useAllRecords(tableName) {
+export default (tableName) => {
     const api = serverPath + tableName + "/"
-    const [data, setData] = useState([])
-    const [loaded, setLoaded] = useState(false)
+    const [data, setData] = React.useState([])
+    const [loaded, setLoaded] = React.useState(false)
 
     const getData = async () => {
         let res = await fetch(api + "all", {
@@ -15,7 +17,6 @@ export function useAllRecords(tableName) {
             }
         })
         let t = await res.json()
-        console.log(api, t)
         return t
     }
 
@@ -31,11 +32,10 @@ export function useAllRecords(tableName) {
         return t
     }
 
-    useEffect(() => {
+    React.useEffect(() => {
         clearCache(tableName)
         const fetchData = async () => {
             let d = await get()
-            console.log(api, d)
             setLoaded(true)
         };
 
@@ -44,7 +44,6 @@ export function useAllRecords(tableName) {
             fetchData()
             return
         }
-        console.log(api, d)
         setLoaded(true)
     }, [])
 

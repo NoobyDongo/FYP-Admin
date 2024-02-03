@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState } from "react";
+import React from "react";
 
 export default function useDarkMode() {
-    const [darkmode, setDarkmode] = useState(true)
-    useEffect(() => {
+    const [darkmode, setDarkmode] = React.useState(true)
+    React.useEffect(() => {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => setDarkmode(e.matches));
         setDarkmode(window.matchMedia('(prefers-color-scheme: dark)').matches)
         return () => {

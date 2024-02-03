@@ -10,40 +10,34 @@ function a11yProps(index) {
     };
 }
 
-export default function TabMenu({ tabs, value, handleChange, sx, ...other }) {
+export default function TabMenu({ tabs, value, handleChange, TabProps, sx, ...other }) {
     return (
-        <Box sx={{ minWidth: "100%", borderBottom: 1, borderColor: "divider", ...sx }}>
-            <Tabs {...other} value={value} onChange={handleChange} sx={(theme) => ({
-                "& .MuiTabs-indicator":{
-                    backgroundColor: theme.palette.background.default,
-                    border: 1,
-                    borderColor: 'divider',
-                    height: .75,
-                    borderRadius: 50,
-                    top:"50%",
-                    left:"50%",
-                    zIndex: -1,
-                    transform: "translateY(-50%)",
-                },
-                '& .MuiTabs-flexContainer' : {
-                    py: .25,
-                },
-                zIndex: 2,
-            })}>
-                {tabs.map((e, i) => {
-                    return (<Tab key={i}
-                        sx={{
-                            zIndex: 1000,
-                            borderRadius: 50,
-                            textTransform:"capitalize",
-                            px: 2,
-                            py: 0,
-                            margin: 0.5,
-                            minHeight: 40,
-                        }}
-                        label={e} {...a11yProps(i)} />);
-                })}
-            </Tabs>
-        </Box>
+        <Tabs {...other} value={value} onChange={handleChange} sx={{
+            "& .MuiTabs-indicator": {
+                transform: "scaleX(.85) translateY(-5px)",
+                borderRadius: 50,
+            },
+            '& .MuiTabs-flexContainer': {
+                py: .25,
+            },
+            minWidth: "100%",
+            zIndex: 2,
+            ...sx
+        }}>
+            {tabs.map((e, i) => {
+                return (<Tab key={i}
+                    sx={{
+                        zIndex: 1000,
+                        borderRadius: 50,
+                        textTransform: "capitalize",
+                        px: 2,
+                        py: 0,
+                        margin: 0.5,
+                        minHeight: 40,
+                        ...TabProps?.sx
+                    }}
+                    label={e} {...TabProps} {...a11yProps(i)} />);
+            })}
+        </Tabs>
     );
 }
