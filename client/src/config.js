@@ -2,6 +2,7 @@ export const hostname = process.env.NEXT_PUBLIC_HOSTNAME
 export const serverPort = process.env.NEXT_PUBLIC_SERVER_PORT
 export const wsPort = process.env.NEXT_PUBLIC_WS_PORT
 export const apiPort = process.env.NEXT_PUBLIC_API_PORT
+export const authPort = process.env.NEXT_PUBLIC_AUTH_PORT
 export const wsKey = process.env.WS_KEY
 
 export const server = `http://${hostname}:${serverPort}`
@@ -21,7 +22,7 @@ export const dirOption = {
 }
 export const imageUploadPath = process.env.IMAGE_UPLOAD_PATH
 export const imageUploadWs = {
-    start: process.env.NEXT_PUBLIC_IMAGE_UPLOAD_WS_START,
-    end: process.env.NEXT_PUBLIC_IMAGE_UPLOAD_WS_END,
+    start: process.env.IMAGE_UPLOAD_WS_START,
+    end: process.env.IMAGE_UPLOAD_WS_END,
 }
 export const productImagePath = process.env.PRODUCT_IMAGE_PATH

@@ -6,6 +6,33 @@
 }
 
 /*
+html, body{
+  background: yellow;
+}
+*/
+@media (prefers-color-scheme: dark) {
+  *::-webkit-scrollbar {
+    width: 1rem;
+    height: 1rem;
+    background: black;
+  }
+
+  *::-webkit-scrollbar-track {
+    background-color: black;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(75, 75, 75);
+    border-radius: 10px;
+    border: 3px solid black;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: #000;
+  }
+}
+
+/*
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -28,10 +55,6 @@ a {
   }
 }
 */
-.z-alert {
-  z-index: 9999;
-}
-
 .MuiTextField-root>label {
   text-transform: capitalize;
 }
@@ -44,7 +67,6 @@ a {
   }
 
   & .tableContainer {
-    position: relative;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -68,5 +90,7 @@ a {
         flex-basis: 0;
       }
     }
+
+
   }
 }

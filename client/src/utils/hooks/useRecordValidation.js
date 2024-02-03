@@ -1,65 +1,71 @@
 'use client'
-import React from "react"
+import { useCallback, useEffect, useState } from "react";
 
-const validateRequired = (value) => {
-    if (typeof value === 'object' && value !== null) {
-        return Object.keys(value).length > 0;
-    }
-    return value !== undefined && (value > 0 || !!value.length);
-}
+export const numberReg = /^-?\d+\.?\d*$/
+export const urlReg = /(https?:\/\/[^\s]+)/g;
+export const imageReg = /(data:image\/[^\s]+)/g;
 
-export default function useRecordValidation(inputs){
-    const [validationErrors, setValidationErrors] = React.useState({})
-    const [validators, setValidators] = React.useState([])
+export default function useRecordValidation(columns) {
+    const [validationErrors, setValidationErrors] = useState({})
+    const [validators, setValidators] = useState([])
 
-    const validateRecord = React.useCallback(async (record) => {
-        let errorText = {}
-        for (const validator of validators) {
-            const newErrorText = await validator(record);
+    const validateRequired = (value) => value !== undefined && (value > 0 || !!value.length);
+
+    const validateRecord = useCallback((record) => {
+        console.log("validateRecord", record)
+        console.log("validateRecordError", validators)
+
+        var errorText = {}
+        validators.forEach(validator => {
+            var newErrorText = validator(record)
+            console.log("temp", newErrorText)
             errorText = {
                 ...errorText,
                 ...newErrorText
             }
-        }
-        console.log("errorText", validators, record, errorText)
+        })
+        console.log("Error", errorText)
         if (Object.values(errorText).some((error) => error)) {
-            setValidationErrors(errorText)
-            return false
+            setValidationErrors(errorText);
+            return false;
         }
         setValidationErrors({})
-        return true
-    }, [validators])
-
-    React.useEffect(() => {
+        return true;
+        
+    },[validators])
+    
+    useEffect(() => {
+        console.log("setValidators()")
         setValidators([])
-        const getRecordValue = (input, record) => input.valueGetter(record) || undefined
+        
+        const getRecordValue = (col, r) => col.accessorFn?.(r) || r[col.accessorKey]
 
-        inputs.forEach(input => {
-            if (input.required && input.validator) {
+        columns.forEach((c) => {
+            if (c.input?.required && c.input?.validator) {
                 setValidators(prev => [
                     ...prev,
-                    async (r) => ({
-                        [input.name]:
-                            !validateRequired(getRecordValue(input, r)) ? `${input.label} is required`
+                    (r) => ({
+                        [c.accessorKey]:
+                            !validateRequired(getRecordValue(c, r)) ? `${c.header} is required`
                                 :
-                                !await input?.validator(getRecordValue(input, r)) ? input?.errorMessage || 'Error' : ''
+                                !c.input?.validator(getRecordValue(c, r)) ? c.input?.errorMessage || 'Error' : ''
                     })
                 ])
             }
-            else if (input.required) {
+            else if (c.input?.required) {
                 setValidators(prev => [
                     ...prev,
-                    async (r) => ({ [input.name]: !validateRequired(getRecordValue(input, r)) ? `${input.label} is Required` : '' })
+                    (r) => ({ [c.accessorKey]: !validateRequired(getRecordValue(c, r)) ? `${c.header} is Required` : '' })
                 ])
             }
-            else if (input.validator) {
+            else if (c.input?.validator) {
                 setValidators(prev => [
                     ...prev,
-                    async (r) => ({ [input.name]: !await input?.validator(getRecordValue(input, r)) ? input?.errorMessage || 'Error' : '' })
+                    (r) => ({ [c.accessorKey]: !c.input?.validator(getRecordValue(c, r)) ? c.input?.errorMessage || 'Error' : '' })
                 ])
             }
         })
-    }, [inputs])
+    }, [columns])
 
     return [validationErrors, setValidationErrors, validateRecord]
 }

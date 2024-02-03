@@ -1,32 +1,40 @@
 'use client'
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import React from "react"
+
+import { useTheme } from "@emotion/react"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
+import { Box, Button, Divider, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from "@mui/material"
+import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from 'axios'
 import useProgress from "@/components/Progress/useProgress/useProgress"
 import ProgressButton from "@/components/Progress/ProgressButton"
-import toTableColumns from '@/components/Table/utils/toTableColumns';
+import useRecordValidation from "@/utils/hooks/useRecordValidation"
+import FormEditField, { toTableColumns } from "@/components/Table/TableColumnEditField";
 import useProgressListener from "@/components/Progress/useProgress/useProgressListener"
-import useNotification from "@/components/Notifications/useNotification"
-import useForm from "@/components/Form/useForm";
+import { useNotification } from "@/components/Notifications/useNotification"
 
-export default function Home(props) {
+export default function LoginForm(props) {
+    const theme = useTheme()
 
+    const [form, setForm] = useState({})
     const { startAsync } = useProgress("signin")
     const { loading } = useProgressListener('signin')
     const { error: displayError, normal: displayNotes } = useNotification()
 
+    console.log("Form rendered")
+
+    const onChange = (fn) => {
+        let newForm = fn({ ...form })
+        console.log(newForm)
+        setForm(newForm)
+    }
     const router = useRouter()
 
     const signin = async () => {
-        validateRecord(async (formData) => {
+        if (validateRecord(form)) {
             await startAsync(async () => {
                 try {
-                    const response = await axios.post('/api/login', formData)
+                    const response = await axios.post('/api/login', form)
                     console.log("Response:", response)
                     return response.data.valid
                 } catch (error) {
@@ -37,38 +45,41 @@ export default function Home(props) {
             }).then((valid) => {
                 if (valid) {
                     displayNotes("Login Successful", "success")
-
+                    
                     setTimeout(() => {
                         let page = localStorage.getItem('lastVisitedPage') || "/"
-                        if (page == "/signin") {
-                            page = "/"
-                        }
                         router.push(page)
                     }, 1000)
                 } else {
                     displayError({ error: "Invalid Username or Password" })
                 }
             })
-        })
+        }
+
     }
 
-    const inputs = React.useMemo(() => toTableColumns([
+    const columns = useMemo(() => toTableColumns([
         {
+            header: "Username",
             accessorKey: 'username',
             input: {
                 type: "text",
                 required: true,
+                labelShrink: false,
             }
         },
         {
+            header: "Password",
             accessorKey: 'password',
             input: {
-                type: "password",
+                type: "text",
                 required: true,
+                labelShrink: false,
             }
         },
-    ]).inputs, [])
-    const [setFormData, validateRecord, form] = useForm({ inputs, disabled: loading })
+    ]), [])
+    const [validationErrors, setValidationErrors, validateRecord] = useRecordValidation(columns)
+
 
     return (
         <Box
@@ -77,14 +88,26 @@ export default function Home(props) {
             alignItems="center"
             minHeight="100vh"
             minWidth="100vw"
-            sx={(theme) => ({ backgroundColor: theme.palette.background.default })}
         >
             <Paper sx={{ minWidth: 400, minHeight: "fit-content" }}>
                 <Typography sx={{ padding: 3 }} variant="h5">Sign in</Typography>
-                <Divider sx={(theme) => ({ borderColor: theme.palette.background.default })} />
+                <Divider sx={{ borderColor: theme.palette.background.default }} />
 
                 <Stack gap={3} sx={{ padding: 3, height: 1 }}>
-                    {form}
+                    <Stack gap={3}>
+                        {
+                            columns.map((e, i) => (
+                                <FormEditField key={i}
+                                    disabled={loading}
+                                    col={e}
+                                    record={form}
+                                    value={e.accessorFn?.(form)}
+                                    onComplete={onChange}
+                                    validationErrors={validationErrors}
+                                    setValidationErrors={setValidationErrors} />
+                            ))
+                        }
+                    </Stack>
                     <Stack direction="row" gap={2} sx={{
                         justifyContent: "flex-end",
                         alignItems: "center",

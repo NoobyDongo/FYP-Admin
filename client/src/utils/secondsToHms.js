@@ -1,4 +1,4 @@
-export default (d) => {
+export default function secondsToHms(d) {
     d = Number(d);
     var h = Math.floor(d / 3600);
     var m = Math.floor(d % 3600 / 60);

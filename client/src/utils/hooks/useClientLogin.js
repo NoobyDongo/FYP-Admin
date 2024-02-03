@@ -1,34 +1,28 @@
 'use client'
 import { useRouter, usePathname } from "next/navigation"
-import React from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
-import useNotification from "@/components/Notifications/useNotification"
 
 export default function useClientLogin() {
-    const [valid, setValid] = React.useState(false)
+    const [valid, setValid] = useState(false)
     const router = useRouter()
     const location = usePathname()
-    const { error } = useNotification()
 
-    React.useEffect(() => {
+    useEffect(() => {
         const verifyToken = async () => {
-            const response = await axios.get('/api/verify')
-            setValid(response.data.valid)
+            const response = await axios.get('/api/verify');
+            console.log("Response:", response.data.valid)
+            setValid(response.data.valid);
 
             if (response.data.valid) {
-                if (location == "/signin") {
-                    router.push("/")
-                    localStorage.setItem('lastVisitedPage', '/')
-                }
+                localStorage.setItem('lastVisitedPage', location);
             } else if (location !== "/signin") {
-                error({error: "Session Timeout, Please Sign In"})
-                localStorage.setItem('lastVisitedPage', location)
                 router.push("/signin")
             }
-            return response.data.valid
-        }
-        verifyToken()
+        };
+
+        verifyToken();
     }, [location])
 
-    return [valid, location]
+    return [valid, location, !valid]
 }

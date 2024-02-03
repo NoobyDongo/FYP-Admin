@@ -1,6 +1,6 @@
-import parseBody from '@/utils/api/parseBody'
 import BadRequest from '@/utils/api/response/badRequest'
 import Response from '@/utils/api/response/response'
+import Unauthorized from '@/utils/api/response/unauthorized'
 import jwt from 'jsonwebtoken'
 
 function createToken({ id, email }) {
@@ -20,8 +20,6 @@ export async function POST(req) {
         const token = createToken({ id: 1, email: 'admin@example.com' })
         console.log("Token:", token)
         const res = Response({ valid: true })
-
-        console.log("Max age",Number(process.env.JWT_EXPIRES_IN))
 
         res.cookies.set('auth', token, {
             httpOnly: true,

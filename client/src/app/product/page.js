@@ -1,148 +1,95 @@
 'use client'
-import * as React from 'react'
+import * as React from 'react';
 //import ExampleWithProviders from './table3'
-//import Example from './table2'
-import TabPanel from '@/components/Tabs/TabPanel'
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import CustomDialog from '@/components/Dialog/CustomDialog'
-import CrudTable from '@/components/Table/Table.jsx'
-
-import { NavTabs } from '@/components/Navigation/navoptions/options.jsx'
-
-import useForm from '@/components/Form/useForm.jsx'
-import reformat from '@/schema/reformat.js'
-import productSchema from '@/schema/product/product.js'
-import producttype from '@/schema/product/producttype.js'
-import origin from '@/schema/product/origin.js'
+//import Example from './table2';
 import TableContainer from '@/components/Table/TableContainer'
-import useHashTabMenu from '@/components/Tabs/useHashTabMenu.js'
-import inventoryproduct from '@/schema/company/inventoryproduct';
-import formEditMode from '@/components/Form/formEditMode';
+import ProductTable from './table';
+import TabPanel from '@/components/Tabs/TabPanel';
+import TabMenu from '@/components/Tabs/TabMenu';
+import useTabMenu from '@/components/Tabs/useTabMenu';
+import ImagesUpload from '@/components/Image/ImagesUpload';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider } from '@mui/material';
+import useProgress from "@/components/Progress/useProgress/useProgress";
+import { io } from 'socket.io-client';
+import { imageUploadWs, server, ws } from '../../config.js';
 
 export default function Home() {
-  const tables = {
-    0: productSchema,
-    1: producttype,
-    2: origin,
-  }
-  const { menu, value } = useHashTabMenu({
-    tabIndicators: NavTabs.product,
-    MenuProps: {
-      sx: {
-        mb: 2,
-      }
-    }
-  })
-  console.log("page rendered", NavTabs, value)
-
-  const Table = React.useCallback(() => CrudTable({
-    columns: tables[value].columns,
-    inputs: tables[value].inputs,
-    tableName: tables[value].name,
-    ...tables[value].props,
-  }), [value])
+  console.log("page rendered")
+  const [value, handleChange] = useTabMenu()
+  const tabs = ["Product List", "Product Type", "Origin"]
 
   return (
     <>
       <TableContainer>
-        {menu}
-        <div className="tabpanel">
-          <Table />
-        </div>
+        <TabMenu tabs={tabs} value={value} handleChange={handleChange} sx={{mb: 3, border: 0}}/>
+        <TabPanel className="" value={value} index={1}>
+          
+        </TabPanel>
+        <TabPanel className="tabpanel" value={value} index={0}>
+          <ProductTable />
+        </TabPanel>
       </TableContainer>
     </>
   )
 }
 
-/*
-          <ImageUploadDemo />
-    <CustomPanel className="tabpanel" value={value} index={0}>
-      <ProductTable />
-    </CustomPanel>
-    <CustomPanel className="tabpanel" value={value} index={1}>
-      <ProductTypeTable />
-    </CustomPanel>
-    <CustomPanel className="tabpanel" value={value} index={2}>
-      <OriginTable />
-    </CustomPanel>
-*/
-
 function ImageUploadDemo() {
 
-  const columns = React.useMemo(() => reformat({
-    label: "Inventory",
-    name: "inventory",
-    columns: [
-      {
-        accessorKey: 'id',
-        enableClickToCopy: true,
-      },
-      {
-        accessorKey: 'name',
-        enableClickToCopy: true,
-        size: 200,
-        input: {
-          required: true,
-        },
-      },
-      {
-        accessorKey: 'address',
-        header: 'Address',
-        size: 250,
-        input: {
-          multiline: true,
-          required: true,
-        },
-      },
-      {
-        tab: "Products",
-        content: [
-          {
-            hidden: true,
-            accessorKey: 'inventoryProduct',
-            header: 'Inventory Product',
-            enableColumnFilter: false,
-            visibleInShowHideMenu: false,
-            input: {
-              type: "records",
-              schema: inventoryproduct,
-            }
-          },
-        ]
+  const imageUpload = React.useRef(null);
+  const {start, stop} = useProgress()
+
+  const uploadImage = () => {
+    ///imageUpload.current.uploadImages()
+    const socket = io(ws); // Replace with your server URL
+    
+    socket.on('connect', async () => {
+      console.log('Connected with socket ID:', socket.id);
+      console.log(imageUpload.current.getImages())
+
+      let formdata = {
+        name: "124",
+        desc: '234',
+        price: 124213,
+        images: imageUpload.current.getImages(),
       }
 
-    ],
-  }), [])
-  console.log('columnscolumnscolumnscolumns', columns)
-  const [setForm, validateRecord, form] = useForm({ inputs: columns.inputs, mode: formEditMode.create })
-  //const [f2, v2, ff1] = useForm({ inputs: product.inputs })
+      let body = {
+        socket: socket.id,
+        form: formdata,
+      }
+      await fetch(`${server}/api/record/product`, {
+        method:"POST",
+        body: JSON.stringify(body)
+      }).then(() => {
+        socket.disconnect()
+        socket.close()
+      })
+    });
 
-  const sendForm = () => {
-    validateRecord((e) => console.log(e))
+    socket.on(imageUploadWs.start, (data) => {
+      console.log(data)
+      start(data.name)
+    })
+    socket.on(imageUploadWs.end, (data) => {
+      console.log(data)
+      setTimeout(stop(data.name), 500)
+    })
+
   }
 
-  return (
-    <>
-      <CustomDialog open={true}
-        header='Records'
-        content={
-          <>
-            <Stack gap={3}>
-              {form}
-            </Stack>
-          </>
-        }
-        actions={
-          <>
-            <Button onClick={() => setForm({})}>Cancel</Button>
-            <Button variant="contained" onClick={sendForm}>Save</Button>
-          </>
-        }
-        onClose={() => { }}
-      />
+  return <Dialog open fullWidth>
+    <DialogTitle variant="h4" sx={{ textTransform: "capitalize" }}>Test New Record</DialogTitle>
+    <Divider />
+    <DialogContent
+      sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+    >
+      <ImagesUpload ref={imageUpload}></ImagesUpload>
 
-    </>
-  )
+    </DialogContent>
+    <DialogActions sx={{ padding: 3, pt: 1, pb: 2, gap: 2 }}>
+      <Button>Cancel</Button>
+      <Button variant="contained" onClick={uploadImage}>Save</Button>
+    </DialogActions>
+  </Dialog>;
 }
 

@@ -1,228 +1,159 @@
-'use client'
+'use client';
 import {
     useMutation,
     useQuery,
-    useQueryClient,
-    keepPreviousData,
-} from '@tanstack/react-query'
-import useProgress from "@/components/Progress/useProgress/useProgress"
-import useNotification from '@/components/Notifications/useNotification'
-import useAPI from '@/utils/crud/useAPI'
-import { useCallback, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import toFilters from '../../components/Table/utils/filters/toFilters'
-import toStorage from '../storage/toStorage'
-import isEmptyObject from '../isEmptyObject'
+    useQueryClient
+} from '@tanstack/react-query';
+import useProgress from "@/components/Progress/useProgress/useProgress";
+import { useNotification } from '@/components/Notifications/useNotification';
+import { useAPI, useAPIs } from '@/utils/crud/useAPI';
 
-export default function CRUD({ tableName, methods = {}, allowSimple = false }, fetchAll, options = {}) {
+export default function CRUD({ tableName, subTable, simple, methods }) {
 
-    const { pagination, columnFilters, globalFilter, sorting } = options
+    const callAPI = useAPI('api/record/api', tableName);
+    const otherAPIs = useAPIs('api/record/api', subTable);
+    const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods;
+    const { createSimple = true, getSimple = true, updateSimple = true, deleteSimple = true } = methods;
+    const { createOption = "add", getOption = "all", updateOption = "add", deleteOption } = methods;
+    const { startAsync } = useProgress(1);
 
-    const router = useRouter()
-    const callAPI = useAPI('api/record', tableName, router)
+    const { normal: newNotification, error: alertError } = useNotification();
 
-    const { customUpdate, customDelete, customCreate } = methods
-    const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods
-    const { createOption, getOption, updateOption, deleteOption } = methods
-    const { createSimple = true, getSimple = true, updateSimple = true, deleteSimple = true } = methods
-    const [tries, setTries] = useState(0)
-
-    const createFn = useCallback(async (record) => await create({
-        option: createOption || "add",
-        method: "POST",
-        simple: createSimple && allowSimple,
-        body: customCreate?.(record) ?? record
-    }), [createOption, createSimple, allowSimple, customCreate])
-
-    const getFn = useCallback(async () => {
-
-        console.log("fetchAll", deleteOption)
-        let criteriaList = toFilters(columnFilters) || []
-        criteriaList = criteriaList.concat(globalFilter)
-
-        let body = {
-            ...(criteriaList.length > 0 ? { criteriaList } : {}),
-            ...(sorting.length > 0 ? { sort: sorting.map(e => ({ property: e.id, direction: e.desc ? "desc" : "asc" })) } : {}),
-            page: pagination.pageIndex,
-            size: pagination.pageSize,
-        }
-        /*
-        console.log("columnFilters", toFilters(columnFilters))
-        console.log("globalFilter", globalFilter)
-        console.log("sorting", sorting)
-        console.log(JSON.stringify(body))
-        */
-
-        let res = await get({
-            option: getOption || (fetchAll ? "all" : "search"),
-            method: fetchAll ? "GET" : "POST",
-            ...(fetchAll ? {} : { body }),
-            simple: getSimple && allowSimple
-        })
-        return res
-    }, [fetchAll, getSimple, allowSimple, getOption, pagination, columnFilters, globalFilter, sorting])
-
-    const updateFn = useCallback(async (record) => await update({
-        option: updateOption || "add",
-        method: "POST",
-        simple: updateSimple && allowSimple,
-        body: customUpdate?.(record) ?? record
-    }), [updateOption, updateSimple, allowSimple, customUpdate])
-
-    const deleteFn = useCallback(async (record) => await _del({
-        option: deleteOption || `remove/${record.id}`,
-        method: "DELETE",
-        simple: deleteSimple && allowSimple,
-        body: customDelete?.(record) ?? record
-    }), [deleteOption, deleteSimple, allowSimple, customDelete])
-
-    const queryKey = useMemo(() => (fetchAll ?
-        [tableName] :
-        [tableName, pagination.pageIndex, pagination.pageSize, columnFilters, globalFilter, sorting]),
-        [tableName, fetchAll, pagination, columnFilters, globalFilter, sorting])
-
-    const _updateQuerySet = (prevRecords, newRecord, updateMethod) => {
-        let { [tableName]: table, ...others } = prevRecords
-        let o = {
-            ...others, [tableName]: updateMethod(newRecord, table)
-        }
-        console.log(o)
-        return o
-    }
-    const append = (prevRecords, newRecord) => {
-        return _updateQuerySet(prevRecords, newRecord, (n, table) => [...table, n])
-    }
-    const modify = (prevRecords, newRecord) => {
-        return _updateQuerySet(prevRecords, newRecord, (n, table) => table?.map((p) => p.id === n.id ? n : p))
-    }
-    const remove = (prevRecords, newRecord) => {
-        return _updateQuerySet(prevRecords, newRecord, (n, table) => table?.filter((p) => p.id !== n.id))
-    }
-
-    const { normal: newNotification, error: alertError } = useNotification()
-    const { startAsync } = useProgress(1)
-
-    const _mutationFn = (aquireDataFn) => async (record = null) => {
-        return await startAsync(async () => {
-            try {
-                let e = await aquireDataFn(record)
-                if (isEmptyObject(e)) {
-                    console.log("empty object", e)
-                    return null
-                }
-                console.log("res", e)
-                return e
-            } catch (err) {
-                console.log(err)
-                alertError({ error: err })
-            }
-        })
-    }
-
-    const useCreate = () => {
-        const queryClient = useQueryClient()
+    function useCreate() {
+        const queryClient = useQueryClient();
         return useMutation({
-            mutationFn: _mutationFn(createFn),
+            mutationFn: async (record) => {
+                var rec = await startAsync(async () => {
+                    var t = await create({
+                        option: createOption,
+                        method: "POST",
+                        simple: true && createSimple,
+                        body: record
+                    });
+
+                    return t;
+                });
+                return rec;
+            },
             onSuccess: (newRecord) => {
-                console.log("newREcord", newRecord)
-                if (!newRecord?.id) {
-                    alertError({ error: "Failed to create record" })
-                    return
-                }
+                console.log("newREcord", newRecord);
                 if (alertError(newRecord))
                     return
-                if (fetchAll)
-                    queryClient.setQueryData(queryKey, (p) => append(p, newRecord))
-
-                newNotification("A record has been created", "info")
+                if (!newRecord.id) {
+                    alertError({ error: "No id returned from server" })
+                    return
+                }
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords;
+                    let o = {
+                        ...others, [tableName]: [...table, newRecord],
+                    };
+                    console.log(o);
+                    return o;
+                });
+                newNotification("A record has been created", "info");
             },
             onError: (err) => {
-                alertError({ error: err })
+                alertError({ error: err });
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
-        })
+            //onSettled: () => queryClient.invalidateQueries({ queryKey: [tableName] }), //refetch users after mutation, disabled for demo
+        });
     }
 
-    const useGet = () => {
+    function useGet() {
         return useQuery({
-            queryKey: queryKey,
-            queryFn: _mutationFn(async () => {
-                let record = []
-                let table = await getFn()
-                if (table.error) {
-                    setTries(prev => prev + 1)
-                    if (tries > 0)
-                        table.error = `${table.error}(${tries})`
-                    alertError(table)
-                    return record
-                }
-                else {
-                    setTries(0)
-                }
-                record = table
-                console.log("record", record)
-                /*
-                await Promise.all(otherAPIs.map(async (e) => {
-                    let table = await e.fn()
-                    if (alertError(table))
-                        return
-                    record[e.name] = table
-                }))
-                */
-                return record
-            }),
-            onError: (err) => {
-                alertError({ error: err })
+            queryKey: [tableName],
+            queryFn: async () => {
+                return await startAsync(async () => {
+                    let record = {};
+                    record[tableName] = await get({
+                        option: getOption,
+                        simple: simple && getSimple
+                    });
+                    await Promise.all(otherAPIs.map(async (e) => {
+                        record[e.name] = await e.fn();
+                    }));
+                    return record;
+                });
             },
-            placeholderData: keepPreviousData,
             refetchOnWindowFocus: false,
-        })
+        });
     }
 
-    const useUpdate = () => {
-        const queryClient = useQueryClient()
+    function useUpdate() {
+        const queryClient = useQueryClient();
         return useMutation({
-            mutationFn: _mutationFn(updateFn),
+            mutationFn: async (record) => {
+                var rec = await startAsync(async () => {
+                    var t = await update({
+                        option: updateOption,
+                        method: "POST",
+                        simple: true && updateSimple,
+                        body: record
+                    });
+
+                    return t;
+                });
+                return rec;
+            },
             onSuccess: (newRecord) => {
-                console.log("newREcord", newRecord)
-                if (!newRecord?.id) {
-                    alertError({ error: "Failed to update record" })
+                console.log("newREcord", newRecord);
+                if (alertError(newRecord))
+                    return;
+                if (!newRecord.id) {
+                    alertError({ error: "No id returned from server" })
                     return
                 }
-                if (alertError(newRecord))
-                    return
-
-                if (fetchAll)
-                    queryClient.setQueryData(queryKey, (p) => modify(p, newRecord))
-
-                newNotification("A record has been edited", "info")
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords;
+                    let o = {
+                        ...others, [tableName]: table?.map((prevRecord) => prevRecord.id === newRecord.id ? newRecord : prevRecord)
+                    };
+                    console.log(o);
+                    return o;
+                });
+                newNotification("A record has been edited", "info");
             },
             onError: (err) => {
-                alertError({ error: err })
+                alertError({ error: err });
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
-        })
+        });
     }
 
-    const useDelete = () => {
-        const queryClient = useQueryClient()
+    function useDelete() {
+        const queryClient = useQueryClient();
         return useMutation({
-            mutationFn: _mutationFn(deleteFn),
+            mutationFn: async (recordId) => {
+                var rec = await startAsync(async () => {
+                    var t = await _del({
+                        option: deleteOption || `remove/${recordId}`,
+                        method: "DELETE",
+                        simple: false && deleteSimple,
+                        body: { id: recordId }
+                    });
+                    return t;
+                });
+                return rec;
+            },
             onSuccess: (newRecord) => {
-                console.log("newREcord", newRecord)
+                console.log("newREcord", newRecord);
                 if (alertError(newRecord))
-                    return
-
-                if (fetchAll)
-                    queryClient.setQueryData(queryKey, (p) => remove(p, newRecord))
-                newNotification("A record has been removed", "info")
+                    return;
+                queryClient.setQueryData([tableName], (prevRecords) => {
+                    let { [tableName]: table, ...others } = prevRecords;
+                    let o = {
+                        ...others, [tableName]: table?.filter((record) => record.id !== newRecord.id)
+                    };
+                    console.log(o);
+                    return o;
+                });
+                newNotification("A record has been removed", "info");
             },
             onError: (err) => {
-                alertError({ error: err })
+                alertError({ error: err });
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
-        })
+        });
     }
 
-    return [useCreate, useGet, useUpdate, useDelete]
+    return [useCreate, useGet, useUpdate, useDelete];
 }

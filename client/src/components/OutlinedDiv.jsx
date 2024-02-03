@@ -1,44 +1,27 @@
 'use client';
-import React from 'react';
+import { forwardRef } from 'react';
 import TextField from '@mui/material/TextField';
 
 //https://stackoverflow.com/a/55036265, thx to Ryan Cogswell
-const InputComponent = React.forwardRef((props, ref) => <div ref={ref} {...props} />);
+const InputComponent = forwardRef((props, ref) => <div ref={ref} {...props} />);
 InputComponent.displayName = "InputComponent";
-const OutlinedDiv = ({ children, label, boxSx, sx, active, disabled, error, ...others }) => {
+const OutlinedDiv = ({ children, label, boxSx, sx, ...others }) => {
     return (
         <TextField
-            sx={(theme) => ({
-                ...(!disabled && !error && {
-                    '&> .MuiInputBase-root > .MuiOutlinedInput-notchedOutline.Mui-focused, :not(.Mui-error) > .MuiInputBase-root > .MuiOutlinedInput-notchedOutline': {
-                        borderWidth: `${active ? 2 : 1}px !important`,
-                        borderColor: `${active ? theme.palette.primary.main : theme.palette.input.border.main} !important`,
-                    },
-
-                    '&:not(.Mui-error) > .MuiFormLabel-root': {
-                        color: `${active ? theme.palette.primary.main : theme.palette.input.label.main} !important`,
-                    },
-                }),
-                ...(typeof boxSx === 'function' ? boxSx(theme) : boxSx)
-            })}
+            sx={boxSx}
             variant="outlined"
             label={label}
-            disabled={disabled}
             multiline
-            InputLabelProps={{ shrink: true, sx: {zIndex: 10} }}
+            InputLabelProps={{ shrink: true }}
             InputProps={{
                 sx: (theme) => ({
-                    padding: 0,
-                    position: 'relative',
                     cursor: "default",
-                    ...(typeof sx === 'function' ? sx(theme) : sx),
+                    ...sx(theme),
                 }),
                 inputComponent: InputComponent
             }}
-            error={error}
             inputProps={{ children: children }}
-            {...others}
-        />
+            {...others} />
     );
 };
 export default OutlinedDiv;
