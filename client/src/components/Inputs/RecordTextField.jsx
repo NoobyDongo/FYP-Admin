@@ -123,6 +123,8 @@ const RecordTextField = React.forwardRef((props, ref) => {
             tempLabel.current = inputValue
             resetValue()
         }
+        if(validationErrors[input.name])
+            setValidationErrors({ ...validationErrors, [input.name]: null })
         setInputValue(newInputValue)
         if (!newInputValue && !useMultiple) {
             resetValue()

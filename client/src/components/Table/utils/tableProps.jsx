@@ -45,7 +45,7 @@ const tableProps = {
         },
         color: 'primary',
         siblingCount: 1,
-        rowsPerPageOptions: [15, 20, 30, 50],
+        rowsPerPageOptions: [10, 15, 20, 30, 50],
         variant: 'filled',
     },
     muiTablePaperProps: ({ table }) => ({
@@ -204,6 +204,9 @@ const useCustomTableProps = (props = {}) => {
                                     position: 'absolute',
                                     right: 0,
                                 },
+                                '& > .MuiCollapse-root':{
+                                    width: "100%",
+                                },
 
                                 '& > .Mui-TableHeadCell-Content': {
                                     '& > .Mui-TableHeadCell-Content-Labels': {
@@ -244,6 +247,14 @@ const useCustomTableProps = (props = {}) => {
                     },
                     '&>tbody:not(:has(.norecord))': {
                         opacity: noRow ? 0 : 1,
+                        '&>tr': {
+                            '&>td:first-child': {
+                                ...(mini && { pl: 0,}),
+                            },
+                            '&>td': {
+                                ...(mini && { py: .5, px: 2}),
+                            },
+                        }
                     },
                     '&>tbody': {
                         transitionProperty: 'opacity',
@@ -260,13 +271,9 @@ const useCustomTableProps = (props = {}) => {
                                 overflow: "hidden",
                                 border: "none",
                                 boxShadow: "none",
-                                ...(mini && { py: .5, px: 2}),
                                 ...(!enableSelection && {
                                     backgroundColor: theme.palette.background.default,
                                 }),
-                            },
-                            '&>td:first-child': {
-                                ...(mini && { pl: 0,}),
                             },
                         }
                     }
@@ -417,8 +424,8 @@ const useCustomTableProps = (props = {}) => {
 
             <MRT_ToggleFiltersButton table={table} key={2} />,
             <MRT_ShowHideColumnsButton table={table} key={3} />,
-            !simple && <MRT_ToggleDensePaddingButton table={table} key={4} />,
-            !simple && <MRT_ToggleFullScreenButton table={table} key={5} />,
+            !mini && <MRT_ToggleDensePaddingButton table={table} key={4} />,
+            <MRT_ToggleFullScreenButton table={table} key={5} />,
             <CustomTooltip title={createTitle} key={6}>
                 <IconButton onClick={toCreate} disabled={disabled}
                     sx={{

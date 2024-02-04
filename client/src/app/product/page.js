@@ -2,7 +2,6 @@
 import * as React from 'react'
 //import ExampleWithProviders from './table3'
 //import Example from './table2'
-import TabPanel from '@/components/Tabs/TabPanel'
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import CustomDialog from '@/components/Dialog/CustomDialog'

@@ -10,13 +10,11 @@ import useProgressListener from "@/components/Progress/useProgress/useProgressLi
 import CustomDialog from "../Dialog/CustomDialog";
 import customDialogConfig from "../Dialog/customDialogConfig";
 import useForm from "../Form/useForm";
-import sleep from "@/utils/sleep";
-
 
 const actions = ["Create New Record", "Edit Record"]
 
 export default function Prompt(props) {
-    const { inputs, action, onClose, data, useUpload, saveRecord, title, ...others } = props
+    const { inputs, action, onClose, data, useUpload, saveRecord, title, context,  ...others } = props
 
     const [disabled, setDisabled] = useState(false)
     const { startAsync } = useProgress('promptsave')
@@ -93,6 +91,7 @@ export default function Prompt(props) {
         <CustomDialog {...others} onClose={handleClose}
             header={title || actions[action]}
             content={form}
+            context={context}
             actions={
                 <>
                     {false && <Button onClick={() => setDisabled(!disabled)}>Disable</Button>}

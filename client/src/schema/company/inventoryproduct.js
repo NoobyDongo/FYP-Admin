@@ -8,7 +8,8 @@ const inventoryproduct = reformat({
     columns: [
         {
             header: "Product",
-            size: 400,
+            size: 300,
+            accessorKey: 'product.name',
             accessorFn: (record) => `${record.product?.name} (id:${record.product?.id})`,
             enableClickToCopy: true,
         },

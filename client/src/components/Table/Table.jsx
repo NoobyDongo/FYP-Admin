@@ -17,7 +17,6 @@ import useCustomTableProps from './utils/tableProps'
 import useCreateEditDeletePrompts from '../Prompt/useCreateEditDeletePrompts'
 import dataFn from "@/utils/crud/clientToServer"
 import FadeWrapper from '../FadeWrapper'
-import { Paper } from '@mui/material'
 
 function usePagenation(dependency = []) {
     const [pagination, setPagination] = React.useState({
@@ -72,10 +71,10 @@ function useRowCount(data, pagination, setPagination, valid) {
 const RawTable = (props) => {
     const enableSelection = false
 
-    const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, fetchAll=false, mini=false } = props
+    const { columns, inputs, initialState, tableName, crud, render=true, upload = false, baseSearchCriteria, fetchAll = false, mini = false } = props
     const [columnVisibility, setColumnVisibility] = React.useState(initialState?.columnVisibility || {})
 
-    const [columnFilters, setColumnFilters] = React.useState(baseSearchCriteria? [baseSearchCriteria] : [])
+    const [columnFilters, setColumnFilters] = React.useState(baseSearchCriteria ? [baseSearchCriteria] : [])
     /*
     const handleOnColumnFiltersChange = React.useCallback((columnFilters) => {
         setColumnFilters(baseSearchCriteria? [baseSearchCriteria, ...columnFilters] : columnFilters)
@@ -184,21 +183,25 @@ const RawTable = (props) => {
         },
     })
 
-    return (
-        <>
-            <div className='MuiPaper-root'>
-                {renderTopToolbar({ table })}
-                <FadeWrapper variants={{
-                    initial: { scale: 1, opacity: 0 },
-                }}
-                    transition={{ duration: .35 }}>
-                    <MaterialReactTable table={table} />
-                </FadeWrapper>
-            </div>
-            {CreatePrompt}
-            {EditPrompt}
-        </>
-    )
+    if (render)
+        return (
+            <>
+                <div className='MuiPaper-root'>
+                    {renderTopToolbar({ table })}
+                    <FadeWrapper variants={{
+                        initial: { scale: 1, opacity: 0 },
+                    }}
+                        transition={{ duration: .35 }}>
+                        <MaterialReactTable table={table} />
+                    </FadeWrapper>
+                </div>
+                {CreatePrompt}
+                {EditPrompt}
+            </>
+        )
+    else {
+        return <></>
+    }
 }
 
 export default function CrudTable(props) {

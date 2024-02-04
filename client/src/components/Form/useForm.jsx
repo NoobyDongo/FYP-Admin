@@ -34,7 +34,7 @@ const FormGroup = React.forwardRef((properties, ref) => {
     const form = React.useMemo(() => {
         return (
             <>
-                {label != 0 && <Stack direction='row' alignItems="center" sx={{ my: gap / 2, mb: gap }}>
+                {label != 0 && <Stack direction='row' alignItems="center" sx={{ mb: gap - 1 }}>
                     <Typography sx={{ fontSize: 12, fontWeight: 500 }} variant="h6">{label}</Typography>
                     <Divider sx={{ flex: 1, height: 1, alignSelf: "center", ml: gap / 2 / 2 }} />
                 </Stack>
@@ -43,7 +43,7 @@ const FormGroup = React.forwardRef((properties, ref) => {
                     {
                         inputs.map((input, i) =>
                             <Collapse in={true} key={i}>
-                                <Box sx={{ pt: i > 0 ? gap : 0 }}>
+                                <Box sx={{ pt: i > 0 ? gap : 1, pb:gap / 2, }}>
                                     <FormEditField ref={el => formInputs.current[i] = el} {...props} {...makeInput(input, inputProps, formData)} />
                                 </Box>
                             </Collapse>

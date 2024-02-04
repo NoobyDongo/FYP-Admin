@@ -10,11 +10,13 @@ const invoiceproduct = reformat({
     columns: [
         {
             header: "Product",
+            accessorKey: 'product.name',
             accessorFn: (record) => `${record.product?.name} (id:${record.product?.id})`,
             enableClickToCopy: true,
         },
         {
             header: "Inventory",
+            accessorKey: 'inventory.name',
             size: 300,
             accessorFn: (record) => `${record.inventory?.name} (${record.inventory?.address})`,
             enableClickToCopy: true,

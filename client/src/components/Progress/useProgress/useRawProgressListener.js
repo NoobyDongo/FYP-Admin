@@ -1,6 +1,5 @@
 'use client';
-import { useEffect } from "react";
-
+import React from "react";
 
 export default function useRawProgressListener(id = "", start, end) {
     const onMakingProgress = (e) => {
@@ -10,7 +9,7 @@ export default function useRawProgressListener(id = "", start, end) {
         else
             end(e);
     };
-    useEffect(() => {
+    React.useEffect(() => {
         window.addEventListener("makingProgress" + id, onMakingProgress);
         return () => {
             window.removeEventListener("makingProgress" + id, onMakingProgress);

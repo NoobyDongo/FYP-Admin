@@ -2,7 +2,7 @@
 import React from 'react';
 import styled from "@mui/material/styles/styled";
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
-import { Fade } from '@material-ui/core';
+import Fade from '@mui/material/Fade';
 
 const UnstyledCustomHtmlTooltip = React.forwardRef(({ className, ...props }, ref) => (
     <Tooltip TransitionComponent={Fade} {...props} classes={{ popper: className }} ref={ref} />

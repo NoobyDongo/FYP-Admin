@@ -12,9 +12,9 @@ const invoice = reformat({
             accessorKey: 'id',
             enableClickToCopy: true,
         },
-        
         {
             accessorFn: (record) => record.customer?.fname + " " + record.customer?.lname,
+            accessorKey: 'customer.name',
             header: "Customer Name",
             enableClickToCopy: true,
         },

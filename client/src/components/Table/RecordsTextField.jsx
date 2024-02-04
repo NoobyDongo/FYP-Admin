@@ -205,7 +205,7 @@ const RecordsTextField = forwardRef((props, ref) => {
     const {
         input, disabled, value, record
     } = props;
-    const { schema, label, required, name } = input;
+    const { schema, label, required, name, demo = false } = input;
 
     console.log('RecordsTextField value', value, 'record', input.valueSetter({}, value));
 
@@ -242,7 +242,7 @@ const RecordsTextField = forwardRef((props, ref) => {
         inputs: schema.inputs,
         tableName: schema.name,
         ...schema.props,
-        baseSearchCriteria,
+        ...(!demo && baseSearchCriteria),
         mini: true,
         crud: {
             methods: {

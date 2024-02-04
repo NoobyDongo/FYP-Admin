@@ -1,7 +1,7 @@
 'use client'
 //https://github.com/iamhosseindhv/notistack
 //amazing, helped me to save a lot of time
-import { useEffect } from 'react';
+import React from 'react';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 import Button from '@mui/material/Button';
 
@@ -26,7 +26,7 @@ function MyApp() {
         )
     };
 
-    useEffect(() => {
+    React.useEffect(() => {
         const handleNewNotification = (e) => {
             // variant could be success, error, warning, info, or default
             enqueueSnackbar(e.detail.message || "", {

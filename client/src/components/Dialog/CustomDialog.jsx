@@ -7,7 +7,6 @@ import Box from "@mui/material/Box"
 import customDialogConfig from './customDialogConfig'
 import DialogContentText from '@mui/material/DialogContentText'
 import React from 'react'
-import { useTheme } from '@emotion/react'
 
 export default function CustomDialog(props) {
     const {
@@ -33,11 +32,14 @@ export default function CustomDialog(props) {
                 ...otherPaperProps
             }}
             {...others} onClose={handleClose} fullWidth>
-            <DialogTitle variant="h6" sx={{ textTransform: "capitalize", userSelect: "none", px: padding, ...(menu && {pb: gap/2/2}) }}>
+            <DialogTitle variant="h6" sx={{ textTransform: "capitalize", userSelect: "none", px: padding, ...(menu && { pb: gap / 2 / 2 }) }}>
                 {header}
+                {context && <DialogContentText sx={{ fontSize: 12, pt: 1, textTransform: 'none' }}>
+                    {context}
+                </DialogContentText>}
             </DialogTitle>
-            {menu && <Box sx={{px: gap}}>{menu}</Box>}
-            {divider && <Divider sx={{ opacity: .3, mx: gap / 2 }} />}
+            {menu && <Box sx={{ px: gap }}>{menu}</Box>}
+            {divider && <Divider sx={{ opacity: .5, mx: gap / 2 }} />}
             <div style={{ overflow: "overlay", scrollbarGutter: 'stable both-edges' }}>
                 <DialogContent
                     sx={{
@@ -48,9 +50,6 @@ export default function CustomDialog(props) {
                         px: padding,
                     }}
                 >
-                    {context && <DialogContentText>
-                        {context}
-                    </DialogContentText>}
                     {content}
                 </DialogContent>
             </div>

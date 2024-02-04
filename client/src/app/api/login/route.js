@@ -16,7 +16,7 @@ export async function POST(req) {
     if (!username || !password)
         return BadRequest()
 
-    if (username === ' ' && password === ' ') {
+    if (username === 'admin' && password === 'admin') {
         const token = createToken({ id: 1, email: 'admin@example.com' })
         console.log("Token:", token)
         const res = Response({ valid: true })

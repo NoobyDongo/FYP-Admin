@@ -13,7 +13,7 @@ const customer = reformat({
             enableClickToCopy: true,
         },
         {
-            tab: "Thsi is a fking test",
+            tab: "test",
             content: [
                 {
                     group: "Basic Information",

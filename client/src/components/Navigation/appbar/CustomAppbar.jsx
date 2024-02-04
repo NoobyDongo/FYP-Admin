@@ -7,7 +7,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import openCloseTransitionMixin from "@/utils/styles/openCloseTransitionMixin"
-import { forwardRef } from 'react'
+import React from 'react'
 import Stack from '@mui/material/Stack'
 import UserCorner from '../UserCorner'
 import SearchBar from '../SearchBar'
@@ -16,7 +16,7 @@ import { closedWidthMixin } from '../mixin'
 import DynamicText from '../../DynamicText'
 
 
-const CustomAppbar = forwardRef(({ open, onOpen, onClose }, ref) => {
+const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
 
     return (
         <AppBar ref={ref} elevation={0} position="fixed" open={open}>

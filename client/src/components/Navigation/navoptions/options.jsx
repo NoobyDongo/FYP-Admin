@@ -1,4 +1,4 @@
-import { Dashboard } from '@mui/icons-material'
+import Dashboard from '@mui/icons-material/Dashboard'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import Category from '@mui/icons-material/Category'
 import BusinessIcon from '@mui/icons-material/Business';
@@ -6,6 +6,7 @@ import capitalizeEachWord from '@/utils/capitalizeEachWord';
 import sanitizeString from '@/utils/sanitizeString';
 import event from '../../../utils/events/customHashChangeEvent';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import EmergencyRecordingIcon from '@mui/icons-material/EmergencyRecording';
 
 function transformArray(array) {
     const result = new Map()
@@ -132,6 +133,15 @@ const navOptions = [
         name: "Dashboard",
         link: "/",
         icon: <Dashboard />
+    },
+    {
+        group: 2,
+        displayname: {
+            title: "Demonstrate Form Component",
+        },
+        name: "Demo",
+        link: "/demo",
+        icon: <EmergencyRecordingIcon />,
     },
 ]
 export default navOptions

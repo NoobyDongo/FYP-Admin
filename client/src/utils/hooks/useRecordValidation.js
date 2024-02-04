@@ -40,7 +40,7 @@ export default function useRecordValidation(inputs){
                     ...prev,
                     async (r) => ({
                         [input.name]:
-                            !validateRequired(getRecordValue(input, r)) ? `${input.label} is required`
+                            !validateRequired(getRecordValue(input, r)) ? `Value is required`
                                 :
                                 !await input?.validator(getRecordValue(input, r)) ? input?.errorMessage || 'Error' : ''
                     })
@@ -49,7 +49,7 @@ export default function useRecordValidation(inputs){
             else if (input.required) {
                 setValidators(prev => [
                     ...prev,
-                    async (r) => ({ [input.name]: !validateRequired(getRecordValue(input, r)) ? `${input.label} is Required` : '' })
+                    async (r) => ({ [input.name]: !validateRequired(getRecordValue(input, r)) ? `Value is required` : '' })
                 ])
             }
             else if (input.validator) {
