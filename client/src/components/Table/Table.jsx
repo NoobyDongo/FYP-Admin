@@ -131,7 +131,6 @@ const RawTable = (props) => {
         initialState,
         setPagination,
         rowCount,
-        disableTopToolbar: true,
         enableSelection,
         toCreate,
         toEdit,
@@ -148,6 +147,11 @@ const RawTable = (props) => {
         data: data,
         ...tableProps,
 
+        enableTopToolbar: isFullScreen,
+        ...isFullScreen && {
+            renderTopToolbar
+        },
+
         ...(!fetchAll && {
             manualPagination: true,
             manualFiltering: true,
@@ -160,6 +164,7 @@ const RawTable = (props) => {
             onGlobalFilterChange: setGlobalFilter,
             onSortingChange: setSorting,
         }),
+        onIsFullScreenChange: setIsFullScreen,
 
         renderEmptyRowsFallback,
         muiToolbarAlertBannerProps: isError ? { color: 'error', children: 'Error loading data', } : undefined,
@@ -174,6 +179,7 @@ const RawTable = (props) => {
                 sorting,
                 columnVisibility,
             }),
+            isFullScreen,
 
             //showGlobalFilter: !noRecord && showSearchBar,
             isLoading: isLoading,

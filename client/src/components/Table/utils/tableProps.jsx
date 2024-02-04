@@ -99,7 +99,7 @@ const useCustomTableProps = (props = {}) => {
         disableTopToolbar,
         disableBottomToolbar,
         rowCount = 0,
-        noRecord = false,
+        noRecord: inNoRecord = false,
         isLoading = true,
         createTitle = 'Create New Record',
         toEdit = () => { console.log('Edit not implemented') },
@@ -111,6 +111,11 @@ const useCustomTableProps = (props = {}) => {
     let scale = mini ? .8 : 1
     let iconScale = mini ? 1.1 : 1.2
     let noRow = rowCount < 1
+
+    const [noRecord, setNoRecord] = React.useState(inNoRecord)
+    React.useEffect(() => {
+        setNoRecord(inNoRecord)
+    }, [inNoRecord])
 
     const muiTableBodyProps = React.useMemo(() => ({
         ...(noRow && !isLoading && {
@@ -179,13 +184,14 @@ const useCustomTableProps = (props = {}) => {
                     '&>thead': {
                         '&>tr': {
                             borderBottom: 1,
+                            userSelect: noRow && noRecord ? 'none' : 'auto',
                             opacity: noRow && noRecord ? 0 : 1,
                             borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
                             transitionProperty: 'opacity, border-color',
                             transitionDuration: '200ms',
                             backgroundColor: `transparent !important`,
                             '&>th:first-child': {
-                                ...(mini && { pl: 0,}),
+                                ...(mini && { pl: 0, }),
                             },
                             '&>th': {
                                 fontSize: theme.typography.fontSize * fontScale,
@@ -194,7 +200,7 @@ const useCustomTableProps = (props = {}) => {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 pb: ".5rem",
-                                ...(mini && { py: .5, px: 2}),
+                                ...(mini && { py: .5, px: 2 }),
                                 boxShadow: "none",
                                 border: 0,
                                 textTransform: "capitalize",
@@ -204,7 +210,7 @@ const useCustomTableProps = (props = {}) => {
                                     position: 'absolute',
                                     right: 0,
                                 },
-                                '& > .MuiCollapse-root':{
+                                '& > .MuiCollapse-root': {
                                     width: "100%",
                                 },
 
@@ -249,10 +255,10 @@ const useCustomTableProps = (props = {}) => {
                         opacity: noRow ? 0 : 1,
                         '&>tr': {
                             '&>td:first-child': {
-                                ...(mini && { pl: 0,}),
+                                ...(mini && { pl: 0, }),
                             },
                             '&>td': {
-                                ...(mini && { py: .5, px: 2}),
+                                ...(mini && { py: .5, px: 2 }),
                             },
                         }
                     },
@@ -443,7 +449,7 @@ const useCustomTableProps = (props = {}) => {
             <Box
                 sx={{
                     //backgroundColor: lighten(theme.palette.background.default, 0.05),
-                    pb: 1.5,
+                    pb: 2.5,
                     pl: mini ? 0 : 1 * scale,
                     pt: table.getState().isFullScreen ? 1 : 0,
                     display: 'flex',
