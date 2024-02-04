@@ -142,6 +142,8 @@ const RawTable = (props) => {
         mini,
     })
 
+    const [isFullScreen, setIsFullScreen] = React.useState(false)
+
     const table = useMaterialReactTable({
         columns: columns,
         data: data,
