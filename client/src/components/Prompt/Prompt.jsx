@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from "react";
+import React from "react";
 import Button from '@mui/material/Button';
 import ProgressButton from "@/components/Progress/ProgressButton";
 import useProgress from "@/components/Progress/useProgress/useProgress";
@@ -10,24 +10,35 @@ import useProgressListener from "@/components/Progress/useProgress/useProgressLi
 import CustomDialog from "../Dialog/CustomDialog";
 import customDialogConfig from "../Dialog/customDialogConfig";
 import useForm from "../Form/useForm";
+import settings from "@/app/admin/settings";
 
 const actions = ["Create New Record", "Edit Record"]
 
 export default function Prompt(props) {
-    const { inputs, action, onClose, data, useUpload, saveRecord, title, context,  ...others } = props
+    const { inputs, action, onClose, data, useUpload, saveRecord, title, context, ...others } = props
 
-    const [disabled, setDisabled] = useState(false)
+    const [disabled, setDisabled] = React.useState(false)
     const { startAsync } = useProgress('promptsave')
     const { loading } = useProgressListener('promptsave')
-    const [completed, setCompleted] = useState(false)
-    const [setForm, validateRecord, form] = useForm({ data, inputs, mode:action, disabled: disabled || loading })
+    const [completed, setCompleted] = React.useState(false)
+    const { setFormData, validate, form } = useForm({ data, inputs, mode: action, disabled: disabled || loading })
 
-    console.log("Prompt rendered")
+    const [autoBlock, setAutoBlocks] = React.useState(true)
+    const [autoClose, setAutoClose] = React.useState(false)
+
+    React.useEffect(() => {
+        setAutoBlocks(localStorage.getItem(
+            action == 0 ? settings.autoDisableCreateRecord : settings.autoDisableEditRecord
+        ) !== 'false')
+        setAutoClose(localStorage.getItem(
+            action == 0 ? settings.autoCloseCreatePrompt : settings.autoCloseEditPrompt
+        ) === 'true')
+    }, [])
 
     const clearForm = (fromData) => {
         setDisabled(false)
         setCompleted(false)
-        setForm(fromData)
+        setFormData(fromData)
     }
     const exitForm = () => {
         onClose()
@@ -36,7 +47,7 @@ export default function Prompt(props) {
         clearForm({})
     }
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (others.open) {
             if (action == 0)
                 clearForm({})
@@ -45,6 +56,15 @@ export default function Prompt(props) {
             }
         }
     }, [others?.open])
+
+    const handleAfterSave = () => {
+        if (autoClose)
+            onClose()
+        if (autoBlock) {
+            setDisabled(true)
+            setCompleted(true)
+        }
+    }
 
     //const { startAsync : startAsync2 } = useProgress(1)
     const handleSave = async () => {
@@ -57,38 +77,32 @@ export default function Prompt(props) {
             })
         })
         */
-       //setDisabled(true)
-       //return
-        
-        validateRecord(async (formData) => {
-            console.log("Form data", formData)
+        //setDisabled(true)
+        //return
+
+        validate(async (formData) => {
             if (useUpload)
                 listenToUpload(async (data) => startAsync(async () => await saveRecord(data)), formData, (res) => {
-                    console.log("save record result:", res)
                     if (res && !res.error) {
-                        setDisabled(true)
-                        setCompleted(true)
+                        handleAfterSave()
                     }
                 })
             else {
                 let res = await startAsync(async () => await saveRecord(formData))
-                console.log("save record result:", res)
                 if (res && !res.error) {
-                    setDisabled(true)
-                    setCompleted(true)
+                    handleAfterSave()
                 }
             }
         })
-            
+
     }
 
-    const handleClose = (event, reason) => {
-        if (reason && reason === "backdropClick")
-            return
-    }
+    const handleClose = React.useCallback((event, reason) => {
+        onClose()
+    }, [onClose])
 
     return (
-        <CustomDialog {...others} onClose={handleClose}
+        <CustomDialog {...others} handleClose={handleClose}
             header={title || actions[action]}
             content={form}
             context={context}

@@ -3,7 +3,6 @@ import React from "react";
 
 export default function useRawProgressListener(id = "", start, end) {
     const onMakingProgress = (e) => {
-        console.log("making progress..................", id, e.detail.status);
         if (e.detail.status)
             start(e);
         else

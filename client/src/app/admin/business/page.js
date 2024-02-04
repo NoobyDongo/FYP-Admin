@@ -26,7 +26,7 @@ export default function Home() {
       }
     }
   })
-  console.log("page rendered", NavTabs, value)
+  //console.log("page rendered", NavTabs, value)
 
   let Table = React.useCallback(() => value ? CrudTable({
     columns: tables[value].columns,

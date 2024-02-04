@@ -1,19 +1,18 @@
 'use client'
-import { useCallback, useMemo, useRef } from 'react'
+import React from 'react'
 import IconButtonWithTooltip from './IconButtonWithTooltip'
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function useHistory({ initialValue, valueSetter, comparator, disabled, removeAll }) {
-    const history = useRef([initialValue])
-    const pointer = useRef(history.current.length - 1)
+    const history = React.useRef([initialValue])
+    const pointer = React.useRef(history.current.length - 1)
 
     const numUndo = () => pointer.current
     const numRedo = () => history.current.length - pointer.current - 1
 
-    const add = (value) => {
-        console.log("history", pointer.current, history.current)
+    const add = React.useCallback((value) => {
         const newValue = comparator(value)
         const currentValue = comparator(history.current[pointer.current])
 
@@ -22,31 +21,28 @@ export default function useHistory({ initialValue, valueSetter, comparator, disa
             history.current.push(value)
             pointer.current++
         }
-        console.log("new history", pointer.current, history.current)
-    }
+    }, [comparator])
 
-    const undo = () => {
-        console.log("history", pointer.current, history.current)
+    const undo = React.useCallback(() => {
         if (pointer.current > 0) {
             pointer.current--
             valueSetter(history.current[pointer.current])
         }
-    }
+    }, [valueSetter])
 
-    const redo = () => {
-        console.log("history", pointer.current, history.current)
+    const redo = React.useCallback(() => {
         if (pointer.current < history.current.length - 1) {
             pointer.current++
             valueSetter(history.current[pointer.current])
         }
-    }
+    }, [valueSetter])
 
-    const resetHistory = () => {
+    const resetHistory = React.useCallback(() => {
         history.current = [[]]
         pointer.current = 0
-    }
+    }, [])
 
-    const renderTools = useCallback((props) => {
+    const renderTools = React.useCallback((props) => {
         const { enableDeleteAll, remove } = props || {}
         return [
             removeAll && (
@@ -81,7 +77,7 @@ export default function useHistory({ initialValue, valueSetter, comparator, disa
                 <RedoIcon />
             </IconButtonWithTooltip>,
         ]
-    }, [pointer, disabled]);
+    }, [pointer, disabled, removeAll]);
 
     return { history, pointer, add, undo, redo, numUndo, numRedo, renderTools, resetHistory }
 }

@@ -1,5 +1,4 @@
 import Dashboard from '@mui/icons-material/Dashboard'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import Category from '@mui/icons-material/Category'
 import BusinessIcon from '@mui/icons-material/Business';
 import capitalizeEachWord from '@/utils/capitalizeEachWord';
@@ -7,6 +6,7 @@ import sanitizeString from '@/utils/sanitizeString';
 import event from '../../../utils/events/customHashChangeEvent';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import EmergencyRecordingIcon from '@mui/icons-material/EmergencyRecording';
+import link from '@/app/admin/link';
 
 function transformArray(array) {
     const result = new Map()
@@ -43,8 +43,8 @@ const navOptions = [
         },
         name: "Product",
         icon: <Category />,
-        link: "/product#0",
-        base: "/product",
+        link: link.product,
+        base: link.product,
         ascontent: true,
         content: [
             {
@@ -52,14 +52,14 @@ const navOptions = [
                 displayname: {
                     nav: "Type",
                 },
-                link: "/product#0",
+                link: `${link.product}#0`,
             },
             {
                 name: "Product Origin",
                 displayname: {
                     nav: "Origin",
                 },
-                link: "/product#1",
+                link: `${link.product}#1`,
             },
         ]
     },
@@ -72,50 +72,20 @@ const navOptions = [
         },
         name: "Business",
         icon: <BusinessIcon />,
-        link: "/business",
-        base: "/business",
+        link: link.business,
+        base: link.business,
         ascontent: true,
         content: [
             {
                 name: "Customer",
-                link: "/business#0",
+                link: `${link.business}#0`,
             },
             {
                 name: "Invoice",
-                link: "/business#1",
-            },
-            /*
-            {
-                name: "Delivery",
-                link: "/business#1",
-            },
-            */
-        ]
-    },
-    /*
-    {
-        group: 1,
-        displayname: {
-            tab: "Company",
-            title: "Manage Company"
-        },
-        name: "Company",
-        icon: <ManageAccountsIcon />,
-        link: "/company",
-        base: "/company",
-        ascontent: true,
-        content: [
-            {
-                name: "Employee",
-                link: "/company#0",
-            },
-            {
-                name: "Inventory",
-                link: "/company#1",
+                link: `${link.business}#1`,
             },
         ]
     },
-    */
     {
         group: 1,
         displayname: {
@@ -124,14 +94,14 @@ const navOptions = [
         },
         name: "Inventory",
         icon: <InventoryIcon />,
-        link: "/inventory",
-        base: "/inventory",
+        link: link.inventory,
+        base: link.inventory,
     },
     {
         order: 0,
         group: 0,
         name: "Dashboard",
-        link: "/",
+        link: link.base,
         icon: <Dashboard />
     },
     {
@@ -140,7 +110,7 @@ const navOptions = [
             title: "Demonstrate Form Component",
         },
         name: "Demo",
-        link: "/demo",
+        link: link.demo,
         icon: <EmergencyRecordingIcon />,
     },
 ]
@@ -187,10 +157,11 @@ const configurateOption = (option, tabs) => {
             return res
         }
         updatedOption.func = updatedOption.hash || pendingObject ? (window, router) => {
-            router.push(updatedOption.link + '#' + updatedOption.hash);
+            router.push(updatedOption.link);
             window.dispatchEvent(event({ path: updatedOption.link, hash: updatedOption.hash }))
+            //console.log('pushing to', updatedOption.link + (updatedOption.hash ? '#' + updatedOption.hash : ''))
         } : (window, router) => {
-            console.log('pushing to', updatedOption.link)
+            //console.log('pushing to', updatedOption.link)
             router.push(updatedOption.link)
         };
     }

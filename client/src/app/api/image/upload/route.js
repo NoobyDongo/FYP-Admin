@@ -26,18 +26,13 @@ export async function POST(req) {
     const { image, filename, path: directoryPath, directory } = await req.json()
     const imageData = image.replace(/^data:image\/\w+;base64,/, '')
 
-    console.log(isGif(image) ? 'gif' : 'not gif')
     let gif = isGif(image)
     let buffer = Buffer.from(imageData, 'base64')
     if (!gif)
       buffer = await toWebp(buffer)
 
-    console.log('directoryPath:', directoryPath);
-    console.log('directory:', directory);
     const uniqueFilename = generateUniqueFilename(directoryPath, filename, gif ? "gif" : "webp")
-    console.log('uniqueFilename:', uniqueFilename);
     const relativePath = path.join(directoryPath, directory+ "", uniqueFilename)
-    console.log("relativePath", relativePath)
     await new Promise(function (resolve, reject) {
       fs.writeFile(relativePath, buffer, (err) => {
         if (err) {

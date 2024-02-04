@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import FadeWrapper from '@/components/FadeWrapper'
 
-export default function TabPanel({ children, preventUmount = false, value, index, ...other }) {
+export default function TabPanel({ children, preventUmount = false, pending, value, index, ...other }) {
     return (
         <>
             <FadeWrapper
@@ -13,7 +13,7 @@ export default function TabPanel({ children, preventUmount = false, value, index
                 aria-labelledby={`simple-tab-${index}`}
                 {...other}
             >
-                {(value === index || preventUmount) && (
+                {((value === index)|| preventUmount) && (
                     <>
                         {children}
                     </>

@@ -20,8 +20,7 @@ export default function Home() {
       }
     }
   })
-  console.log("page rendered", NavTabs, value)
-
+  
   let Table = React.useCallback(() =>CrudTable({
     columns: tables[value].columns,
     inputs: tables[value].inputs,
@@ -31,8 +30,7 @@ export default function Home() {
 
   return (
     <>
-      <TableContainer>
-        {menu}
+      <TableContainer sx={{pt: 1}}>
         <div className="tabpanel">
           <Table />
         </div>

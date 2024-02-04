@@ -17,8 +17,8 @@ export default async (reqBody, tableName) => {
             data: body || {}
         })
     };
-    console.log("Before", url);
+    //console.log("Before", url);
     let res = await axios(reqParam);
-    console.log("after", url, res.status);
+    //console.log("after", url, res.status);
     return res;
 };

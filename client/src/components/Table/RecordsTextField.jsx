@@ -1,5 +1,5 @@
 'use client';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React from 'react';
 import CrudTable from './Table';
 
 /*
@@ -201,15 +201,14 @@ const a =
         )}
     />
 */
-const RecordsTextField = forwardRef((props, ref) => {
+
+const RecordsTextField = React.forwardRef((props, ref) => {
     const {
-        input, disabled, value, record
+        input, value, record
     } = props;
-    const { schema, label, required, name, demo = false } = input;
+    const { schema, demo = false } = input;
 
-    console.log('RecordsTextField value', value, 'record', input.valueSetter({}, value));
-
-    useImperativeHandle(ref, () => ({
+    React.useImperativeHandle(ref, () => ({
         getValue() {
             return data;
         },
@@ -219,22 +218,16 @@ const RecordsTextField = forwardRef((props, ref) => {
 
     const customCreate = React.useCallback((r) => {
         input.valueSetter(r, input.valueGetter(record));
-        console.log('customCreate', r);
         return schema.props?.crud?.methods?.customCreate(r) ?? r;
     }, [input]);
     const customUpdate = React.useCallback((r) => {
         input.valueSetter(r, input.valueGetter(record));
-        console.log('customUpdate', r);
         return schema.props?.crud?.methods?.customUpdate(r) ?? r;
-        return r;
     }, [input]);
     const customDelete = React.useCallback((r) => {
         return schema.props?.crud?.methods?.customDelete(r) ?? r.id;
-        //input.valueSetter(r, input.valueGetter(record));
-        //return schema.getId(r);
     }, [input]);
 
-    //console.log('customCreate', customCreate({}))
     const baseSearchCriteria = React.useMemo(() => ({ id: `id.${input.setterKey}`, value: `${input.valueGetter(record)}` }), [record, input]);
 
     let Table = React.useCallback(() => CrudTable({

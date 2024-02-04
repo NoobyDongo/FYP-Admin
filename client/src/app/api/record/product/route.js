@@ -18,9 +18,6 @@ function deleteFilesExcept(folderPath, filenamesToKeep) {
     return new Promise((resolve, reject) => {
         fs.readdir(folderPath, (err, files) => {
             if (err) reject(err)
-
-            console.log("files", files)
-            console.log("filenamesToKeep", filenamesToKeep)
             const deletePromises = files
                 .filter(file => !filenamesToKeep.some(f => f.name === file))
                 .map(file => fs.promises.unlink(path.join(folderPath, file)))
@@ -43,18 +40,15 @@ async function handleDelete(json) {
             method: "DELETE",
             simple: false,
         }, "product")).data
-        console.log("response from product api", response)
         if (response.id === id) {
             if (directoryExists(path.join(process.cwd(), productImagePath, id + ""))) {
                 let res = await removeDirectory(id, productImagePath)
-                console.log(res)
             }
             return Response({ id: id })
         }
         else
             return InternalError({ error: "Failed to delete record" })
     } catch (error) {
-        console.log(error)
         return InternalError({ error: "Failed to delete record" })
     }
 }
@@ -68,31 +62,25 @@ async function handlePost(json) {
         const images = form.images
         let requireNewFolder = false
         let directoryName = form.id || ""
-        console.log('received form')
 
         if (images?.length > 0) {
             let productDirectory = path.join(process.cwd(), productImagePath, directoryName + "")
-            console.log(productDirectory)
 
             requireNewFolder = !form.id || !directoryExists(productDirectory)
             let savedImages = images.filter(img => img.id)
 
             if (requireNewFolder) {
                 directoryName = (await createDirectory(directoryName, productImagePath)).name
-                console.log("new directory created", directoryName)
             } else {
-                //console.log("unwanted images deleted", savedImages, unsavedImages)
                 await deleteFilesExcept(productDirectory, savedImages)
             }
 
             await Promise.all(images.map(async (img, index) => {
                 if (img.data) {
                     let image = await uploadImage(img, directoryName, socket)
-                    //console.log("New image uploaded", image)
                     form.images[index] = image
                 }
             }))
-            console.log("images uploaded", form.images)
         } else {
             await removeDirectory(directoryName, productImagePath)
         }
@@ -104,27 +92,21 @@ async function handlePost(json) {
             simple: false,
         }, "product")).data
 
-        console.log("response from product api", response.id)
         if (requireNewFolder) {
             if (response.id) {
-                let res = await renameDirectory(directoryName, response.id, productImagePath)
-                console.log("rename file to", res.name)
+                await renameDirectory(directoryName, response.id, productImagePath)
             } else {
-                console.log("api call failed, removing directory")
-                let res = await removeDirectory(directoryName, productImagePath)
-                console.log(res)
+                await removeDirectory(directoryName, productImagePath)
             }
         }
         return Response(response)
     } catch (error) {
-        console.log(error)
         return InternalError({ error: "Failed to create record" })
     }
 }
 
 export async function POST(req) {
     const json = await req.json()
-    console.log("POST", json)
     return await authClient(async () => {
         if(json.method === "DELETE")
             return await handleDelete(json)

@@ -33,21 +33,22 @@ export default function Home() {
       }
     }
   })
-  console.log("page rendered", NavTabs, value)
-
-  const Table = React.useCallback(() => CrudTable({
-    columns: tables[value].columns,
-    inputs: tables[value].inputs,
-    tableName: tables[value].name,
-    ...tables[value].props,
-  }), [value])
+  
+  const Table = React.useCallback(() => {
+    return CrudTable({
+      columns: tables[value].columns,
+      inputs: tables[value].inputs,
+      tableName: tables[value].name,
+      ...tables[value].props,
+    })
+  }, [value])
 
   return (
     <>
       <TableContainer>
         {menu}
         <div className="tabpanel">
-          <Table />
+            <Table />
         </div>
       </TableContainer>
     </>
@@ -113,13 +114,9 @@ function ImageUploadDemo() {
 
     ],
   }), [])
-  console.log('columnscolumnscolumnscolumns', columns)
-  const [setForm, validateRecord, form] = useForm({ inputs: columns.inputs, mode: formEditMode.create })
+  
+  const { setFormData, validate, form } = useForm({ inputs: columns.inputs, mode: formEditMode.create })
   //const [f2, v2, ff1] = useForm({ inputs: product.inputs })
-
-  const sendForm = () => {
-    validateRecord((e) => console.log(e))
-  }
 
   return (
     <>
@@ -134,7 +131,7 @@ function ImageUploadDemo() {
         }
         actions={
           <>
-            <Button onClick={() => setForm({})}>Cancel</Button>
+            <Button onClick={() => setFormData({})}>Cancel</Button>
             <Button variant="contained" onClick={sendForm}>Save</Button>
           </>
         }

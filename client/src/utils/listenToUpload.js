@@ -9,16 +9,13 @@ export default async function listenToUpload(asyncFunc, formdata, callback) {
 
 
   socket.on("connect", async () => {
-    console.log("upload socket connected");
 
     socket.on(imageUploadWs.start, (data) => {
       const { name, ...others } = data
-      console.log("image upload start", data);
       startLoadingEvent(name, others);
     });
     socket.on(imageUploadWs.end, (data) => {
       const { name, ...others } = data
-      console.log("image upload end", data);
       setTimeout(stopLoadingEvent(name, others), 500);
     });
 

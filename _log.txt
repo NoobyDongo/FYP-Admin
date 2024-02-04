@@ -328,3 +328,86 @@ UI adjustment
 bug fix
     fixed some incorrect error notifications
     fixed a bug where user got stuck at signin page when re-visiting signin page after login in
+
+30/1/2024 ~ 7/2/2024
+done:
+implemented records Input
+built a demo page
+fixed some bug related to the navigation menu
+fixed some bug related to the table searching function
+
+7/2/2024 - 8/2/2024
+summery:
+will be focusing on functionality instead of minor details.
+to do:
+coupons and promotions
+socket security
+done:
+ImagesUpload is less laggier than in the previous version
+fixed a bug that erases the local value of inputs when switching tabs
+prevented UI components from flashing by limited sudden changes in state of the login form
+prevented login form from abusing login api by repeatedly sending the same uname and password
+removed the preventUpdate prop from form component, now form data will only be updated when switching tabs or validating the form.
+removed the preventDismount prop form tabs panel used by form component
+removed fetchAll option from table component
+improved custom dialog by adding a fullscreen toggle and preventing it from overflowing from the screen
+changed the return type of form component to object
+fixed a bug in the useClientLogin which marks the lastVisitedPage when client hasnt login
+
+8/2/2024
+done:
+moved admin panel to /admin
+
+10/2/2024 - 16/2/2024
+to do:
+coupons and promotions, this has to wait
+socket security
+done:
+added a shortcut key to admin panel on the index page
+added more indicators to the table component regarding the numbers of records
+added preference to table component
+added scroll to topbar and bottombar
+added delay to tabMenu indicator's transition to avoid lag...
+
+17/2/2024
+navigation menu is secretly very buggy...
+to do:
+socket security
+done:
+minor UI changes
+added feedback when redirected by hashMenu
+removed searchbar
+status of darkmode is now saved in localStorage
+added a settings page
+correct some navbar/progressbar color issues
+fixed RecordTextField
+
+Version 1.0 summery
+admin panel
+issues:
+kind of laggy when rendering table content...
+done:
+manage records
+other supportive features
+pending features:
+inventory alert
+reports
+nav searchbar?
+
+plan for client side:
+Manage account
+    register account
+    reset password
+    change account details
+Manage order
+    create order
+    with delivery
+    with payment gateway
+    view past orders
+    cancel?
+    review... (╯°□°）╯︵ ┻━┻
+Browse product
+    catalog
+    detail
+    banner?
+public announcement... (╯°□°）╯︵ ┻━┻

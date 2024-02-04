@@ -13,25 +13,32 @@ import toTableColumns from '@/components/Table/utils/toTableColumns';
 import useProgressListener from "@/components/Progress/useProgress/useProgressListener"
 import useNotification from "@/components/Notifications/useNotification"
 import useForm from "@/components/Form/useForm";
+import link from "../link";
 
-export default function Home(props) {
+export default function Home() {
 
-    const { startAsync } = useProgress("signin")
-    const { loading } = useProgressListener('signin')
+    //prevent spam :-))
+    const { startAsync } = useProgress("signin", 700)
+    const [previous, setPrevious] = React.useState({ username: "", password: "" })
+
+    const { loading: disabled } = useProgressListener("signin")
     const { error: displayError, normal: displayNotes } = useNotification()
 
     const router = useRouter()
 
     const signin = async () => {
-        validateRecord(async (formData) => {
+        validate(async (formData) => {
+            if (formData.username === previous.username && formData.password === previous.password) {
+                return displayError({ error: "Invalid Username or Password" })
+            }else{
+                setPrevious(formData)
+            }
             await startAsync(async () => {
                 try {
                     const response = await axios.post('/api/login', formData)
-                    console.log("Response:", response)
                     return response.data.valid
                 } catch (error) {
                     displayError({ error: "Login Request Failed" })
-                    // The request failed, you can handle the error here.
                     console.error(error)
                 }
             }).then((valid) => {
@@ -39,9 +46,10 @@ export default function Home(props) {
                     displayNotes("Login Successful", "success")
 
                     setTimeout(() => {
-                        let page = localStorage.getItem('lastVisitedPage') || "/"
-                        if (page == "/signin") {
-                            page = "/"
+                        let lastVisitedPage = localStorage.getItem('lastVisitedPage')
+                        let page = lastVisitedPage?.startsWith(link.base)? lastVisitedPage : link.base
+                        if (page == link.signin) {
+                            page = link.base
                         }
                         router.push(page)
                     }, 1000)
@@ -68,7 +76,7 @@ export default function Home(props) {
             }
         },
     ]).inputs, [])
-    const [setFormData, validateRecord, form] = useForm({ inputs, disabled: loading })
+    const {validate, form} = useForm({ inputs, disabled })
 
     return (
         <Box

@@ -7,6 +7,12 @@ import Box from "@mui/material/Box"
 import customDialogConfig from './customDialogConfig'
 import DialogContentText from '@mui/material/DialogContentText'
 import React from 'react'
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import Stack from '@mui/material/Stack';
+import IconButtonWithTooltip from '../IconButtonWithTooltip'
+import Close from '@mui/icons-material/Close';
+import settings from "@/app/admin/settings";
 
 export default function CustomDialog(props) {
     const {
@@ -16,24 +22,57 @@ export default function CustomDialog(props) {
     } = props
     const { sx: paperSx, ...otherPaperProps } = PaperProps || {}
 
+    const [fullScreen, setFullScreen] = React.useState(false)
+    const [allowBackdropClose, setAllowBackdropClose] = React.useState(true)
+
+    const exitIcon = React.useMemo(() => (
+        <IconButtonWithTooltip onClick={handleClose}>
+            <Close color="error" />
+        </IconButtonWithTooltip>
+    ), [handleClose])
+
+    const fullScreenToggle = React.useMemo(() => (
+        <IconButtonWithTooltip label={fullScreen ? 'Full Screen Mode Off' : 'Full Screen Mode On'}
+            onClick={fullScreen ? () => setFullScreen(false) : () => setFullScreen(true)}>
+            {fullScreen && <FullscreenExitIcon />}
+            {!fullScreen && <FullscreenIcon />}
+        </IconButtonWithTooltip>
+    ), [fullScreen])
+
+    React.useEffect(() => {
+        setAllowBackdropClose(localStorage.getItem(settings.promptAllowBackdropClickClose) !== 'false')
+    }, [])
+
+    const onClose = React.useCallback((event, reason) => {
+        if (!allowBackdropClose && reason === 'backdropClick')
+            return
+        handleClose(event, reason)
+    }, [handleClose])
+
     return (
-        <Dialog PaperComponent={Box}
+        <Dialog PaperComponent={Box} onClose={onClose}
             PaperProps={{
                 sx: (theme) => ({
-                    border: 1,
+                    border: fullScreen ? 0 : 1,
                     borderColor: theme.palette.divider,
-                    borderRadius: 1,
+                    borderRadius: fullScreen ? 0 : 1,
                     backgroundColor: theme.palette.background.default,
-                    width: customDialogConfig.width,
                     minWidth: customDialogConfig.width,
-                    maxHeight: customDialogConfig.width * 1.5,
+                    maxHeight: fullScreen ? '100vh' : 'calc(100vh - 80px)',
                     ...paperSx,
                 }),
                 ...otherPaperProps
             }}
-            {...others} onClose={handleClose} fullWidth>
+            {...others} fullWidth fullScreen={fullScreen}>
             <DialogTitle variant="h6" sx={{ textTransform: "capitalize", userSelect: "none", px: padding, ...(menu && { pb: gap / 2 / 2 }) }}>
-                {header}
+                <Stack direction='row' alignItems="center">
+                    {header}
+                    <Stack direction='row' alignItems="center" sx={{ ml: 'auto' }}>
+                        {fullScreenToggle}
+                        {exitIcon}
+                    </Stack>
+                </Stack>
+
                 {context && <DialogContentText sx={{ fontSize: 12, pt: 1, textTransform: 'none' }}>
                     {context}
                 </DialogContentText>}

@@ -12,7 +12,5 @@ export default function reformat(schema) {
             columnVisibility: bigCol.columnVisibility
         }
     }
-
-    console.log("reformat", schema.name,  bigCol)
     return schema
 }

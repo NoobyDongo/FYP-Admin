@@ -5,38 +5,36 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import useProgress from "@/components/Progress/useProgress/useProgress"
 import useNotification from '@/components/Notifications/useNotification'
 import useAPI from '@/utils/crud/useAPI'
-import { useCallback, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React from 'react'
 import toFilters from '../../components/Table/utils/filters/toFilters'
-import toStorage from '../storage/toStorage'
 import isEmptyObject from '../isEmptyObject'
 
-export default function CRUD({ tableName, methods = {}, allowSimple = false }, fetchAll, options = {}) {
+export default function CRUD({ tableName, methods = {}, allowSimple = false, refetchTotalRowCount}, fetchAll, options = {}) {
 
     const { pagination, columnFilters, globalFilter, sorting } = options
 
     const router = useRouter()
-    const callAPI = useAPI('api/record', tableName, router)
+    const callAPI = useAPI('/api/record', tableName, router)
 
     const { customUpdate, customDelete, customCreate } = methods
     const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods
     const { createOption, getOption, updateOption, deleteOption } = methods
     const { createSimple = true, getSimple = true, updateSimple = true, deleteSimple = true } = methods
-    const [tries, setTries] = useState(0)
+    const [tries, setTries] = React.useState(0)
 
-    const createFn = useCallback(async (record) => await create({
+    const createFn = React.useCallback(async (record) => await create({
         option: createOption || "add",
         method: "POST",
         simple: createSimple && allowSimple,
         body: customCreate?.(record) ?? record
     }), [createOption, createSimple, allowSimple, customCreate])
 
-    const getFn = useCallback(async () => {
+    const getFn = React.useCallback(async () => {
 
-        //console.log("fetchAll", deleteOption)
         let criteriaList = toFilters(columnFilters) || []
         criteriaList = criteriaList.concat(globalFilter)
 
@@ -46,12 +44,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             page: pagination.pageIndex,
             size: pagination.pageSize,
         }
-        /*
-        //console.log("columnFilters", toFilters(columnFilters))
-        //console.log("globalFilter", globalFilter)
-        //console.log("sorting", sorting)
-        //console.log(JSON.stringify(body))
-        */
 
         let res = await get({
             option: getOption || (fetchAll ? "all" : "search"),
@@ -62,21 +54,21 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         return res
     }, [fetchAll, getSimple, allowSimple, getOption, pagination, columnFilters, globalFilter, sorting])
 
-    const updateFn = useCallback(async (record) => await update({
+    const updateFn = React.useCallback(async (record) => await update({
         option: updateOption || "add",
         method: "POST",
         simple: updateSimple && allowSimple,
         body: customUpdate?.(record) ?? record
     }), [updateOption, updateSimple, allowSimple, customUpdate])
 
-    const deleteFn = useCallback(async (record) => await _del({
+    const deleteFn = React.useCallback(async (record) => await _del({
         option: deleteOption || `remove/${record.id}`,
         method: "DELETE",
         simple: deleteSimple && allowSimple,
         body: customDelete?.(record) ?? record
     }), [deleteOption, deleteSimple, allowSimple, customDelete])
 
-    const queryKey = useMemo(() => (fetchAll ?
+    const queryKey = React.useMemo(() => (fetchAll ?
         [tableName] :
         [tableName, pagination.pageIndex, pagination.pageSize, columnFilters, globalFilter, sorting]),
         [tableName, fetchAll, pagination, columnFilters, globalFilter, sorting])
@@ -86,7 +78,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         let o = {
             ...others, [tableName]: updateMethod(newRecord, table)
         }
-        //console.log(o)
         return o
     }
     const append = (prevRecords, newRecord) => {
@@ -107,14 +98,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             try {
                 let e = await aquireDataFn(record)
                 if (isEmptyObject(e)) {
-                    //console.log("empty object", e)
                     return null
                 }
-                //console.log("res", e)
                 return e
             } catch (err) {
-                //console.log(err)
-                alertError({ error: err })
+                console.error(err)
+                alertError({ error: 'Something went wrong' })
             }
         })
     }
@@ -124,7 +113,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         return useMutation({
             mutationFn: _mutationFn(createFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (!newRecord?.id) {
                     alertError({ error: "Failed to create record" })
                     return
@@ -139,7 +127,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: [tableName] })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 
@@ -160,15 +153,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
                     setTries(0)
                 }
                 record = table
-                //console.log("record", record)
-                /*
-                await Promise.all(otherAPIs.map(async (e) => {
-                    let table = await e.fn()
-                    if (alertError(table))
-                        return
-                    record[e.name] = table
-                }))
-                */
                 return record
             }),
             onError: (err) => {
@@ -184,7 +168,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         return useMutation({
             mutationFn: _mutationFn(updateFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (!newRecord?.id) {
                     alertError({ error: "Failed to update record" })
                     return
@@ -200,7 +183,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 
@@ -209,7 +197,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         return useMutation({
             mutationFn: _mutationFn(deleteFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (alertError(newRecord))
                     return
 
@@ -220,7 +207,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: [tableName] })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 

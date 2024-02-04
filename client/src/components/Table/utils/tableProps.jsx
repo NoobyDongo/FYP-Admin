@@ -23,6 +23,9 @@ import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import React from 'react'
 import { useTheme } from '@emotion/react'
 import CustomTooltip from '@/components/ToolTip/CustomTooltip'
+import Collapse from '@mui/material/Collapse'
+import CustomHtmlTooltip from '@/components/ToolTip/CustomHtmlTooltip'
+import InfoIcon from '@mui/icons-material/Info';
 
 
 const tableProps = {
@@ -56,6 +59,7 @@ const tableProps = {
         }),
         style: {
             overflow: "overlay",
+            overflowX: "hidden",
             zIndex: table.getState().isFullScreen ? 1200 : undefined,
         },
     }),
@@ -90,17 +94,14 @@ const tableProps = {
 }
 const useCustomTableProps = (props = {}) => {
     const theme = useTheme()
+
     const {
         setPagination,
         enableSelection,
         enableColumnFilterModes,
         mini,
-        showSearchBar,
         disableTopToolbar,
         disableBottomToolbar,
-        rowCount = 0,
-        noRecord = false,
-        isLoading = true,
         createTitle = 'Create New Record',
         toEdit = () => { console.log('Edit not implemented') },
         toDelete = () => { console.log('Delete not implemented') },
@@ -110,10 +111,9 @@ const useCustomTableProps = (props = {}) => {
     let fontScale = mini ? .9 : 1
     let scale = mini ? .8 : 1
     let iconScale = mini ? 1.1 : 1.2
-    let noRow = rowCount < 1
 
-    const muiTableBodyProps = React.useMemo(() => ({
-        ...(noRow && !isLoading && {
+    const muiTableBodyProps = ({ table }) => ({
+        ...(table.getState().noRow && !table.getState().isLoading && {
             sx: {
                 left: 0,
                 bottom: 0,
@@ -122,9 +122,9 @@ const useCustomTableProps = (props = {}) => {
                 position: "absolute",
             },
         })
-    }), [noRow, isLoading])
+    })
 
-    const muiSearchTextFieldProps = React.useMemo(() => ({
+    const muiSearchTextFieldProps = () => ({
         variant: 'outlined',
         placeholder: 'Search...',
         sx: {
@@ -142,9 +142,9 @@ const useCustomTableProps = (props = {}) => {
             },
             startAdornment: null,
         }
-    }), [mini])
+    })
 
-    const muiTableBodyRowProps = React.useCallback(({ row }) => ({
+    const muiTableBodyRowProps = ({ row }) => ({
         ...(enableSelection && {
             onClick: row.getToggleSelectedHandler(),
         }),
@@ -155,17 +155,17 @@ const useCustomTableProps = (props = {}) => {
             }),
             backgroundColor: 'transparent',
         }
-    }), [enableSelection])
+    })
 
-    //render * 2, isLoading
-    const muiTableContainerProps = React.useMemo(() => {
+    const muiTableContainerProps = ({ table }) => {
         return ({
             sx: {
-                overflow: noRow || isLoading ? "hidden" : "overlay",
+                overflow: table.getState().noRow || table.getState().isLoading? 'hidden' : 'overlay',
                 scrollbarGutter: 'stable',
                 minHeight: 300,
                 pl: 1,
                 ...mini && { height: 600, maxHeight: 600 },
+
                 "&>.MuiBox-root": {
                     position: 'absolute',
                     height: 1,
@@ -175,17 +175,35 @@ const useCustomTableProps = (props = {}) => {
                     left: 0,
                 },
 
+                ...((table.getState().noRecord || table.getState().noRow) && table.getState().columnFilters.length > 0 && {
+                    '&>.MuiTable-root:has(.norecord)': {
+                        '&>thead': {
+                            '&>tr': {
+                                width: 1,
+                                overflowX: "overlay",
+                                scrollbarWidth: 'none',
+                                scrollbarGutter: 'stable',
+                            },
+                        },
+                    },
+                }),
+
                 '&>.MuiTable-root': {
                     '&>thead': {
                         '&>tr': {
                             borderBottom: 1,
-                            opacity: noRow && noRecord ? 0 : 1,
-                            borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
-                            transitionProperty: 'opacity, border-color',
-                            transitionDuration: '200ms',
+                            borderColor: theme.palette.border.main,
+                            ...(table.getState().noRecord && !table.getState().columnFilters.length > 0 && {
+                                pointerEvents: 'none',
+                                opacity: 0,
+                                borderColor: 'transparent',
+                            }),
+                            boxShadow: "none",
+                            transitionProperty: 'border-color opacity',
+                            transitionDuration: '300ms',
                             backgroundColor: `transparent !important`,
-                            '&>th:first-child': {
-                                ...(mini && { pl: 0,}),
+                            '&>th:first-of-type': {
+                                ...(mini && { pl: 0, }),
                             },
                             '&>th': {
                                 fontSize: theme.typography.fontSize * fontScale,
@@ -194,7 +212,7 @@ const useCustomTableProps = (props = {}) => {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 pb: ".5rem",
-                                ...(mini && { py: .5, px: 2}),
+                                ...(mini && { py: .5, px: 2 }),
                                 boxShadow: "none",
                                 border: 0,
                                 textTransform: "capitalize",
@@ -204,7 +222,7 @@ const useCustomTableProps = (props = {}) => {
                                     position: 'absolute',
                                     right: 0,
                                 },
-                                '& > .MuiCollapse-root':{
+                                '& > .MuiCollapse-root': {
                                     width: "100%",
                                 },
 
@@ -216,14 +234,14 @@ const useCustomTableProps = (props = {}) => {
                                             },
                                             '& .MuiButtonBase-root.Mui-active:has(.MuiSvgIcon-root[data-testid="SyncAltIcon"])': {
                                                 opacity: 0,
-                                                transition: 'opacity 200ms',
+                                                transition: 'opacity 300ms',
                                             }
                                         }
                                     },
                                     '& > .Mui-TableHeadCell-Content-Actions': {
                                         opacity: 0,
                                         transitionProperty: 'opacity',
-                                        transitionDuration: '200ms',
+                                        transitionDuration: '300ms',
                                     },
                                 },
                                 '&:hover': {
@@ -246,20 +264,20 @@ const useCustomTableProps = (props = {}) => {
                         }
                     },
                     '&>tbody:not(:has(.norecord))': {
-                        opacity: noRow ? 0 : 1,
+                        opacity: table.getState().noRow ? 0 : 1,
                         '&>tr': {
-                            '&>td:first-child': {
-                                ...(mini && { pl: 0,}),
+                            '&>td:first-of-type': {
+                                ...(mini && { pl: 0, }),
                             },
                             '&>td': {
-                                ...(mini && { py: .5, px: 2}),
+                                ...(mini && { py: .5, px: 2 }),
                             },
                         }
                     },
                     '&>tbody': {
                         transitionProperty: 'opacity',
                         transitionDelay: '100ms',
-                        transitionDuration: '200ms',
+                        transitionDuration: '300ms',
                         '&>tr:not(:hover):not(.Mui-selected)': {
                             '&>td': {
                                 backgroundColor: theme.palette.background.default,
@@ -280,10 +298,10 @@ const useCustomTableProps = (props = {}) => {
                 }
             }
         })
-    }, [noRow, isLoading, theme, mini, noRecord, enableSelection])
+    }
 
-    const renderEmptyRowsFallback = React.useCallback(() => (
-        <Fade in={noRow} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
+    const renderEmptyRowsFallback = ({ table }) => (
+        <Fade in={table.getState().noRow} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
             <Stack sx={{
                 width: 1,
                 height: 1,
@@ -297,9 +315,9 @@ const useCustomTableProps = (props = {}) => {
                 </Typography>
             </Stack>
         </Fade>
-    ), [noRow])
+    )
 
-    const renderRowActionMenuItems = React.useCallback(({ row }) => [
+    const renderRowActionMenuItems = ({ row }) => [
         <MenuItem key="edit" onClick={() => toEdit(row.original)}>
             <ListItemIcon>
                 <EditIcon color='primary' />
@@ -313,23 +331,22 @@ const useCustomTableProps = (props = {}) => {
             </ListItemIcon>
             <ListItemText primary="Delete" />
         </MenuItem>,
-    ], [toEdit, toDelete])
+    ]
 
-    const renderBottomToolbar = React.useCallback(({ table, sx, simple = false }) => {
+    const renderBottomToolbar = ({ table, sx, simple = false }) => {
         return (
             <Box
                 sx={(theme) => ({
                     position: "relative",
-                    px: 2 * scale,
-                    py: 1.5 * scale,
+                    height: 55,
+                    width: 1,
                     borderTop: 1,
-                    borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
+                    borderColor: table.getState().noRow ? 'transparent' : theme.palette.border.main,
+                    overflowX: "overlay",
+                    scrollbarWidth: 'none',
                     display: 'flex',
                     alignItems: "center",
                     justifyContent: 'flex-end',
-                    gap: '0.5rem',
 
                     "& > .MuiButtonBase-root": {
                         height: "fit-content",
@@ -346,42 +363,141 @@ const useCustomTableProps = (props = {}) => {
                         paddingBottom: 0.3 * scale,
                         fontSize: 14 * fontScale,
                     },
+                    '& > #table-pagination-wrapper': {
+                        flex: 1,
+                        maxWidth: 1,
+                        height: 1,
+                        display: 'flex',
+                        overflowX: 'visible',
+                        position: 'relative',
+                        backgroundColor: theme.palette.background.default,
+                    },
+
                     "& .MuiTablePagination-root": {
+                        '& > .MuiPagination-root': {
+                            '& > .MuiPagination-ul': {
+                                height: 1,
+                                flexWrap: 'nowrap',
+                            }
+                        },
+                        flexWrap: 'nowrap',
                         justifyContent: "flex-end",
                         padding: 0,
-                        width: "100%",
+                        pl: 1 * scale,
+                        flexShrink: 1,
+                        width: 'fit-content',
                     },
                     ...sx,
                 })}
             >
-                {!simple && <Box sx={(theme) => ({
-                    width: "fit-content",
-                    whiteSpace: "nowrap",
-                    fontSize: 14 * fontScale,
-                    marginRight: 'auto',
-
+                <Collapse orientation="horizontal" in={!Boolean(simple)} sx={theme => ({
+                    width: 115 + 8 * (table.getState().totalRowCount + 1 / 10 + 1),
+                    mr: "auto",
+                    overflow: "hidden",
                     [theme.breakpoints.down('md')]: {
-                        display: "none"
-                    },
+                        width: 0,
+                        mr: 0,
+                    }
                 })}>
-                    Total Record:
-                    <Box component='span' sx={(theme) => ({
-                        color: theme.palette.primary.main,
-                        fontSize: 14 * fontScale,
-                        marginLeft: 1 * scale
-                    })}>
-                        {rowCount}
-                    </Box>
-                </Box>}
+                    <Stack sx={{ pl: 1, alignItems: "baseline" }}>
+                        <Collapse sx={{ transitionDelay: 400 }} timeout={600} in={Boolean(table.getState().totalRowCount && table.getState().rowCount != table.getState().totalRowCount && !table.getState().isLoading)}>
+                            <Box sx={(theme) => ({
+                                width: "fit-content",
+                                whiteSpace: "nowrap",
+                                fontSize: 10 * fontScale,
+                                opacity: .6,
+                            })}>
+                                Total:
+                                <Box component='span' sx={(theme) => ({
+                                    color: theme.palette.primary.main,
+                                    marginLeft: 1 * scale
+                                })}>
+                                    {table.getState().totalRowCount}
+                                </Box>
+                            </Box>
+                        </Collapse>
+                        <Box sx={{
+                            width: "fit-content",
+                            whiteSpace: "nowrap",
+                            fontSize: 13 * fontScale,
+                        }}>
+                            Current Record{table.getState().rowCount > 0 ? 's' : ''}:
+                            <Box component='span' sx={(theme) => ({
+                                color: theme.palette.primary.main,
+                                marginLeft: 1 * scale
+                            })}>
+                                {table.getState().rowCount}
+                            </Box>
+                        </Box>
+                    </Stack>
+                </Collapse>
 
-                <Fade appear={simple} in={!noRow}>
-                    <span>
+                <Fade appear={simple} in={!table.getState().noRow}>
+                    <span id='table-pagination-wrapper'>
+                        <Box sx={theme => ({
+                            flexShrink: 0,
+                            width: 30,
+                            pl: 1,
+                            mr: 'auto',
+                            display: "flex",
+                            transition: 'width 200ms',
+                            alignItems: "center",
+                            justifyContent: 'flex-start',
+                            overflow: "hidden",
+                            [theme.breakpoints.up('md')]: {
+                                width: 0,
+                            }
+                        })}>
+                            <CustomHtmlTooltip title={
+                                <>
+                                    <Box sx={{
+                                        padding: 1,
+                                        px: 1.5,
+                                        border: 1,
+                                        borderColor: 'input.border.main',
+                                        borderRadius: 1,
+                                        userSelect: "none",
+                                    }}>
+                                        <Box sx={(theme) => ({
+                                            width: "fit-content",
+                                            whiteSpace: "nowrap",
+                                            fontSize: 10 * fontScale,
+                                            opacity: .6,
+                                        })}>
+                                            Total:
+                                            <Box component='span' sx={(theme) => ({
+                                                color: theme.palette.primary.main,
+                                                pl: 1 * scale
+                                            })}>
+                                                {table.getState().totalRowCount}
+                                            </Box>
+                                        </Box>
+                                        <Box sx={{
+                                            width: "fit-content",
+                                            whiteSpace: "nowrap",
+                                            fontSize: 13 * fontScale,
+                                        }}>
+                                            Current Record{table.getState().rowCount > 0 ? 's' : ''}:
+                                            <Box component='span' sx={(theme) => ({
+                                                color: theme.palette.primary.main,
+                                                marginLeft: 1 * scale
+                                            })}>
+                                                {table.getState().rowCount}
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                </>
+                            } placement="top-start">
+
+                                <InfoIcon color="primary" />
+                            </CustomHtmlTooltip>
+                        </Box>
                         <MRT_TablePagination table={table} />
                     </span>
                 </Fade>
-            </Box>
+            </Box >
         )
-    }, [noRow, noRecord, rowCount, mini])
+    }
 
     const renderTopToolbar = React.useCallback(({ table, simple, disabled }) => {
         let tools = ([
@@ -390,6 +506,7 @@ const useCustomTableProps = (props = {}) => {
                 minWidth: iconScale * tableConfig.iconButtonSize,
                 height: iconScale * tableConfig.iconButtonSize,
                 position: 'relative',
+                flexShrink: 0,
 
                 ...(simple && {
                     borderRight: 1,
@@ -423,6 +540,7 @@ const useCustomTableProps = (props = {}) => {
             </Box>,
 
             <MRT_ToggleFiltersButton table={table} key={2} />,
+
             <MRT_ShowHideColumnsButton table={table} key={3} />,
             !mini && <MRT_ToggleDensePaddingButton table={table} key={4} />,
             <MRT_ToggleFullScreenButton table={table} key={5} />,
@@ -443,8 +561,8 @@ const useCustomTableProps = (props = {}) => {
             <Box
                 sx={{
                     //backgroundColor: lighten(theme.palette.background.default, 0.05),
-                    pb: 1.5,
                     pl: mini ? 0 : 1 * scale,
+                    pb: 1,
                     pt: table.getState().isFullScreen ? 1 : 0,
                     display: 'flex',
                     alignItems: "center",
@@ -454,12 +572,13 @@ const useCustomTableProps = (props = {}) => {
                 }}
             >
                 <Box sx={(theme) => ({
-                    [theme.breakpoints.up('sm')]: {
-                        display: 'flex',
-                        height: "fit-content",
-                        alignItems: 'center',
-                        width: 1,
-                    },
+                    pb: 1.5,
+                    display: 'flex',
+                    height: "fit-content",
+                    alignItems: 'center',
+                    width: 1,
+                    overflow: 'overlay',
+                    scrollbarWidth: 'none',
                     '& > .MuiButtonBase-root:not(:first-of-type)': {
                         marginLeft: 0.5,
                     },
@@ -478,11 +597,8 @@ const useCustomTableProps = (props = {}) => {
     }, [mini, createTitle, toCreate])
 
     return {
-        rowCount: rowCount,
         initialState: {
             ...props.initialState,
-            showColumnFilters: false,
-            showGlobalFilter: showSearchBar,
             columnPinning: { right: ['mrt-row-actions'] }
         },
         ...tableProps,

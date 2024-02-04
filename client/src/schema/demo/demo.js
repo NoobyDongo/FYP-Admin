@@ -119,6 +119,21 @@ const demo = reformat({
                         },
                     ]
                 },
+                {
+                    tab: "Records",
+                    content: [
+                        {
+                            hidden: true,
+                            accessorKey: 'product',
+                            header: 'Products',
+                            input: {
+                                type: "records",
+                                setterKey: 'product',
+                                schema: product,
+                            }
+                        },
+                    ]
+                },
             ]
         }
 

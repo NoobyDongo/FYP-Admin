@@ -129,7 +129,6 @@ export default function toTableColumns(list, addColumns = true) {
                             )
                             : v
                     ]).filter((e) => {
-                        //console.log("dwadwadawdwadaw", e[1], e)
                         return Object.keys(e[1]).length > 0;
                     })
             )
@@ -188,13 +187,11 @@ function TableColumn(props) {
                 type: inputType === "number" ? "tel" : inputType, //no updown arrow this way lol
                 valueGetter: inputValueGetter,
                 valueSetter: inputValueSetter,
-                [formEditMode.create]: !noncreatetype.includes(inputType) || input[formEditMode.create] !== false,
+                [formEditMode.create]: !noncreatetype.includes(inputType) && input[formEditMode.create] !== false,
                 [formEditMode.update]: input[formEditMode.update] !== false,
             },
-            ...((!inputType || inputType === "text") && TableTextCell()),
             ...(inputType && {
                 ...(inputType === "image" && TableImageTextCell({ accessorFn })),
-                ...(inputType === "select" && TableSelectCell(input)),
             }),
         }),
     };
@@ -207,11 +204,7 @@ function TableImageTextCell(props) {
     return {
         Cell: ({ renderedCellValue, row }) => {
             return (
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                }}>
+                <div className="imagecell">
                     <Box sx={{
                         maxHeight: 0,
                         display: 'flex',
@@ -235,32 +228,8 @@ function TableImageTextCell(props) {
                         />
                     </Box>
                     {showText && <span style={{ whiteSpace: "nowrap" }}>{renderedCellValue}</span>}
-                </Box>
+                </div>
             );
         },
-    };
-}
-
-
-function TableTextCell() {
-    return {
-        Cell: ({ renderedCellValue }) => {
-            return (
-                <Box sx={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span>{renderedCellValue}</span>
-                </Box>
-            );
-        },
-    };
-}
-
-function TableSelectCell(input) {
-
-    return {
-        Cell: ({ cell }) => (
-            <Box sx={{ textTransform: "capitalize" }}>
-                {cell.getValue()}
-            </Box>
-        ),
     };
 }

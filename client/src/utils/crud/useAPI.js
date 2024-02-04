@@ -1,5 +1,5 @@
 import dataFn from "./clientToServer";
 
-export default (path, service, router) => {
+export default function useAPI(path, service, router){
     return dataFn(path + '/' + service + '/', router)
 }

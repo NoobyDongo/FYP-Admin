@@ -9,6 +9,9 @@ export default function useCreateEditDeletePrompts(props) {
     const [row, setRow] = React.useState({})
     const [editing, setEditing] = React.useState(false)
 
+    const closeCreate = React.useCallback(() => setCreating(false), [])
+    const closeEdit = React.useCallback(() => setEditing(false), [])
+
     const toCreate = React.useCallback(() => setCreating(true), [])
     const toEdit = React.useCallback((row) => {
         setRow(row)
@@ -20,10 +23,10 @@ export default function useCreateEditDeletePrompts(props) {
         }
     }, [deleteRecord])
 
-    const RawCreatePrompt = React.useCallback((open) => <Prompt useUpload={upload ? 1 : 0} open={open} onClose={() => setCreating(false)} action={0} {...{ inputs, saveRecord: createRecord, context:createContext }} />,
+    const RawCreatePrompt = React.useCallback((open) => <Prompt useUpload={upload ? 1 : 0} open={open} onClose={closeCreate} action={0} {...{ inputs, saveRecord: createRecord, context:createContext }} />,
         [inputs, createRecord, createContext])
 
-    const RawEditPrompt = React.useCallback((open) => <Prompt useUpload={upload ? 1 : 0} open={open} onClose={() => setEditing(false)} action={1} data={row} {...{ inputs, saveRecord: updateRecord, context:updateContext }} />,
+    const RawEditPrompt = React.useCallback((open) => <Prompt useUpload={upload ? 1 : 0} open={open} onClose={closeEdit} action={1} data={row} {...{ inputs, saveRecord: updateRecord, context:updateContext }} />,
         [inputs, updateRecord, row, updateContext])
 
 

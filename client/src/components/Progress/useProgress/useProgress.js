@@ -3,21 +3,20 @@ import React from "react";
 import startEvent from "./startEvent";
 import stopEvent from "./stopEvent";
 
-export default function useProgress(id = "") {
-
+export default function useProgress(id = "", minTime = 0) {
     const startAsync = React.useCallback(async (func, sid) => {
         start(sid);
-        /*
-        const startTime = Date.now();
-        const result = await func();
-        const elapsedTime = Date.now() - startTime;
-
-        if (elapsedTime < 1000) {
-            await new Promise((resolve) => setTimeout(resolve, 1000 - elapsedTime));
+        let result
+        if (minTime > 0) {
+            let startTime = Date.now();
+            result = await func();
+            let elapsedTime = Date.now() - startTime;
+            if (elapsedTime < minTime) {
+                await new Promise((resolve) => setTimeout(resolve, minTime - elapsedTime));
+            }
+        }else{
+            result = await func();
         }
-
-        */
-        const result = await func();
         stop(sid);
         return result;
     }, []);
