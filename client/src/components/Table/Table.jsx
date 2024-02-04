@@ -97,8 +97,6 @@ export const Table = (props) => {
 
     const [isFullScreen, setIsFullScreen] = React.useState(false)
 
-    const [isFullScreen, setIsFullScreen] = React.useState(false)
-
     const table = useMaterialReactTable({
 <<<<<<< HEAD
         columns: columns,
