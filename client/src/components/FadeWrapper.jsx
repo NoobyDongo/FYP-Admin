@@ -1,33 +1,37 @@
 "use client"
-const { usePathname } = require("next/navigation");
 import { motion } from "framer-motion";
 
-export default function FadeWrapper(props) {
-    const { children, ...other } = props
-    const pathname = usePathname()
-    return (
+function ease(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
 
+export default function FadeWrapper(props) {
+    const { children, animate = "animate", initial = "initial", exit = "initial", variants, transition, keyValue, ...other } = props
+
+    return (
         <motion.div
-            key={pathname}
+            key={keyValue}
             className="fadeWrapper"
-            initial="initial"
-            animate="animate"
-            exit="initial"
+            initial={initial}
+            animate={animate}
+            exit={exit}
             variants={{
                 initial: {
                     opacity: 0,
-                    scale: 0.98
+                    scale:.99,
+                    ...variants?.initial
                 },
                 animate: {
                     opacity: 1,
-                    scale: 1
+                    scale: 1,
+                    ...variants?.animate
                 },
+                ...variants
             }}
             transition={{
-                ease: "linear",
-                stiffness: 260,
-                damping: 20,
-                duration: .25
+                ease: ease,
+                duration: .35,
+                ...transition
             }}
             {...other}
         >

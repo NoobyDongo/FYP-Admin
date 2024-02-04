@@ -10,9 +10,10 @@ export default function ProgressBar({ id }) {
     return (
         <>
             <Slide direction="down" in={loading} timeout={250}>
-                <LinearProgress sx={{ height: barHeight, position: "absolute", top: 0, width: 1 }} variant="determinate" value={0} />
+                <div>
+                    <LinearProgress sx={{ height: barHeight, position: "absolute", top: 0, width: 1, zIndex: 1000 }} />
+                </div>
             </Slide>
-            {loading && <LinearProgress sx={{ height: barHeight }} />}
         </>
     );
 }

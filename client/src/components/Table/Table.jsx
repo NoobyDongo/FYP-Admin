@@ -1,51 +1,104 @@
 'use client'
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
+import Button from '@mui/material/Button'
 
 import {
     useMaterialReactTable,
-    MRT_GlobalFilterTextField,
-    MRT_ToggleFiltersButton,
-    MRT_TablePagination,
-    MRT_ToggleDensePaddingButton,
-    MRT_ToggleGlobalFilterButton,
-    MRT_ToggleFullScreenButton,
-    MRT_ShowHideColumnsButton,
     MaterialReactTable,
-} from 'material-react-table';
+} from 'material-react-table'
 
-import { useTheme } from '@emotion/react';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Prompt from '@/components/Table/Prompt';
-import { useMemo, useState } from 'react';
-import CRUD from '@/utils/crud/crud';
+import React, { useCallback } from 'react'
+import CRUD from '@/utils/crud/crud'
+import Stack from '@mui/material/Stack'
+import Fade from '@mui/material/Fade'
+import Typography from '@mui/material/Typography'
+import CachedIcon from '@mui/icons-material/Cached'
+import useGlobalFilter from './utils/filters/useGlobalFilter'
+import useCustomTableProps from './utils/tableProps'
+import useCreateEditDeletePrompts from '../Prompt/useCreateEditDeletePrompts'
+import dataFn from "@/utils/crud/clientToServer"
+import FadeWrapper from '../FadeWrapper'
+import { Paper } from '@mui/material'
 
-export const Table = (props) => {
-    const theme = useTheme()
+function usePagenation(dependency = []) {
+    const [pagination, setPagination] = React.useState({
+        pageIndex: 0,
+        pageSize: 15,
+    })
+    React.useEffect(() => {
+        setPagination({
+            pageIndex: 0,
+            pageSize: pagination.pageSize,
+        })
+    }, dependency)
 
-    const { columns: rawColumns, initialState, tableName, crud } = props
+    return [pagination, setPagination]
+}
 
-    const [creating, setCreating] = useState(false)
-    const [row, setRow] = useState({})
-    const [editing, setEditing] = useState(false)
+async function getCount(tablename) {
+    let api = dataFn('api/record/' + tablename)
+    let res = await api({
+        method: 'GET',
+        option: "count"
+    })
+    return Number(res)
+}
 
+function useRowCount(data, pagination, setPagination, valid) {
+    const rowCount = React.useMemo(() => data?.totalElements || 0, [data])
+    const [noRecord, setNoRecord] = React.useState(true)
+    const lastRowCount = React.useMemo(() => rowCount, [pagination, rowCount > 0])
+    //console.log("rowCount", rowCount, "lastRowCount", lastRowCount)
 
-    const toCreate = () => setCreating(true)
-    const toEdit = (row) => { setEditing(true); setRow(row) }
+    React.useEffect(() => {
+        if (noRecord && rowCount > 0)
+            setNoRecord(false)
+        let size = pagination.pageSize
+        let index = pagination.pageIndex
+        let max = Math.ceil(rowCount / size)
+        if (valid)
+            if (rowCount > size && lastRowCount > 0) {
+                if (index * size > rowCount)
+                    index = max - 1
+                setPagination({
+                    pageIndex: index,
+                    pageSize: size,
+                })
+            }
+    }, [rowCount])
 
-    const [useCreate, useGet, useUpdate, useDelete] = CRUD(crud)
+    return [rowCount, noRecord]
+}
+
+const RawTable = (props) => {
+    const enableSelection = false
+
+    const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, fetchAll=false, mini=false } = props
+    const [columnVisibility, setColumnVisibility] = React.useState(initialState?.columnVisibility || {})
+
+    const [columnFilters, setColumnFilters] = React.useState(baseSearchCriteria? [baseSearchCriteria] : [])
+    /*
+    const handleOnColumnFiltersChange = React.useCallback((columnFilters) => {
+        setColumnFilters(baseSearchCriteria? [baseSearchCriteria, ...columnFilters] : columnFilters)
+    }, [columnFilters])
+    */
+    const [rawGlobalFilter, setGlobalFilter] = React.useState('')
+    const [sorting, setSorting] = React.useState([])
+    const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
+
+    const globalFilter = useGlobalFilter(columns, columnVisibility, rawGlobalFilter)
+
+    const [useCreate, useGet, useUpdate, useDelete] = CRUD(
+        { tableName, ...crud },
+        fetchAll,
+        { pagination, columnFilters, globalFilter, sorting })
+
     const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate()
-    const { data: fetchedRecords = { product: [], pt: [], o: [] }, isError, isFetching = true, isLoading = true, } = useGet()
+    const { data: fetchedRecords = [], isError, isFetching = true, isLoading = true, refetch } = useGet()
     const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate()
     const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete()
 
-    const columns = useMemo(() => rawColumns(fetchedRecords), [isLoading])
+    const data = React.useMemo(() => ((fetchAll ? fetchedRecords : fetchedRecords?.content) || []), [fetchedRecords, columns])
 
-<<<<<<< HEAD
     const [rowCount, noRecord] = useRowCount(fetchedRecords, pagination, setPagination,
         columnFilters.length < 1 && !rawGlobalFilter && sorting.length < 1)
 
@@ -79,6 +132,7 @@ export const Table = (props) => {
         initialState,
         setPagination,
         rowCount,
+        disableTopToolbar: true,
         enableSelection,
         toCreate,
         toEdit,
@@ -87,26 +141,11 @@ export const Table = (props) => {
         isLoading,
         mini,
     })
-=======
-    const defaultOpenDeleteConfirmModal = (row) => {
-        if (window.confirm('Are you sure you want to delete this record?')) {
-            deleteRecord(row.original.id);
-        }
-    };
->>>>>>> parent of 769ac9e (1.0 PR)
-
-    const [isFullScreen, setIsFullScreen] = React.useState(false)
 
     const table = useMaterialReactTable({
-<<<<<<< HEAD
         columns: columns,
         data: data,
         ...tableProps,
-
-        enableTopToolbar: isFullScreen,
-        ...isFullScreen && {
-            renderTopToolbar
-        },
 
         ...(!fetchAll && {
             manualPagination: true,
@@ -118,242 +157,13 @@ export const Table = (props) => {
             onColumnVisibilityChange: setColumnVisibility,
             onColumnFiltersChange: setColumnFilters,
             onGlobalFilterChange: setGlobalFilter,
-            onIsFullScreenChange: setIsFullScreen,
             onSortingChange: setSorting,
-=======
-        columns,
-        data: fetchedRecords[tableName] || [],
-        initialState: {
-            ...initialState,
-            showColumnFilters: false,
-            showGlobalFilter: true,
-        },
-        enableColumnFilterModes: true,
-        enableColumnOrdering: true,
-        enableGrouping: true,
-        enableColumnPinning: true,
-        enableFacetedValues: true,
-        enableRowActions: true,
-        enableRowSelection: false,
-        enableColumnResizing: true,
-        enableBottomToolbar: true,
-        enableStickyHeader: true,
-        createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
-        editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-        layoutMode: "grid",
-        paginationDisplayMode: 'pages',
-        muiSearchTextFieldProps: {
-            size: 'small',
-            variant: 'outlined',
-        },
-        muiPaginationProps: {
-            sx: {
-                pd: 0,
-                marginLeft: "auto"
-            },
-            color: 'primary',
-            rowsPerPageOptions: [10, 15, 20, 30, 50],
-            variant: 'filled',
-        },
-        muiTableHeadCellProps: {
-            sx: {
-                overflow: "hidden",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: "1rem",
-                paddingBottom: ".5rem",
-                boxShadow: "none",
-                border: 0,
-                textTransform: "capitalize",
-                backgroundColor: "transparent",
-                "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
-                    position: 'absolute',
-                    right: 0,
-                },
-            }
-        },
-        muiTablePaperProps: ({ table }) => ({
-            elevation: theme.palette.mode == "dark" ? 1 : 0,
-            sx: {
-                transition: 'none',
-                backgroundColor: table.getState().isFullScreen ? theme.palette.background.default : 'transparent',
-            },
-            style: {
-                overflow: "auto",
-                zIndex: table.getState().isFullScreen ? 1200 : undefined,
-            },
->>>>>>> parent of 769ac9e (1.0 PR)
         }),
-        muiTableHeadRowProps: {
-            sx: {
-                borderBottom: 1,
-                backgroundColor: "transparent",
-                borderColor: theme.palette.border.main
-            }
-        },
-        muiTableBodyRowProps: {
-            sx: {
-                backgroundColor: 'transparent',
-            }
-        },
-        muiTableBodyCellProps: {
-            sx: {
-                border: "none",
-                boxShadow: "none"
-            }
-        },
-        muiTableFooterProps: {
-            sx: {
-                outline: "none"
-            }
-        },
-        muiTableContainerProps: ({ table }) => ({
-            sx: {
-                overflow: table.getState().isLoading ? "hidden" : "auto",
-                "&>.MuiBox-root": {
-                    backgroundColor: "transparent",
-                }
-            }
-        }),
-        muiToolbarAlertBannerProps: isError
-            ? {
-                color: 'error',
-                children: 'Error loading data',
-            }
-            : undefined,
-        getRowId: (row) => row.id,
 
-        displayColumnDefOptions: {
-            'mrt-row-actions': {
-                header: 'Actions',
-                size: 120,
-            },
-        },
-        renderRowActionMenuItems: ({ row }) => [
+        renderEmptyRowsFallback,
+        muiToolbarAlertBannerProps: isError ? { color: 'error', children: 'Error loading data', } : undefined,
 
-            <MenuItem key="edit" onClick={() => toEdit(row.original)}>
-                <ListItemIcon>
-                    <EditIcon color='primary' />
-                </ListItemIcon>
-                <ListItemText primary="Edit" />
-            </MenuItem>,
-
-            <MenuItem key="delete" onClick={() => (defaultOpenDeleteConfirmModal)(row)}>
-                <ListItemIcon>
-                    <DeleteIcon color='error' />
-                </ListItemIcon>
-                <ListItemText primary="Delete" />
-            </MenuItem>,
-
-        ],
-        renderBottomToolbar: ({ table }) => {
-            return (
-                <Box
-                    sx={(theme) => ({
-                        px: 2,
-                        py: 1.5,
-                        borderTop: 1,
-                        borderColor: theme.palette.border.main,
-                        borderTopLeftRadius: 0,
-                        borderTopRightRadius: 0,
-                        display: 'flex',
-                        alignItems: "center",
-                        justifyContent: 'flex-end',
-                        gap: '0.5rem',
-
-                        "& > .MuiButtonBase-root": {
-                            height: "fit-content",
-                            paddingBlock: .45,
-                            paddingInline: 1,
-                            fontSize: 13
-                        },
-                        "& .MuiFormLabel-root": {
-                            fontSize: 14
-                        },
-                        "& #mrt-rows-per-page": {
-                            paddingLeft: 1,
-                            paddingBlock: .5,
-                            paddingBottom: .3,
-                        },
-                        "& .MuiTablePagination-root": {
-                            padding: 0,
-                            paddingLeft: 0,
-                            paddingBlock: 0,
-                        },
-                        "& .MuiTablePagination-root": {
-                            justifyContent: "flex-end",
-                            padding: 0,
-                            width: "100%",
-                        }
-                    })}
-                >
-                    <Box sx={(theme) => ({
-                        width: "fit-content",
-                        whiteSpace: "nowrap",
-                        fontSize: 14,
-                        marginRight: 4,
-
-                        [theme.breakpoints.down('md')]: {
-                            display: "none"
-                        },
-                    })}>
-                        Total Record: <span style={{
-                            color: theme.palette.primary.main,
-                            fontSize: 16, marginLeft: 8
-                        }}>
-                            {fetchedRecords[tableName]?.length || 0}</span>
-                    </Box>
-                    <MRT_TablePagination table={table} />
-                </Box>
-            );
-        },
-        renderTopToolbar: ({ table }) => {
-
-            return (
-                <Box
-                    sx={(theme) => ({
-                        //backgroundColor: lighten(theme.palette.background.default, 0.05),
-                        padding: 2,
-                        display: 'flex',
-                        alignItems: "center",
-                        justifyContent: 'space-between',
-                        gap: '0.5rem',
-                        position: "relative",
-                    })}
-                >
-                    <Box sx={{
-                        [theme.breakpoints.up('sm')]: {
-                            display: 'flex', gap: '0.5rem', height: "fit-content", alignItems: 'center',
-                        },
-                    }}>
-
-                        <MRT_ToggleGlobalFilterButton sx={{
-                            [theme.breakpoints.only('xs')]: {
-                                display: 'none',
-                            },
-                        }} table={table} />
-                        <MRT_GlobalFilterTextField table={table} />
-                        <MRT_ToggleFiltersButton table={table} />
-                        <MRT_ShowHideColumnsButton table={table} />
-                        <MRT_ToggleDensePaddingButton table={table} />
-                        <MRT_ToggleFullScreenButton table={table} />
-                    </Box>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            px: 2,
-                            py: 1.5,
-                        }}
-                        onClick={toCreate}
-                    >
-                        Create New {tableName || "record"}
-                    </Button>
-                </Box>
-            );
-        },
         state: {
-<<<<<<< HEAD
             ...props.state,
             ...(!fetchAll && {
                 columnFilters,
@@ -363,25 +173,36 @@ export const Table = (props) => {
                 sorting,
                 columnVisibility,
             }),
-            isFullScreen,
 
             //showGlobalFilter: !noRecord && showSearchBar,
-=======
->>>>>>> parent of 769ac9e (1.0 PR)
             isLoading: isLoading,
             isSaving: isCreatingRecord || isUpdatingRecord || isDeletingRecord,
             showAlertBanner: isError,
-            showProgressBars: isFetching || true || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
+            //showProgressBars: isFetching || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
         },
-    });
+    })
 
     return (
         <>
-            <MaterialReactTable table={table} />
-            <Prompt open={creating} onClose={() => setCreating(false)} actioname={0} name={tableName} {...{ columns, saveRecord: createRecord }} />
-            <Prompt open={editing} onClose={() => setEditing(false)} actioname={1} name={tableName} data={row}{...{ columns, saveRecord: updateRecord }} />
+            <div className='MuiPaper-root'>
+                {renderTopToolbar({ table })}
+                <FadeWrapper variants={{
+                    initial: { scale: 1, opacity: 0 },
+                }}
+                    transition={{ duration: .35 }}>
+                    <MaterialReactTable table={table} />
+                </FadeWrapper>
+            </div>
+            {CreatePrompt}
+            {EditPrompt}
         </>
     )
-};
+}
+
+export default function CrudTable(props) {
+    return (
+        <RawTable {...props} />
+    )
+}
 
 

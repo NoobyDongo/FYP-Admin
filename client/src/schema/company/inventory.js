@@ -20,7 +20,7 @@ const inventory = reformat({
         },
         {
             accessorKey: 'address',
-            enableClickToCopy: true,
+            header: 'Address',
             size: 250,
             input: {
                 multiline: true,

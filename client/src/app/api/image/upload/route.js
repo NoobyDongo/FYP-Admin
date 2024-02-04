@@ -1,4 +1,4 @@
-import { authServer } from '@/utils/api/authServer';
+import authServer from '@/utils/api/authServer';
 import { imageUploadKey } from '../../../../config';
 import fs from 'fs';
 import { NextResponse } from 'next/server';

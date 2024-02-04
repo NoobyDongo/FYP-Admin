@@ -223,3 +223,108 @@ new fearure
     working login form
     user no longer directly interact with backend api
     authentication when calling apis
+
+11/1/2024
+to do:
+input type: password
+improve table and product
+product type and origin
+coupons and promotions
+issues:
+connection status only works in development mode...
+done:
+bug fix
+    ws communication error due to misconfiguration of config.env.local
+table improvement
+    allow optimized fetching for table
+    prevented table from going to the first page when getting updated
+    table will jump to the newest record after creating one
+UI
+    Added MediaQuery to adjust UI layout
+    Adjusted Tab menu, and side drawers
+    Placeholders were created for navigation search bar
+Added user corner
+    displays connection status
+
+14/1/2024
+to do:
+input type: password
+improve table and product
+coupons and promotions
+socket security
+table searching
+record input
+done:
+bug fixed
+    prompt action section no longer resize after loading
+better scroll bars
+added table for producttype and origin
+
+16/1/2024
+to do:
+input type: password
+improve table and product
+coupons and promotions
+socket security
+table searching
+record input
+optimize
+done:
+added option for table to refetch when there is no record
+notfication no longer flashes after completing signin
+navigation searchbar just got better
+enabled user authentication when switching tabs
+enabled auto-redirection to login page when received 401 error
+connection status also works in production mode
+
+17/1/2024 to 30/1/2024
+to do:
+improve table and product
+coupons and promotions
+socket security
+records input
+optimize
+issues:
+since the row count is cached, pagnation takes a second to get the new row count when creating/removing record
+done:
+overhauled navigation options
+    navigation options are now centeralized
+    routing function is now stored within the option
+    allowed multiple display for one nav option
+    optimized checking for status
+    added tooltips for nav options in CustomDrawer
+tabs just got better and can now be set with hash
+    tabs menu can now be defined with navigation option
+    tabs menu/panels(optional) are provided by the hook 
+improved table
+    overlayed global search control button onto the search field
+    auto hides drag handle and option menu for table headers
+    pagnation will only display when there's record
+    added tooltip for small create record button
+    hide table layout when there is no record in database
+    shrink global search field when there's no record to search for
+    table content fade in when first loaded
+    prevented image from expanding the column
+    allowed searching in CrudTable
+    scrollbar no longer shifts the body
+    removed the big create record button
+    creating a record no longer sends the user to the new record
+    image loads softly
+new inputs are avaliable
+    added record input which allows searching for record
+    added password input
+    created miniaturized CrudTable
+UI adjustment
+    prevented prompt's save button from shifting when completing loading animation.
+    prevented images in ImageUpload from shifting when changing upload status
+    prevented the content of CustomModal from shifting when scrollbar appears
+    prevented ImageUpload's color from reacting to drag events when disabled 
+    adjusted the scale of UI
+    groups and tabs for inputs
+    error status can be presented by OutlineDiv
+    allowed Form element to collect data at once to prevent unnessery update
+    changed website title to "V# Admin Panel"
+    hovermenu now disappears when the component is disabled
+bug fix
+    fixed some incorrect error notifications
+    fixed a bug where user got stuck at signin page when re-visiting signin page after login in

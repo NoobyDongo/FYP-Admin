@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { authServer } from "@/utils/api/authServer.js";
+import authServer from "@/utils/api/authServer.js";
 import { dirKey, dirOption } from "../../../config.js";
 import BadRequest from "@/utils/api/response/badRequest.js";
 import Response from "@/utils/api/response/response.js";
