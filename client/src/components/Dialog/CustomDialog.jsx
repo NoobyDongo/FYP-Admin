@@ -7,6 +7,10 @@ import Box from "@mui/material/Box"
 import customDialogConfig from './customDialogConfig'
 import DialogContentText from '@mui/material/DialogContentText'
 import React from 'react'
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import Stack from '@mui/material/Stack';
+import IconButtonWithTooltip from '../IconButtonWithTooltip'
 
 export default function CustomDialog(props) {
     const {
@@ -16,24 +20,42 @@ export default function CustomDialog(props) {
     } = props
     const { sx: paperSx, ...otherPaperProps } = PaperProps || {}
 
+    const [fullScreen, setFullScreen] = React.useState(false)
+    const fullScreenOn = React.useCallback(() => {
+        setFullScreen(true)
+    }, [])
+    const fullScreenOff = React.useCallback(() => {
+        setFullScreen(false)
+    }, [])
+
     return (
         <Dialog PaperComponent={Box}
             PaperProps={{
                 sx: (theme) => ({
-                    border: 1,
+                    border: fullScreen? 0 :1,
                     borderColor: theme.palette.divider,
-                    borderRadius: 1,
+                    borderRadius: fullScreen? 0 : 1,
                     backgroundColor: theme.palette.background.default,
-                    width: customDialogConfig.width,
                     minWidth: customDialogConfig.width,
-                    maxHeight: customDialogConfig.width * 1.5,
+                    maxHeight: '100vh',
                     ...paperSx,
                 }),
                 ...otherPaperProps
             }}
-            {...others} onClose={handleClose} fullWidth>
+            {...others} onClose={handleClose} fullWidth fullScreen={fullScreen}>
             <DialogTitle variant="h6" sx={{ textTransform: "capitalize", userSelect: "none", px: padding, ...(menu && { pb: gap / 2 / 2 }) }}>
-                {header}
+                <Stack direction='row' alignItems="center">
+                    {header}
+                    <Stack direction='row' alignItems="center" sx={{ml: 'auto'}}>
+                        <IconButtonWithTooltip label={fullScreen ? 'Full Screen Mode Off' : 'Full Screen Mode On'}
+                            onClick={fullScreen ? fullScreenOff : fullScreenOn}>
+                            {fullScreen && <FullscreenExitIcon />}
+                            {!fullScreen && <FullscreenIcon />}
+                        </IconButtonWithTooltip>
+
+                    </Stack>
+                </Stack>
+
                 {context && <DialogContentText sx={{ fontSize: 12, pt: 1, textTransform: 'none' }}>
                     {context}
                 </DialogContentText>}

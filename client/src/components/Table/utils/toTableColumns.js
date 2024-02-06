@@ -188,7 +188,7 @@ function TableColumn(props) {
                 type: inputType === "number" ? "tel" : inputType, //no updown arrow this way lol
                 valueGetter: inputValueGetter,
                 valueSetter: inputValueSetter,
-                [formEditMode.create]: !noncreatetype.includes(inputType) || input[formEditMode.create] !== false,
+                [formEditMode.create]: !noncreatetype.includes(inputType) && input[formEditMode.create] !== false,
                 [formEditMode.update]: input[formEditMode.update] !== false,
             },
             ...((!inputType || inputType === "text") && TableTextCell()),
