@@ -129,7 +129,7 @@ export default function HoverButtonGroup({ in: appear = true, floating, disabled
     ), [lock, disabled])
 
     const menu = (
-        <Fade in={appear} mountOnEnter unmountOnExit>
+        <Fade in={appear} mountOnEnter unmountOnExit appear={false}>
             <CustomMenu floating={floating}>
                 <div style={MenuContentOutterWrapperStyle}
                     onMouseEnter={handleMouseEnter}

@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Fade from '@mui/material/Fade';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
-import sleep from '@/utils/sleep';
 
 const NextImage = React.forwardRef((props, ref) => {
     const { defaultSrc, src, sx, height, width, ...others } = props;

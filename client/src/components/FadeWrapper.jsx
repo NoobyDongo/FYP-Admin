@@ -18,7 +18,7 @@ export default function FadeWrapper(props) {
             variants={{
                 initial: {
                     opacity: 0,
-                    scale:.99,
+                    scale: .99,
                     ...variants?.initial
                 },
                 animate: {

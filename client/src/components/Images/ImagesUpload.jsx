@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React from 'react';
 import ImageIcon from '@mui/icons-material/Image';
 import CancelIcon from '@mui/icons-material/Cancel';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
@@ -26,8 +26,9 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import useHistory from '../useHistory';
 import HoverButtonGroup from '../HoverButtonGroup';
 import NextImage from './NextImage';
+import useCustomTransition from '@/utils/hooks/useCustomTransition';
 
-const ImageListItemIconWrapper = forwardRef((props, ref) => {
+const ImageListItemIconWrapper = React.forwardRef((props, ref) => {
     const { children, sx, ...others } = props
     return (
         <Box ref={ref} sx={{
@@ -51,109 +52,140 @@ const CopyToClipboardButton = ({ children, ...others }) => {
     return <Button {...others} onClick={handleClick}>{children}</Button>
 }
 
+//think it takes more time on useCallback and useMemo then actually rendering the component lol
 function ImageListItem({ disabled, image, index, link, ...others }) {
 
     const { onImageRemove, onImageUpdate } = others
-    const uploadIconWrapper = useRef(null)
-    const uploadingIcon = useRef(null)
-    const uploadedIcon = useRef(null)
-    const ImageWrapper = useRef(null)
+    const uploadIconWrapper = React.useRef(null)
+    const uploadingIcon = React.useRef(null)
+    const uploadedIcon = React.useRef(null)
+    const ImageWrapper = React.useRef(null)
 
-    const onUploadingStart = (e) => {
+    const onUploadingStart = React.useCallback(() => {
         ImageWrapper.current.style.borderWidth = 0
         uploadIconWrapper.current.style.opacity = 1
         uploadingIcon.current.style.opacity = 1
-    }
-    const onUploadingEnd = (e) => {
+    }, [])
+
+    const onUploadingEnd = React.useCallback(() => {
         uploadingIcon.current.style.opacity = 0
         uploadedIcon.current.style.opacity = 1
-    }
+    }, [])
+
+    const removeImage = React.useCallback(() => {
+        onImageRemove(index)
+    }, [index, onImageRemove])
+
+    const updateImage = React.useCallback(() => {
+        onImageUpdate(index)
+    }, [index, onImageUpdate])
+
     useRawProgressListener(image.name, onUploadingStart, onUploadingEnd)
 
-    return (
-        <Stack direction="row"
-            sx={{
-                overflow: "visible",
-                alignItems: "center",
-                position: "relative",
-                gap: .5,
-                mb: 2,
-                flexShrink: 0
-            }}>
-            <Stack ref={ImageWrapper} sx={(theme) => ({
-                margin: .2,
-                border: 2,
-                borderColor: 'transparent',
-                outline: 2,
-                outlineColor: image['data'] ? theme.palette.primary.main : theme.palette.action.disabled,
-                borderRadius: "50%",
-                overflow: "hidden",
-                alignItems: "center",
-                justifyContent: "center",
-                height: 35, width: 35,
-                marginRight: .8,
-                position: "relative",
-                userSelect: "none",
-                boxSizing: 'border-box'
-            })}>
-                <NextImage src={image['data'] || link + image['name']} alt=''
-                    height={35} width={35}
-                />
-                <div ref={uploadIconWrapper} style={{
-                    opacity: 0,
-                    position: "absolute",
-                    height: "100%",
-                    width: "100%",
-                    backdropFilter: "brightness(0.3) blur(3px) saturate(200%)",
-                    transition: "200ms opacity ease",
-                }}>
-                    <ImageListItemIconWrapper sx={{ transition: "200ms opacity ease 50ms", opacity: 0 }} ref={uploadingIcon}>
-                        <CircularProgress size={25} />
-                    </ImageListItemIconWrapper>
-                    <ImageListItemIconWrapper sx={{ transition: "200ms opacity ease 100ms", opacity: 0 }} ref={uploadedIcon}>
-                        <DoneIcon fontSize="small" color="success" sx={(theme) => ({
-                            stroke: "currentcolor",
-                            strokeWidth: 1,
-                            filter: "drop-shadow(0px 0px 5px rgba(0, 0, 0, 1))"
-                        })} />
-                    </ImageListItemIconWrapper>
+    const RowSx = React.useMemo(() => ({
+        overflow: "visible",
+        alignItems: "center",
+        position: "relative",
+        gap: .5,
+        mb: 2,
+        flexShrink: 0
+    }), [])
 
-                </div>
-            </Stack>
-            <Stack flex={1} overflow="hidden">
+    const ImageWrapperSx = React.useCallback((theme) => ({
+        margin: .2,
+        border: 2,
+        borderColor: 'transparent',
+        outline: 2,
+        outlineColor: image['data'] ? theme.palette.primary.main : theme.palette.action.disabled,
+        borderRadius: "50%",
+        overflow: "hidden",
+        alignItems: "center",
+        justifyContent: "center",
+        height: 35, width: 35,
+        marginRight: .8,
+        position: "relative",
+        userSelect: "none",
+        boxSizing: 'border-box'
+    }), [])
 
-                <Typography variant="body2"
-                    {...(!image['data'] && {
-                        fontStyle: "italic",
-                    })}
-                    fontSize={12}
-                    inline="true"
-                    noWrap textOverflow={"ellipsis"}
-                >
-                    {image['file']?.name || image['name']}
-                </Typography>
-                <Typography
-                    variant="caption"
-                    fontSize={10}
-                    sx={(theme) => ({ color: theme.palette.text.disabled })}
-                    noWrap
-                >
-                    {image['size'] || "uploaded to server"}
-                </Typography>
-            </Stack>
-            <IconButton disabled={disabled} ml="auto" size="small" color="primary" onClick={() => onImageUpdate(index)}>
+    const IconWrapper = React.useMemo(() => (
+        <div ref={uploadIconWrapper} style={{
+            opacity: 0,
+            position: "absolute",
+            height: "100%",
+            width: "100%",
+            backdropFilter: "brightness(0.3) blur(3px) saturate(200%)",
+            transition: "200ms opacity ease",
+        }}>
+            <ImageListItemIconWrapper sx={{ transition: "200ms opacity ease 50ms", opacity: 0 }} ref={uploadingIcon}>
+                <CircularProgress size={25} />
+            </ImageListItemIconWrapper>
+            <ImageListItemIconWrapper sx={{ transition: "200ms opacity ease 100ms", opacity: 0 }} ref={uploadedIcon}>
+                <DoneIcon fontSize="small" color="success" sx={{
+                    stroke: "currentcolor",
+                    strokeWidth: 1,
+                    filter: "drop-shadow(0px 0px 5px rgba(0, 0, 0, 1))"
+                }} />
+            </ImageListItemIconWrapper>
+        </div>
+    ), [])
+
+    const Image = React.useMemo(() => (
+        <NextImage src={image['data'] || link + image['name']} alt=''
+            height={35} width={35}
+        />
+    ), [image, link])
+
+
+    const Info = React.useMemo(() => (
+        <Stack flex={1} overflow="hidden">
+            <Typography variant="body2"
+                {...(!image['data'] && {
+                    fontStyle: "italic",
+                })}
+                fontSize={12}
+                inline="true"
+                noWrap textOverflow={"ellipsis"}
+            >
+                {image['file']?.name || image['name']}
+            </Typography>
+            <Typography
+                variant="caption"
+                fontSize={10}
+                sx={(theme) => ({ color: theme.palette.text.disabled })}
+                noWrap
+            >
+                {image['size'] || "uploaded to server"}
+            </Typography>
+        </Stack>
+    ), [image])
+
+    const ButtonGroups = React.useMemo(() => (
+        <>
+            <IconButton disabled={disabled} ml="auto" size="small" color="primary" onClick={updateImage}>
                 <EditIcon />
             </IconButton>
-            <IconButton disabled={disabled} size="small" color="error" onClick={() => onImageRemove(index)}>
+            <IconButton disabled={disabled} size="small" color="error" onClick={removeImage}>
                 {image['data'] && <RemoveCircleOutlineIcon />}
                 {!image['data'] && <DeleteIcon />}
             </IconButton>
+        </>
+    ), [disabled, image, removeImage, updateImage])
 
+    return (
+        <Stack direction="row" sx={RowSx}>
+            <Stack ref={ImageWrapper} sx={ImageWrapperSx}>
+                {Image}
+                {IconWrapper}
+            </Stack>
+            {Info}
+            {ButtonGroups}
         </Stack>
     )
 }
 
-const ImagesUpload = forwardRef((props, ref) => {
+//this is indeed faster than before when loading a lot of images
+const ImagesUpload = React.forwardRef((props, ref) => {
     const { validationErrors, setValidationErrors,
         maxNumber = 69,
         size = 250,
@@ -167,12 +199,19 @@ const ImagesUpload = forwardRef((props, ref) => {
         ...others } = props
 
     const simpleMode = maxNumber <= 1
-    const [images, setImages] = useState(value || []);
+    const [images, _setImages] = React.useState(value || []);
+    const [, startLoading] = useCustomTransition(_setImages)
 
-    useImperativeHandle(ref, () => ({
+    const setImages = React.useCallback((value) => startLoading(() => {
+        _setImages(value)
+    }), [])
+    const resetImage = React.useCallback(() => setImages([]), [])
+    const comparator = React.useCallback((value) => value.map((image) => image['data'] || image['name']), [])
+
+    React.useImperativeHandle(ref, () => ({
         getValue() { return simpleMode ? images[0] : images },
         clear() {
-            setImages([])
+            resetImage()
             resetHistory()
         }
     }))
@@ -182,11 +221,11 @@ const ImagesUpload = forwardRef((props, ref) => {
             disabled,
             initialValue: images,
             valueSetter: setImages,
-            removeAll: () => setImages([]),
-            comparator: (value) => value.map((image) => image['data'] || image['name'])
+            removeAll: resetImage,
+            comparator
         })
 
-    const onChange = (imageList, addUpdateIndex) => {
+    const onChange = React.useCallback((imageList, addUpdateIndex) => {
         if (validationErrors?.[name])
             setValidationErrors({
                 ...validationErrors,
@@ -199,12 +238,57 @@ const ImagesUpload = forwardRef((props, ref) => {
         })
         console.log("imageList", imageList, "addUpdateIndex", addUpdateIndex);
         changeParent?.(simpleMode ? imageList[0] : imageList)
+
         setImages(imageList)
-
         addToHistory(imageList)
-    };
+    }, [changeParent, simpleMode, validationErrors, name, setValidationErrors, setImages, addToHistory])
+    
+    const customUiContent = React.useCallback(({
+        onImageUpdate,
+        onImageRemove,
+        singleRecord,
+        imageList,
+        full,
+    }) => {
+        return (
+            <Fade in={full}>
+                <Box sx={{
+                    overflowX: "hidden",
+                    overflowY: "overlay",
+                    scrollbarGutter: 'stable',
+                    height: size,
+                    flex: 1,
+                    borderRadius: 1
+                }}>
+                    <TransitionGroup style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        padding: 16,
+                        paddingBottom: 32,
+                        overflow: 'hidden'
+                    }}>
+                        {imageList.map((image, index) => (
+                            <Collapse {...(singleRecord && { timeout: 0 })} key={image['name']}>
+                                <ImageListItem link={link} disabled={disabled} index={index}
+                                    onImageUpdate={onImageUpdate}
+                                    onImageRemove={onImageRemove}
+                                    image={image}
+                                />
+                            </Collapse>
+                        ))}
+                    </TransitionGroup>
+                </Box>
+            </Fade>
+        )
+    }, [disabled, link, size])
 
-    const customUI = useCallback(({
+    const menu = React.useCallback((images, onImageRemoveAll) => (
+        <HoverButtonGroup disabled={disabled} in={!disabled} floating>
+            {renderTools({ enableDeleteAll: images.length > 0, remove: onImageRemoveAll })}
+        </HoverButtonGroup>
+    ), [disabled])
+
+    const customUI = React.useCallback(({
         imageList,
         onImageUpload,
         onImageRemoveAll,
@@ -217,7 +301,14 @@ const ImagesUpload = forwardRef((props, ref) => {
         var singleRecord = imageList.length == 1
         var error = !!validationErrors?.[name]
 
-        console.log(imageList)
+        const customLoadedContent = customUiContent({
+            full,
+            onImageUpdate,
+            onImageRemove,
+            singleRecord,
+            imageList,
+        })
+
         return (
             <OutlinedDiv
                 label={label}
@@ -225,6 +316,8 @@ const ImagesUpload = forwardRef((props, ref) => {
                 fullWidth={!simpleMode}
                 disabled={disabled}
                 required={required}
+
+                sx={{ position: 'relative', overflow: 'hidden' }}
 
                 error={!isDragging && !!validationErrors?.[name]}
                 helperText={validationErrors?.[name]}
@@ -257,44 +350,20 @@ const ImagesUpload = forwardRef((props, ref) => {
                         <Typography sx={{ height: 20 }} variant="body2">{others.imagePlaceholder || "Drag and Drop here"}</Typography>
                         <div style={{ width: "100%", height: "100%", position: "absolute" }} {...dragProps} draggable="true"></div>
                         <Button disabled={disabled} onClick={onImageUpload} sx={{ mt: 2, borderRadius: 1, height: 35, }} variant="outlined">Browse</Button>
-
                     </Box>
 
-                    <Fade in={full}>
-                        <Box sx={{
-                            overflowX: "hidden",
-                            overflowY: "auto",
-                            height: size,
-                            flex: 1,
-                            borderRadius: 1
-                        }}>
-                            <TransitionGroup style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                padding: 16,
-                                paddingBottom: 32,
-                                overflow: 'hidden'
-                            }}>
-                                {imageList.map((image, index) => (
-                                    <Collapse {...(singleRecord && { timeout: 0 })} key={image['name']} mountOnEnter unmountOnExit>
-                                        <ImageListItem link={link} disabled={disabled} index={index} onImageUpdate={onImageUpdate} onImageRemove={onImageRemove} image={image} />
-                                    </Collapse>
-                                ))}
-                            </TransitionGroup>
-                        </Box>
-                    </Fade>
-                </Stack>
-                <HoverButtonGroup disabled={disabled} in={!disabled} floating>
-                    {renderTools({ enableDeleteAll: imageList.length > 0, remove: onImageRemoveAll })}
-                </HoverButtonGroup>
+                    {customLoadedContent}
 
+
+                </Stack>
+                {menu(imageList, onImageRemoveAll)}
             </OutlinedDiv >
         )
     }, [disabled, validationErrors])
 
 
     return (
-        <div className="App">
+        <div className="ImageUpload">
             <ReactImageUploading
                 multiple
                 value={images}
@@ -316,7 +385,7 @@ export function ImageUpload(props) {
     const { name, onChange } = props
     const { images, maxNumber, inputProps, ...others } = props
 
-    useEffect(() => {
+    React.useEffect(() => {
         console.log(images)
     }, [images])
 

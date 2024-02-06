@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from "react";
+import React from "react";
 import Button from '@mui/material/Button';
 import ProgressButton from "@/components/Progress/ProgressButton";
 import useProgress from "@/components/Progress/useProgress/useProgress";
@@ -14,20 +14,20 @@ import useForm from "../Form/useForm";
 const actions = ["Create New Record", "Edit Record"]
 
 export default function Prompt(props) {
-    const { inputs, action, onClose, data, useUpload, saveRecord, title, context,  ...others } = props
+    const { inputs, action, onClose, data, useUpload, saveRecord, title, context, ...others } = props
 
-    const [disabled, setDisabled] = useState(false)
+    const [disabled, setDisabled] = React.useState(false)
     const { startAsync } = useProgress('promptsave')
     const { loading } = useProgressListener('promptsave')
-    const [completed, setCompleted] = useState(false)
-    const [setForm, validateRecord, form] = useForm({ data, inputs, mode:action, disabled: disabled || loading })
+    const [completed, setCompleted] = React.useState(false)
+    const { setFormData, validate, form } = useForm({ data, inputs, mode: action, disabled: disabled || loading })
 
     console.log("Prompt rendered")
 
     const clearForm = (fromData) => {
         setDisabled(false)
         setCompleted(false)
-        setForm(fromData)
+        setFormData(fromData)
     }
     const exitForm = () => {
         onClose()
@@ -36,7 +36,7 @@ export default function Prompt(props) {
         clearForm({})
     }
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (others.open) {
             if (action == 0)
                 clearForm({})
@@ -57,10 +57,10 @@ export default function Prompt(props) {
             })
         })
         */
-       //setDisabled(true)
-       //return
-        
-        validateRecord(async (formData) => {
+        //setDisabled(true)
+        //return
+
+        validate(async (formData) => {
             console.log("Form data", formData)
             if (useUpload)
                 listenToUpload(async (data) => startAsync(async () => await saveRecord(data)), formData, (res) => {
@@ -79,16 +79,15 @@ export default function Prompt(props) {
                 }
             }
         })
-            
+
     }
 
-    const handleClose = (event, reason) => {
-        if (reason && reason === "backdropClick")
-            return
-    }
+    const handleClose = React.useCallback((event, reason) => {
+        onClose()
+    }, [onClose])
 
     return (
-        <CustomDialog {...others} onClose={handleClose}
+        <CustomDialog {...others} handleClose={handleClose}
             header={title || actions[action]}
             content={form}
             context={context}

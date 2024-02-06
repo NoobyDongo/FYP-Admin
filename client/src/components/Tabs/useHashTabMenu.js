@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import React from 'react'
 import verifyToken from './verifyToken';
 import TabMenu from './TabMenu';
 import TabPanel from './TabPanel';
@@ -15,30 +15,32 @@ function getTab(tabIndicators, previousValue) {
     return Math.max(Math.min(hashValue, tabIndicators.length - 1), 0);
 }
 
-export default ({ tabs: inTabs, tabIndicators = [], sx, MenuProps, TabProps }) => {
+export default function useHashTabMenu({ tabs: inTabs, tabIndicators = [], sx, MenuProps, TabProps }) {
     const router = useRouter()
-    const [value, setValue] = useState(getTab(tabIndicators, 0));
-    const [storedEvent, setStoredEvent] = useState(null)
+    const [value, setValue] = React.useState(getTab(tabIndicators, 0));
+    const [storedEvent, setStoredEvent] = React.useState(null)
+    const [pending, startTrans] = React.useTransition()
 
-    const goto = (e) => verifyToken(router, () => {
-        //console.log("1 hash changedchangedchangedchangedchanged", window.location.hash)
-        //console.log("hash changed", e.detail)
+    const goto = React.useCallback((e) => {
+        verifyToken(router, () => {
+            //console.log("1 hash changedchangedchangedchangedchanged", window.location.hash)
+            //console.log("hash changed", e.detail)
 
-        //:-((
+            //:-((
+            if (e.detail.forced || e.detail.path == window.location.pathname) {
+                window.location.hash = e.detail.hash
+                //console.log("setting hash value")
+                setValue(prev => getTab(tabIndicators, prev))
+            } else {
+                setStoredEvent(() => {
+                    window.dispatchEvent(customHashChangeEvent({ hash: e.detail.hash, path: e.detail.path, forced: true }));
+                })
+            }
+            //console.log("2 hash changedchangedchangedchangedchanged", window.location.hash)
+        })
+    }, [tabIndicators])
 
-        if (e.detail.forced || e.detail.path == window.location.pathname) {
-            window.location.hash = e.detail.hash
-            //console.log("setting hash value")
-            setValue(prev => getTab(tabIndicators, prev))
-        } else {
-            setStoredEvent(() => {
-                window.dispatchEvent(customHashChangeEvent({ hash: e.detail.hash, path: e.detail.path, forced: true }));
-            })
-        }
-        //console.log("2 hash changedchangedchangedchangedchanged", window.location.hash)
-    })
-
-    useEffect(() => {
+    React.useEffect(() => {
         window.addEventListener('customhashchange', goto);
         return () => {
             if (storedEvent) {
@@ -49,19 +51,19 @@ export default ({ tabs: inTabs, tabIndicators = [], sx, MenuProps, TabProps }) =
         };
     }, []);
 
-    const handleChange = (event, newValue) => {
+    const handleChange = React.useCallback((event, newValue) => {
         let hash = tabIndicators[newValue].name
         //console.log("hash changed", hash, tabIndicators)
         if (hash) {
             window.dispatchEvent(customHashChangeEvent({ hash, path: window.location.pathname, forced: true }));
         }
-    };
+    }, [])
 
-    const tabs = inTabs ? (
+    const tabs = React.useMemo(() => inTabs ? (
         inTabs.map((e, i) => <TabPanel key={i} index={i} value={value} {...TabProps}>{e.content}</TabPanel>)
-    ) : null
+    ) : null, [value, inTabs])
 
-    const menu = (
+    const menu = React.useMemo(() => (
         <TabMenu
             tabs={inTabs ? inTabs.map((item) => item.name) : tabIndicators.map((item) => item.displayname)}
             value={value}
@@ -69,7 +71,7 @@ export default ({ tabs: inTabs, tabIndicators = [], sx, MenuProps, TabProps }) =
             sx={sx}
             {...MenuProps}
         />
-    )
+    ), [value, inTabs, handleChange])
 
     return { menu, tabs, value }
 }

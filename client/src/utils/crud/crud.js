@@ -5,13 +5,12 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import useProgress from "@/components/Progress/useProgress/useProgress"
 import useNotification from '@/components/Notifications/useNotification'
 import useAPI from '@/utils/crud/useAPI'
-import { useCallback, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React from 'react'
 import toFilters from '../../components/Table/utils/filters/toFilters'
-import toStorage from '../storage/toStorage'
 import isEmptyObject from '../isEmptyObject'
 
 export default function CRUD({ tableName, methods = {}, allowSimple = false }, fetchAll, options = {}) {
@@ -25,16 +24,16 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
     const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods
     const { createOption, getOption, updateOption, deleteOption } = methods
     const { createSimple = true, getSimple = true, updateSimple = true, deleteSimple = true } = methods
-    const [tries, setTries] = useState(0)
+    const [tries, setTries] = React.useState(0)
 
-    const createFn = useCallback(async (record) => await create({
+    const createFn = React.useCallback(async (record) => await create({
         option: createOption || "add",
         method: "POST",
         simple: createSimple && allowSimple,
         body: customCreate?.(record) ?? record
     }), [createOption, createSimple, allowSimple, customCreate])
 
-    const getFn = useCallback(async () => {
+    const getFn = React.useCallback(async () => {
 
         //console.log("fetchAll", deleteOption)
         let criteriaList = toFilters(columnFilters) || []
@@ -62,21 +61,21 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
         return res
     }, [fetchAll, getSimple, allowSimple, getOption, pagination, columnFilters, globalFilter, sorting])
 
-    const updateFn = useCallback(async (record) => await update({
+    const updateFn = React.useCallback(async (record) => await update({
         option: updateOption || "add",
         method: "POST",
         simple: updateSimple && allowSimple,
         body: customUpdate?.(record) ?? record
     }), [updateOption, updateSimple, allowSimple, customUpdate])
 
-    const deleteFn = useCallback(async (record) => await _del({
+    const deleteFn = React.useCallback(async (record) => await _del({
         option: deleteOption || `remove/${record.id}`,
         method: "DELETE",
         simple: deleteSimple && allowSimple,
         body: customDelete?.(record) ?? record
     }), [deleteOption, deleteSimple, allowSimple, customDelete])
 
-    const queryKey = useMemo(() => (fetchAll ?
+    const queryKey = React.useMemo(() => (fetchAll ?
         [tableName] :
         [tableName, pagination.pageIndex, pagination.pageSize, columnFilters, globalFilter, sorting]),
         [tableName, fetchAll, pagination, columnFilters, globalFilter, sorting])

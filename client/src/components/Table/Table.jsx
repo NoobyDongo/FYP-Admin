@@ -6,7 +6,7 @@ import {
     MaterialReactTable,
 } from 'material-react-table'
 
-import React, { useCallback } from 'react'
+import React from 'react'
 import CRUD from '@/utils/crud/crud'
 import Stack from '@mui/material/Stack'
 import Fade from '@mui/material/Fade'
@@ -15,14 +15,15 @@ import CachedIcon from '@mui/icons-material/Cached'
 import useGlobalFilter from './utils/filters/useGlobalFilter'
 import useCustomTableProps from './utils/tableProps'
 import useCreateEditDeletePrompts from '../Prompt/useCreateEditDeletePrompts'
-import dataFn from "@/utils/crud/clientToServer"
 import FadeWrapper from '../FadeWrapper'
+import useCustomTransition from '../../utils/hooks/useCustomTransition'
 
 function usePagenation(dependency = []) {
     const [pagination, setPagination] = React.useState({
         pageIndex: 0,
         pageSize: 15,
     })
+    //const [, setPagination] = useCustomTransition(_setPagination)
     React.useEffect(() => {
         setPagination({
             pageIndex: 0,
@@ -32,7 +33,7 @@ function usePagenation(dependency = []) {
 
     return [pagination, setPagination]
 }
-
+/*
 async function getCount(tablename) {
     let api = dataFn('api/record/' + tablename)
     let res = await api({
@@ -41,7 +42,7 @@ async function getCount(tablename) {
     })
     return Number(res)
 }
-
+*/
 function useRowCount(data, pagination, setPagination, valid) {
     const rowCount = React.useMemo(() => data?.totalElements || 0, [data])
     const [noRecord, setNoRecord] = React.useState(true)
@@ -71,24 +72,25 @@ function useRowCount(data, pagination, setPagination, valid) {
 const RawTable = (props) => {
     const enableSelection = false
 
-    const { columns, inputs, initialState, tableName, crud, render=true, upload = false, baseSearchCriteria, fetchAll = false, mini = false } = props
+    const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
     const [columnVisibility, setColumnVisibility] = React.useState(initialState?.columnVisibility || {})
-
     const [columnFilters, setColumnFilters] = React.useState(baseSearchCriteria ? [baseSearchCriteria] : [])
+    
+    
     /*
     const handleOnColumnFiltersChange = React.useCallback((columnFilters) => {
         setColumnFilters(baseSearchCriteria? [baseSearchCriteria, ...columnFilters] : columnFilters)
     }, [columnFilters])
     */
-    const [rawGlobalFilter, setGlobalFilter] = React.useState('')
+    const [rawGlobalFilter, _setGlobalFilter] = React.useState('')
+    const [, setGlobalFilter] = useCustomTransition(_setGlobalFilter)
     const [sorting, setSorting] = React.useState([])
     const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
 
     const globalFilter = useGlobalFilter(columns, columnVisibility, rawGlobalFilter)
 
     const [useCreate, useGet, useUpdate, useDelete] = CRUD(
-        { tableName, ...crud },
-        fetchAll,
+        { tableName, ...crud }, false,
         { pagination, columnFilters, globalFilter, sorting })
 
     const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate()
@@ -96,7 +98,19 @@ const RawTable = (props) => {
     const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate()
     const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete()
 
-    const data = React.useMemo(() => ((fetchAll ? fetchedRecords : fetchedRecords?.content) || []), [fetchedRecords, columns])
+    const [loading, startLoading] = React.useTransition()
+    /*
+        const [data, setData] = React.useState([])
+        React.useEffect(() => {
+            startLoading(() => {
+                setData((fetchAll ? fetchedRecords : fetchedRecords?.content) || [])
+            })
+        }, [fetchedRecords, columns])
+    */
+    const data = React.useMemo(() => (fetchedRecords?.content || []), [fetchedRecords])
+    React.useEffect(() => {
+        console.log('table fetchedRecords', fetchedRecords)
+    }, [fetchedRecords])
 
     const [rowCount, noRecord] = useRowCount(fetchedRecords, pagination, setPagination,
         columnFilters.length < 1 && !rawGlobalFilter && sorting.length < 1)
@@ -105,12 +119,12 @@ const RawTable = (props) => {
         inputs, upload, createRecord, updateRecord, deleteRecord
     })
 
-    const renderEmptyRowsFallback = useCallback(() => {
+    const renderEmptyRowsFallback = React.useCallback(({table}) => {
         return (
-            <Fade in={!isLoading && !isFetching} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
+            <Fade in={table.getState().noRow && !table.getState().isLoading && !table.getState().isFetching} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
                 <Stack sx={{
                     pt: 10,
-                    pb: 20,
+                    pb: 10,
                     width: 1,
                     height: 1,
                     userSelect: 'none',
@@ -125,7 +139,7 @@ const RawTable = (props) => {
                 </Stack>
             </Fade>
         )
-    }, [isLoading, isFetching, refetch])
+    }, [refetch])
 
     const { renderTopToolbar, ...tableProps } = useCustomTableProps({
         initialState,
@@ -135,8 +149,6 @@ const RawTable = (props) => {
         toCreate,
         toEdit,
         toDelete,
-        noRecord,
-        isLoading,
         mini,
     })
 
@@ -144,7 +156,8 @@ const RawTable = (props) => {
 
     const table = useMaterialReactTable({
         columns: columns,
-        data: data,
+        rowCount: rowCount,
+        data: isFetching ? [] : data,
         ...tableProps,
 
         enableTopToolbar: isFullScreen,
@@ -152,18 +165,17 @@ const RawTable = (props) => {
             renderTopToolbar
         },
 
-        ...(!fetchAll && {
-            manualPagination: true,
-            manualFiltering: true,
-            manualSorting: true,
-            enableFilterMatchHighlighting: false,
+        manualPagination: true,
+        manualFiltering: true,
+        manualSorting: true,
+        enableFilterMatchHighlighting: false,
 
-            //onShowGlobalFilterChange: setShowSearchBar,
-            onColumnVisibilityChange: setColumnVisibility,
-            onColumnFiltersChange: setColumnFilters,
-            onGlobalFilterChange: setGlobalFilter,
-            onSortingChange: setSorting,
-        }),
+        //onShowGlobalFilterChange: setShowSearchBar,
+        onColumnVisibilityChange: setColumnVisibility,
+        onColumnFiltersChange: setColumnFilters,
+        onGlobalFilterChange: setGlobalFilter,
+        onSortingChange: setSorting,
+
         onIsFullScreenChange: setIsFullScreen,
 
         renderEmptyRowsFallback,
@@ -171,43 +183,39 @@ const RawTable = (props) => {
 
         state: {
             ...props.state,
-            ...(!fetchAll && {
-                columnFilters,
-                globalFilter: rawGlobalFilter,
-                isLoading,
-                pagination,
-                sorting,
-                columnVisibility,
-            }),
+            columnFilters,
+            globalFilter: rawGlobalFilter,
+            pagination,
+            sorting,
+            columnVisibility,
             isFullScreen,
+            rowCount,
+            noRecord,
+            noRow: rowCount < 1,
 
             //showGlobalFilter: !noRecord && showSearchBar,
-            isLoading: isLoading,
+            isLoading: isLoading || isFetching,
             isSaving: isCreatingRecord || isUpdatingRecord || isDeletingRecord,
             showAlertBanner: isError,
             //showProgressBars: isFetching || isCreatingRecord || isUpdatingRecord || isDeletingRecord,
         },
     })
 
-    if (render)
-        return (
-            <>
-                <div className='MuiPaper-root'>
-                    {renderTopToolbar({ table })}
-                    <FadeWrapper variants={{
-                        initial: { scale: 1, opacity: 0 },
-                    }}
-                        transition={{ duration: .35 }}>
-                        <MaterialReactTable table={table} />
-                    </FadeWrapper>
-                </div>
-                {CreatePrompt}
-                {EditPrompt}
-            </>
-        )
-    else {
-        return <></>
-    }
+    return (
+        <>
+            <div className='MuiPaper-root'>
+                {renderTopToolbar({ table })}
+                <FadeWrapper variants={{
+                    initial: { scale: 1, opacity: 0 },
+                }}
+                    transition={{ duration: .35 }}>
+                    <MaterialReactTable table={table} />
+                </FadeWrapper>
+            </div>
+            {CreatePrompt}
+            {EditPrompt}
+        </>
+    )
 }
 
 export default function CrudTable(props) {

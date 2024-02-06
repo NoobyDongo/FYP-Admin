@@ -31,30 +31,31 @@ const FormGroup = React.forwardRef((properties, ref) => {
         },
     }))
 
-    const form = React.useMemo(() => {
-        return (
-            <>
-                {label != 0 && <Stack direction='row' alignItems="center" sx={{ mb: gap - 1 }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 500 }} variant="h6">{label}</Typography>
-                    <Divider sx={{ flex: 1, height: 1, alignSelf: "center", ml: gap / 2 / 2 }} />
-                </Stack>
-                }
-                <Collapse in={true}>
-                    {
-                        inputs.map((input, i) =>
-                            <Collapse in={true} key={i}>
-                                <Box sx={{ pt: i > 0 ? gap : 1, pb:gap / 2, }}>
-                                    <FormEditField ref={el => formInputs.current[i] = el} {...props} {...makeInput(input, inputProps, formData)} />
-                                </Box>
-                            </Collapse>
-                        )
-                    }
-                </Collapse>
-            </>
-        )
-    }, [inputs, formData, inputProps, props, gap, label])
+    const info = React.useMemo(() => (
+        <>
+            {label != 0 && <Stack direction='row' alignItems="center" sx={{ mb: gap - 1, mt: 1 }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 500 }} variant="h6">{label}</Typography>
+                <Divider sx={{ flex: 1, height: 1, alignSelf: "center", ml: gap / 2 / 2 }} />
+            </Stack>}
+        </>
+    ), [label, gap])
 
-    return (form)
+    const group = React.useMemo(() => inputs.map((input, i) => {
+        return (
+            <Collapse in={true} key={i}>
+                <Box sx={{ pt: i > 0 ? gap : 1, pb: gap / 2, }}>
+                    <FormEditField ref={el => formInputs.current[i] = el} {...props} {...makeInput(input, inputProps, formData)} />
+                </Box>
+            </Collapse>
+        )
+    }), [inputs, inputProps, formData, props, gap])
+
+    return (
+        <>
+            {info}
+            {group}
+        </>
+    )
 
 })
 FormGroup.displayName = "FormGroup"
@@ -65,96 +66,58 @@ const FormTab = React.forwardRef((properties, ref) => {
 
     React.useImperativeHandle(ref, () => ({
         save(form) {
+            console.log('formGroups', formGroups.current)
             formGroups.current.forEach((group) => {
                 group.save(form)
             })
         },
     }))
 
-    const Groups = React.useMemo(() => {
+    const groups = React.useMemo(() => Object.keys(tab).map((key, i) => {
+        return (
+            <FormGroup key={i} gap={gap} ref={el => formGroups.current[i] = el} formData={formData} inputs={tab[key]} inputProps={inputProps} props={props} label={key} />
+        )
+    }), [tab, formData, gap, inputProps, props])
 
-        return Object.keys(tab).map((key, i) => {
-            console.log('inputs', tab[key])
-            return (
-                <FormGroup key={i} gap={gap} ref={el => formGroups.current[i] = el} formData={formData} inputs={tab[key]} inputProps={inputProps} props={props} label={key} />
-            )
-        })
-
-    }, [tab, formData, inputProps, props, gap])
-
-    return Groups
+    return groups
 
 })
 FormTab.displayName = "FormTab"
 
-let obj = {
-    0: {
-        0: [
-            {
-                1: true,
-                type: "text",
-                required: true,
-                // ... other properties ...
-            },
-        ],
-    },
-    Details: {
-        0: [
-            {
-                1: true,
-                type: "password",
-                required: true,
-                // ... other properties ...
-            },
-            {
-                1: true,
-                type: "password",
-                required: true,
-                // ... other properties ...
-            },
-        ],
-        InnerDetails: [
-            {
-                1: true,
-                type: "text",
-                required: true,
-                // ... other properties ...
-            },
-        ],
-    },
-};
-
-export default function useForm({ data, inputs, disabled, gap = customDialogConfig.gap, mode = formEditMode.create, allowGrouping = true, inputProps, suspendUpdate = true }) {
+export default function useForm({ data, inputs, disabled, gap = customDialogConfig.gap, mode = formEditMode.create, inputProps, suspendUpdate = true }) {
     const [validationErrors, setValidationErrors, validateRecord] = useRecordValidation(inputs[mode][formEditMode.validator])
     const sortedColumns = React.useMemo(() => inputs[mode][formEditMode.content], [mode])
     const [formData, setFormData] = React.useState(data || {})
     const formTabs = React.useRef([])
-
-    const onChange = (fn) => {
-        if (suspendUpdate)
-            return
-        let newForm = fn({ ...formData })
-        setFormData(newForm)
-        console.log(newForm)
-    }
+    /*
+        const onChange = React.useCallback((fn) => {
+            let newForm = fn({ ...formData })
+    
+            setFormData(newForm)
+            console.log(newForm)
+    
+        }, [formData])
+    */
     const setForm = (data) => {
         setFormData(data)
         setValidationErrors({})
     }
-    const validate = React.useCallback(async (fn) => {
-        let formData = { ...data }
-        //console.log('formTabs', formTabs.current)
-        formTabs.current.forEach((input) => {
-            input?.save(formData)
-        })
 
-        if (await validateRecord(formData)) {
-            setFormData(formData)
-            return await fn(formData)
+    const validate = React.useCallback(async (fn) => {
+        let fd = { ...data, ...formData }
+        formTabs.current.forEach((input) => {
+            input?.save(fd)
+        })
+        setFormData(fd)
+
+        if (await validateRecord(fd)) {
+            return await fn(fd)
         }
         else
             return false
-    })
+
+    }, [formData, data, validateRecord])
+
     React.useEffect(() => {
         //console.log('sortedColumns', inputs)
         return () => {
@@ -166,17 +129,17 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
         //console.log('sortedColumns', sortedColumns)
     }, [sortedColumns])
 
-    const form = React.useMemo(() => {
-        let props = {
-            disabled,
-            record: formData,
-            onChange,
-            validationErrors,
-            setValidationErrors,
-            suspendUpdate,
-            ...inputProps,
-        }
+    const props = React.useMemo(() => ({
+        disabled,
+        record: formData,
+        //onChange,
+        validationErrors,
+        setValidationErrors,
+        ...inputProps,
 
+    }), [formData, validationErrors, disabled, inputProps])
+
+    const form = React.useMemo(() => {
         const renderTab = (tab) => {
             /*
             console.log('tab', Object.keys(tab).length)
@@ -191,19 +154,31 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
                 return resTab
             })
         }
+        //console.log('formData', formData)
 
         //console.log('tab content', renderTab(sortedColumns[formEditMode.content]))
 
         return renderTab(sortedColumns)
 
-    }, [sortedColumns, formData, validationErrors, inputProps, gap, disabled, suspendUpdate])
+    }, [sortedColumns, formData, gap, inputProps, props])
+
+    const pageSwitchAction = React.useCallback((index, fn) => {
+        let fd = { ...data, ...formData }
+        console.log('pageSwitchAction', index)
+        formTabs.current.forEach((input) => {
+            input?.save(fd)
+        })
+        setFormData(fd)
+        fn()
+    }, [formData, data])
 
     const { menu, tabs } = useBuiltTabMenu({
         tabs: form,
         useFade: false,
+        pageSwitchAction,
         TabProps: {
-            preventUmount: true,
-            variants:{
+            preventUmount: false,
+            variants: {
                 initial: {
                     opacity: 1,
                     scale: 1,
@@ -230,7 +205,7 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
                     minWidth: 0,
                     borderRadius: 20,
                     padding: .5,
-                    mb: gap,
+                    mb: gap / 2,
                     minHeight: 0,
                 },
             }
@@ -247,7 +222,7 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
 
     //console.log('final', { mode, sortedColumns, })
 
-    return [setForm, validate, final, formData]
+    return { setFormData: setForm, validate, form: final, formData }
 }
 
 /*

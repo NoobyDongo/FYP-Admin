@@ -98,9 +98,6 @@ const useCustomTableProps = (props = {}) => {
         showSearchBar,
         disableTopToolbar,
         disableBottomToolbar,
-        rowCount = 0,
-        noRecord: inNoRecord = false,
-        isLoading = true,
         createTitle = 'Create New Record',
         toEdit = () => { console.log('Edit not implemented') },
         toDelete = () => { console.log('Delete not implemented') },
@@ -110,15 +107,10 @@ const useCustomTableProps = (props = {}) => {
     let fontScale = mini ? .9 : 1
     let scale = mini ? .8 : 1
     let iconScale = mini ? 1.1 : 1.2
-    let noRow = rowCount < 1
 
-    const [noRecord, setNoRecord] = React.useState(inNoRecord)
-    React.useEffect(() => {
-        setNoRecord(inNoRecord)
-    }, [inNoRecord])
 
-    const muiTableBodyProps = React.useMemo(() => ({
-        ...(noRow && !isLoading && {
+    const muiTableBodyProps = ({ table }) => ({
+        ...(table.getState().noRow && !table.getState().isLoading && {
             sx: {
                 left: 0,
                 bottom: 0,
@@ -127,9 +119,9 @@ const useCustomTableProps = (props = {}) => {
                 position: "absolute",
             },
         })
-    }), [noRow, isLoading])
+    })
 
-    const muiSearchTextFieldProps = React.useMemo(() => ({
+    const muiSearchTextFieldProps = () => ({
         variant: 'outlined',
         placeholder: 'Search...',
         sx: {
@@ -147,9 +139,9 @@ const useCustomTableProps = (props = {}) => {
             },
             startAdornment: null,
         }
-    }), [mini])
+    })
 
-    const muiTableBodyRowProps = React.useCallback(({ row }) => ({
+    const muiTableBodyRowProps = ({ row }) => ({
         ...(enableSelection && {
             onClick: row.getToggleSelectedHandler(),
         }),
@@ -160,13 +152,12 @@ const useCustomTableProps = (props = {}) => {
             }),
             backgroundColor: 'transparent',
         }
-    }), [enableSelection])
+    })
 
-    //render * 2, isLoading
-    const muiTableContainerProps = React.useMemo(() => {
+    const muiTableContainerProps = ({ table }) => {
         return ({
             sx: {
-                overflow: noRow || isLoading ? "hidden" : "overlay",
+                overflow: table.getState().noRow || table.getState().isLoading ? "hidden" : "overlay",
                 scrollbarGutter: 'stable',
                 minHeight: 300,
                 pl: 1,
@@ -184,13 +175,12 @@ const useCustomTableProps = (props = {}) => {
                     '&>thead': {
                         '&>tr': {
                             borderBottom: 1,
-                            userSelect: noRow && noRecord ? 'none' : 'auto',
-                            opacity: noRow && noRecord ? 0 : 1,
-                            borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
-                            transitionProperty: 'opacity, border-color',
-                            transitionDuration: '200ms',
+                            opacity: table.getState().noRow && table.getState().noRecord ? 0 : 1,
+                            userSelect: table.getState().noRow && table.getState().noRecord ? 'none' : 'auto',
+                            borderColor: table.getState().noRow && table.getState().noRecord ? 'transparent' : theme.palette.border.main,
+                            transitionProperty: 'border-color opacity',
                             backgroundColor: `transparent !important`,
-                            '&>th:first-child': {
+                            '&>th:first-of-type': {
                                 ...(mini && { pl: 0, }),
                             },
                             '&>th': {
@@ -252,9 +242,9 @@ const useCustomTableProps = (props = {}) => {
                         }
                     },
                     '&>tbody:not(:has(.norecord))': {
-                        opacity: noRow ? 0 : 1,
+                        opacity: table.getState().noRow ? 0 : 1,
                         '&>tr': {
-                            '&>td:first-child': {
+                            '&>td:first-of-type': {
                                 ...(mini && { pl: 0, }),
                             },
                             '&>td': {
@@ -286,10 +276,10 @@ const useCustomTableProps = (props = {}) => {
                 }
             }
         })
-    }, [noRow, isLoading, theme, mini, noRecord, enableSelection])
+    }
 
-    const renderEmptyRowsFallback = React.useCallback(() => (
-        <Fade in={noRow} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
+    const renderEmptyRowsFallback = ({ table }) => (
+        <Fade in={table.getState().noRow} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
             <Stack sx={{
                 width: 1,
                 height: 1,
@@ -303,9 +293,9 @@ const useCustomTableProps = (props = {}) => {
                 </Typography>
             </Stack>
         </Fade>
-    ), [noRow])
+    )
 
-    const renderRowActionMenuItems = React.useCallback(({ row }) => [
+    const renderRowActionMenuItems = ({ row }) => [
         <MenuItem key="edit" onClick={() => toEdit(row.original)}>
             <ListItemIcon>
                 <EditIcon color='primary' />
@@ -319,9 +309,9 @@ const useCustomTableProps = (props = {}) => {
             </ListItemIcon>
             <ListItemText primary="Delete" />
         </MenuItem>,
-    ], [toEdit, toDelete])
+    ]
 
-    const renderBottomToolbar = React.useCallback(({ table, sx, simple = false }) => {
+    const renderBottomToolbar = ({ table, sx, simple = false }) => {
         return (
             <Box
                 sx={(theme) => ({
@@ -329,7 +319,7 @@ const useCustomTableProps = (props = {}) => {
                     px: 2 * scale,
                     py: 1.5 * scale,
                     borderTop: 1,
-                    borderColor: noRow && noRecord ? 'transparent' : theme.palette.border.main,
+                    borderColor: table.getState().noRow ? 'transparent' : theme.palette.border.main,
                     borderTopLeftRadius: 0,
                     borderTopRightRadius: 0,
                     display: 'flex',
@@ -376,18 +366,18 @@ const useCustomTableProps = (props = {}) => {
                         fontSize: 14 * fontScale,
                         marginLeft: 1 * scale
                     })}>
-                        {rowCount}
+                        {table.getState().rowCount}
                     </Box>
                 </Box>}
 
-                <Fade appear={simple} in={!noRow}>
+                <Fade appear={simple} in={!table.getState().noRow}>
                     <span>
                         <MRT_TablePagination table={table} />
                     </span>
                 </Fade>
             </Box>
         )
-    }, [noRow, noRecord, rowCount, mini])
+    }
 
     const renderTopToolbar = React.useCallback(({ table, simple, disabled }) => {
         let tools = ([
@@ -484,7 +474,6 @@ const useCustomTableProps = (props = {}) => {
     }, [mini, createTitle, toCreate])
 
     return {
-        rowCount: rowCount,
         initialState: {
             ...props.initialState,
             showColumnFilters: false,

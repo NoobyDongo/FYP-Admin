@@ -17,12 +17,16 @@ export default function useClientLogin() {
 
             if (response.data.valid) {
                 if (location == "/signin") {
-                    router.push("/")
-                    localStorage.setItem('lastVisitedPage', '/')
+                    if (!localStorage.getItem('lastVisitedPage')) {
+                        localStorage.setItem('lastVisitedPage', '/')
+                        router.push("/")
+                    }
+                    router.push(localStorage.getItem('lastVisitedPage'))
+                } else {
+                    localStorage.setItem('lastVisitedPage', location)
                 }
             } else if (location !== "/signin") {
-                error({error: "Session Timeout, Please Sign In"})
-                localStorage.setItem('lastVisitedPage', location)
+                error({ error: "Session Timeout, Please Sign In" })
                 router.push("/signin")
             }
             return response.data.valid

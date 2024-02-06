@@ -14,16 +14,24 @@ import useProgressListener from "@/components/Progress/useProgress/useProgressLi
 import useNotification from "@/components/Notifications/useNotification"
 import useForm from "@/components/Form/useForm";
 
-export default function Home(props) {
+export default function Home() {
 
-    const { startAsync } = useProgress("signin")
-    const { loading } = useProgressListener('signin')
+    //prevent spam :-))
+    const { startAsync } = useProgress("signin", 700)
+    const [previous, setPrevious] = React.useState({ username: "", password: "" })
+
+    const { loading: disabled } = useProgressListener("signin")
     const { error: displayError, normal: displayNotes } = useNotification()
 
     const router = useRouter()
 
     const signin = async () => {
-        validateRecord(async (formData) => {
+        validate(async (formData) => {
+            if (formData.username === previous.username && formData.password === previous.password) {
+                return displayError({ error: "Invalid Username or Password" })
+            }else{
+                setPrevious(formData)
+            }
             await startAsync(async () => {
                 try {
                     const response = await axios.post('/api/login', formData)
@@ -31,7 +39,6 @@ export default function Home(props) {
                     return response.data.valid
                 } catch (error) {
                     displayError({ error: "Login Request Failed" })
-                    // The request failed, you can handle the error here.
                     console.error(error)
                 }
             }).then((valid) => {
@@ -68,7 +75,7 @@ export default function Home(props) {
             }
         },
     ]).inputs, [])
-    const [setFormData, validateRecord, form] = useForm({ inputs, disabled: loading })
+    const {validate, form} = useForm({ inputs, disabled })
 
     return (
         <Box

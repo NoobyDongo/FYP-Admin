@@ -67,7 +67,7 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
         styleOverrides: {
           root: {
             '& .MuiBackdrop-root': {
-              backdropFilter: 'blur(1px) brightness(0.8)',
+              backdropFilter: 'blur(.5px) brightness(0.8)',
             },
           },
         },

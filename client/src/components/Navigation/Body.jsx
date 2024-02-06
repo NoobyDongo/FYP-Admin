@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import openCloseTransitionMixin from "@/utils/styles/openCloseTransitionMixin";
 import { drawerOpenedWidth, drawerClosedWidth } from './drawer/customDrawerConfig';
 
-export const Body = styled(Box, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
+export default styled(Box, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     flexShrink: 1,
     display: "flex",
     flexDirection: "column",

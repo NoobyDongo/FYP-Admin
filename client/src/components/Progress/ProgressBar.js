@@ -3,7 +3,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Slide from "@mui/material/Slide";
 import useProgressListener from "./useProgress/useProgressListener";
 
-const barHeight = 0.3;
+const barHeight = 0.25;
 
 export default function ProgressBar({ id }) {
     const { loading } = useProgressListener(id);
