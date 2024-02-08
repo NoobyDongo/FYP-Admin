@@ -15,6 +15,7 @@ import ProgressBar from "@/components/Progress/ProgressBar"
 import Fade from "@mui/material/Fade"
 import { SimplifiedNavOptions } from "./navoptions/options"
 import TableWrapper from "../Table/_wrapper"
+import link from "@/app/admin/link"
 
 
 export default function NavWrapper({ children }) {
@@ -52,7 +53,7 @@ export default function NavWrapper({ children }) {
     return (
         <Themed darkmode={darkmode}>
 
-            {valid && location !== "/signin" && <>
+            {valid && location !== link.signin && <>
                 <Fade in={valid} mountOnEnter unmountOnExit>
                     <div>
                         <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
@@ -75,7 +76,7 @@ export default function NavWrapper({ children }) {
                 </Body>
             </>}
 
-            {(!valid && location === "/signin") &&
+            {(!valid && location === link.signin) &&
                 <FadeWrapper>
                     {children}
                 </FadeWrapper>}

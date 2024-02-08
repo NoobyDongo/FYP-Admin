@@ -18,7 +18,7 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
     const { pagination, columnFilters, globalFilter, sorting } = options
 
     const router = useRouter()
-    const callAPI = useAPI('api/record', tableName, router)
+    const callAPI = useAPI('/api/record', tableName, router)
 
     const { customUpdate, customDelete, customCreate } = methods
     const { create = callAPI, get = callAPI, update = callAPI, delete: _del = callAPI } = methods

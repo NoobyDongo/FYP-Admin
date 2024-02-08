@@ -1,4 +1,5 @@
 'use client'
+import link from "@/app/admin/link";
 import axios from "axios";
 
 export default async (router, fn) => {
@@ -7,7 +8,7 @@ export default async (router, fn) => {
     if (response.data.valid) {
         localStorage.setItem('lastVisitedPage', window.location.pathname + window.location.hash);
         fn();
-    } else if (window.location.pathname !== "/signin") {
-        router.push("/signin");
+    } else if (window.location.pathname !== link.signin) {
+        router.push(link.signin);
     }
 }

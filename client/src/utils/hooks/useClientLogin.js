@@ -3,6 +3,7 @@ import { useRouter, usePathname } from "next/navigation"
 import React from "react"
 import axios from "axios"
 import useNotification from "@/components/Notifications/useNotification"
+import link from "@/app/admin/link"
 
 export default function useClientLogin() {
     const [valid, setValid] = React.useState(false)
@@ -16,18 +17,18 @@ export default function useClientLogin() {
             setValid(response.data.valid)
 
             if (response.data.valid) {
-                if (location == "/signin") {
+                if (location == link.signin) {
                     if (!localStorage.getItem('lastVisitedPage')) {
-                        localStorage.setItem('lastVisitedPage', '/')
-                        router.push("/")
+                        localStorage.setItem('lastVisitedPage', link.base)
+                        router.push(link.base)
                     }
                     router.push(localStorage.getItem('lastVisitedPage'))
                 } else {
                     localStorage.setItem('lastVisitedPage', location)
                 }
-            } else if (location !== "/signin") {
+            } else if (location !== link.signin) {
                 error({ error: "Session Timeout, Please Sign In" })
-                router.push("/signin")
+                router.push(link.signin)
             }
             return response.data.valid
         }

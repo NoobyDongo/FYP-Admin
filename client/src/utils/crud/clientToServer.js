@@ -1,9 +1,9 @@
+import link from "@/app/admin/link";
 import axios from "axios";
 
 //client to server
 export default (api, router) => async (props) => {
     //console.log("Before:", props);
-
     try {
         let res = await axios({
             url: api,
@@ -15,7 +15,7 @@ export default (api, router) => async (props) => {
     } catch (err) {
         //console.log("Error:", err?.response || 'no response');
         if (err.response.status === 401) {
-            router?.push("/signin");
+            router?.push(link.signin);
             return err.response.data;
         }
         return err.response.data;

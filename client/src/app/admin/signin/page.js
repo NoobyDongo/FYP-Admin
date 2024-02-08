@@ -13,6 +13,7 @@ import toTableColumns from '@/components/Table/utils/toTableColumns';
 import useProgressListener from "@/components/Progress/useProgress/useProgressListener"
 import useNotification from "@/components/Notifications/useNotification"
 import useForm from "@/components/Form/useForm";
+import link from "../link";
 
 export default function Home() {
 
@@ -46,9 +47,9 @@ export default function Home() {
                     displayNotes("Login Successful", "success")
 
                     setTimeout(() => {
-                        let page = localStorage.getItem('lastVisitedPage') || "/"
-                        if (page == "/signin") {
-                            page = "/"
+                        let page = localStorage.getItem('lastVisitedPage') || link.base
+                        if (page == link.signin) {
+                            page = link.base
                         }
                         router.push(page)
                     }, 1000)

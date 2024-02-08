@@ -14,6 +14,7 @@ import NavOption from './NavOption';
 import useWsConnection from './useWsConnection';
 import { toolSize } from './appbar/customAppbarConfig';
 import CustomTooltip from '../ToolTip/CustomTooltip';
+import link from '@/app/admin/link';
 
 export default function UserCorner(props) {
 
@@ -24,7 +25,7 @@ export default function UserCorner(props) {
     const router = useRouter();
     const signout = async () => {
         await axios.get('/api/logout');
-        router.push('/signin'); // redirect the user to the sign-in page
+        router.push(link.signin); // redirect the user to the sign-in page
     };
 
     const [open, setOpen] = useState(false);
