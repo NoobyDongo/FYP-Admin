@@ -59,13 +59,12 @@ export default function NavWrapper({ children }) {
                         <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
                             <ProgressBar id={1} />
                         </Box>
-                        <CustomAppbar ref={appbarRef} open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                         <CustomDrawer optionLists={SimplifiedNavOptions} toggleDarkMode={toggleDarkMode} open={open} />
                     </div>
                 </Fade>
 
                 <Body ref={bodyRef} open={open}>
-                    <DrawerHeader />
+                    <CustomAppbar ref={appbarRef} open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                     <Box id="pageContainer" sx={{ transition: "padding 200ms", px: { xs: 2, md: 4 }, }}>
                         <FadeWrapper key={location}>
                             <TableWrapper>

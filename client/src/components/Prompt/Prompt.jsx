@@ -10,6 +10,7 @@ import useProgressListener from "@/components/Progress/useProgress/useProgressLi
 import CustomDialog from "../Dialog/CustomDialog";
 import customDialogConfig from "../Dialog/customDialogConfig";
 import useForm from "../Form/useForm";
+import settings from "@/app/admin/settings";
 
 const actions = ["Create New Record", "Edit Record"]
 
@@ -22,7 +23,17 @@ export default function Prompt(props) {
     const [completed, setCompleted] = React.useState(false)
     const { setFormData, validate, form } = useForm({ data, inputs, mode: action, disabled: disabled || loading })
 
-    console.log("Prompt rendered")
+    const [autoBlock, setAutoBlocks] = React.useState(true)
+    const [autoClose, setAutoClose] = React.useState(false)
+
+    React.useEffect(() => {
+        setAutoBlocks(localStorage.getItem(
+            action == 0 ? settings.autoDisableCreateRecord : settings.autoDisableEditRecord
+        ) !== 'false')
+        setAutoClose(localStorage.getItem(
+            action == 0 ? settings.autoCloseCreatePrompt : settings.autoCloseEditPrompt
+        ) === 'true')
+    }, [])
 
     const clearForm = (fromData) => {
         setDisabled(false)
@@ -46,6 +57,15 @@ export default function Prompt(props) {
         }
     }, [others?.open])
 
+    const handleAfterSave = () => {
+        if (autoClose)
+            onClose()
+        if (autoBlock) {
+            setDisabled(true)
+            setCompleted(true)
+        }
+    }
+
     //const { startAsync : startAsync2 } = useProgress(1)
     const handleSave = async () => {
         /*
@@ -61,21 +81,16 @@ export default function Prompt(props) {
         //return
 
         validate(async (formData) => {
-            console.log("Form data", formData)
             if (useUpload)
                 listenToUpload(async (data) => startAsync(async () => await saveRecord(data)), formData, (res) => {
-                    console.log("save record result:", res)
                     if (res && !res.error) {
-                        setDisabled(true)
-                        setCompleted(true)
+                        handleAfterSave()
                     }
                 })
             else {
                 let res = await startAsync(async () => await saveRecord(formData))
-                console.log("save record result:", res)
                 if (res && !res.error) {
-                    setDisabled(true)
-                    setCompleted(true)
+                    handleAfterSave()
                 }
             }
         })

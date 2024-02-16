@@ -10,7 +10,6 @@ import openCloseTransitionMixin from "@/utils/styles/openCloseTransitionMixin"
 import React from 'react'
 import Stack from '@mui/material/Stack'
 import UserCorner from '../UserCorner'
-import SearchBar from '../SearchBar'
 import DrawerHeader from '../drawer/CustomDrawerHeader'
 import { closedWidthMixin } from '../mixin'
 import DynamicText from '../../DynamicText'
@@ -19,9 +18,8 @@ import DynamicText from '../../DynamicText'
 const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
 
     return (
-        <AppBar ref={ref} elevation={0} position="fixed" open={open}>
+        <AppBar ref={ref} elevation={0} position="sticky" open={open}>
             <Toolbar style={{ padding: 0, paddingRight: 16 }}>
-                <DrawerHeader open={open} />
                 <AppBarIcon>
                     <IconButton
                         color="primary"
@@ -48,7 +46,6 @@ const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
                     justifyContent: "flex-end",
                     alignItems: "center",
                 }}>
-                    <SearchBar></SearchBar>
                     <UserCorner></UserCorner>
                 </Stack>
             </Toolbar>

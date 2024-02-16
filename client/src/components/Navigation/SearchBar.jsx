@@ -41,8 +41,7 @@ export default function SearchBar(props) {
     const Router = useRouter();
 
     const addFn = (e) => {
-        if (e.link)
-            setOpen(false)
+        onClose()
     }
 
     const onOpen = () => {

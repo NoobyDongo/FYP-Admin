@@ -6,7 +6,7 @@ import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
 import useAPI from '@/utils/crud/useAPI'
 import useGlobalFilter from '../Table/utils/filters/useGlobalFilter'
@@ -16,10 +16,9 @@ import CloseIcon from '@mui/icons-material/Close'
 import Popper from '@mui/material/Popper'
 import DefaultTextField from './DefaultTextField'
 import Fade from "@mui/material/Fade";
-import Box from "@mui/material/Box"
 import Stack from "@mui/material/Stack"
 
-//what a load of crap
+//what a load of crap (╯°□°）╯︵ ┻━┻
 const RecordTextField = React.forwardRef((props, ref) => {
     const {
         input, onChange: onParentChange, value: unUsedValue, name, disabled, validationErrors, setValidationErrors, ...others
@@ -27,18 +26,18 @@ const RecordTextField = React.forwardRef((props, ref) => {
     const { full = false, sx } = input
     let useMultiple = false
 
-    const [inputValue, setInputValue] = useState('')
-    const [open, setOpen] = useState(false)
-    const [value, setValue] = useState(useMultiple ? [] : null)
-    const [options, setOptions] = useState([])
-    const [fetched, setFetched] = useState(false)
+    const [inputValue, setInputValue] = React.useState('')
+    const [open, setOpen] = React.useState(false)
+    const [value, setValue] = React.useState(useMultiple ? [] : null)
+    const [options, setOptions] = React.useState([])
+    const [fetched, setFetched] = React.useState(false)
     const loading = open && options.length === 0 && !fetched
     const router = useRouter()
-    const callApi = useAPI('api/record', input.table.name, router)
+    const callApi = useAPI('/api/record', input.table.name, router)
 
     const getOptionLabel = React.useCallback((option) => { return `${option.name || input.table.nameFn?.(option)} (id:${option.id})` }, [])
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (unUsedValue) {
             if (unUsedValue == value?.id) {
             } else {
@@ -52,7 +51,7 @@ const RecordTextField = React.forwardRef((props, ref) => {
 
     const globalFilter = useGlobalFilter(input.table.columns, input.table.props?.initialState?.columnVisibility, inputValue)
 
-    useImperativeHandle(ref, () => ({
+    React.useImperativeHandle(ref, () => ({
         getValue() { return full ? value : useMultiple ? value.map((e) => { id: e.id }) : value?.id || null },
         clear() {
             resetValue()
@@ -63,7 +62,7 @@ const RecordTextField = React.forwardRef((props, ref) => {
     }))
 
     //get options
-    useEffect(() => {
+    React.useEffect(() => {
         if (!open || value)
             return
         (async () => {
@@ -84,12 +83,11 @@ const RecordTextField = React.forwardRef((props, ref) => {
 
             clearTimeout(timeoutId)
             setFetched(true)
-            //const response = await 
         })()
     }, [inputValue, open])
 
     //reset options
-    useEffect(() => {
+    React.useEffect(() => {
         if (open)
             return
         setOptions([])
@@ -104,17 +102,14 @@ const RecordTextField = React.forwardRef((props, ref) => {
         tempValue.current = null
         tempLabel.current = null
         setValue(newValue)
-        //onParentChange(fullRecord ? newValue : newValue?.id || null)
-        console.log(newValue)
     }
 
     const resetValue = () => {
         setValue(useMultiple ? [] : null)
     }
 
-    const [skipUpdate, setSkipUpdate] = useState(true)
-    const onInputChange = useCallback((e, newInputValue) => {
-        console.log("onInputChange")
+    const [skipUpdate, setSkipUpdate] = React.useState(true)
+    const onInputChange = React.useCallback((e, newInputValue) => {
         if (skipUpdate) {
             return
         }
@@ -133,20 +128,10 @@ const RecordTextField = React.forwardRef((props, ref) => {
             setOpen(true)
         }
     }, [skipUpdate, open, value])
-    const handleKeyDown = (event) => {
-        /*
-        console.log("handleKeyDown", event.key)
-        if (event.key === 'Enter') {
-            setValue(tempValue.current)
-        }
-        */
-    }
 
-
-    const tempValue = useRef()
-    const tempLabel = useRef()
+    const tempValue = React.useRef()
+    const tempLabel = React.useRef()
     const onMenuOpen = () => {
-        console.log("onMenuOpen")
         if (value) {
             tempValue.current = value
             tempLabel.current = inputValue
@@ -233,7 +218,6 @@ const RecordTextField = React.forwardRef((props, ref) => {
                         ...params.InputProps,
                         onFocus: () => setSkipUpdate(false),
                         onBlur: () => setSkipUpdate(true),
-                        onKeyDown: handleKeyDown,
                         endAdornment: (
                             <>
                                 {loading ? <CircularProgress color="inherit" size={20} /> : null}

@@ -44,7 +44,7 @@ const navOptions = [
         },
         name: "Product",
         icon: <Category />,
-        link: `${link.product}#0`,
+        link: link.product,
         base: link.product,
         ascontent: true,
         content: [
@@ -53,7 +53,7 @@ const navOptions = [
                 displayname: {
                     nav: "Type",
                 },
-                link: `${link.product}#1`,
+                link: `${link.product}#0`,
             },
             {
                 name: "Product Origin",
@@ -133,6 +133,7 @@ const configurateOption = (option, tabs) => {
             name: sanitizeString(item.name),
             displayname: capitalizeEachWord(item.displayname?.tab || item.name),
         }))
+        console.log('tabs', tabs)
     }
     if (updatedOption.link) {
         var str = updatedOption.link.split("#")
@@ -158,8 +159,9 @@ const configurateOption = (option, tabs) => {
             return res
         }
         updatedOption.func = updatedOption.hash || pendingObject ? (window, router) => {
-            router.push(updatedOption.link + '#' + updatedOption.hash);
+            router.push(updatedOption.link);
             window.dispatchEvent(event({ path: updatedOption.link, hash: updatedOption.hash }))
+            console.log('pushing to', updatedOption.link + (updatedOption.hash ? '#' + updatedOption.hash : ''))
         } : (window, router) => {
             console.log('pushing to', updatedOption.link)
             router.push(updatedOption.link)

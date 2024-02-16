@@ -18,6 +18,7 @@ import useCreateEditDeletePrompts from '../Prompt/useCreateEditDeletePrompts'
 import FadeWrapper from '../FadeWrapper'
 import useCustomTransition from '../../utils/hooks/useCustomTransition'
 import GET from '@/utils/crud/get'
+import Box from '@mui/material/Box';
 
 function usePagenation(dependency = []) {
     const [pagination, setPagination] = React.useState({
@@ -58,7 +59,6 @@ async function getCount(tablename) {
 function useRowCount(data, pagination, setPagination, valid) {
     const rowCount = React.useMemo(() => data?.totalElements || 0, [data])
     const lastRowCount = React.useMemo(() => rowCount, [pagination, rowCount > 0])
-    console.log("rowCount", rowCount, "lastRowCount", lastRowCount)
 
     React.useEffect(() => {
         let size = pagination.pageSize
@@ -80,7 +80,6 @@ function useRowCount(data, pagination, setPagination, valid) {
 
 const RawTable = (props) => {
     const enableSelection = false
-    console.log('tableRendered')
 
     const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
 
@@ -222,9 +221,8 @@ const RawTable = (props) => {
         )
     }, [refetch, refetchTotalRowCount])
 
-    const { renderTopToolbar, ...tableProps } = useCustomTableProps({
+    const { renderTopToolbar, renderBottomToolbar, ...tableProps } = useCustomTableProps({
         initialState,
-        pagination,
         setPagination,
         rowCount: rowCount,
         enableSelection,
@@ -243,8 +241,10 @@ const RawTable = (props) => {
         ...tableProps,
 
         enableTopToolbar: isFullScreen,
+        enableBottomToolbar: isFullScreen,
         ...isFullScreen && {
-            renderTopToolbar
+            renderTopToolbar,
+            renderBottomToolbar
         },
 
         manualPagination: true,
@@ -299,12 +299,14 @@ const RawTable = (props) => {
         <>
             <div className='MuiPaper-root'>
                 {renderTopToolbar({ table })}
-                <FadeWrapper variants={{
-                    initial: { scale: 1, opacity: 0 },
-                }}
-                    transition={{ duration: .35 }}>
-                    <MaterialReactTable table={table} />
-                </FadeWrapper>
+                <Box className="fadeWrapper" sx={{ pl: 2 }}>
+                    <FadeWrapper keyValue={pagination.pageIndex} variants={{
+                        initial: { scale: 1, opacity: 0 },
+                    }} transition={{ duration: .45 }}>
+                        <MaterialReactTable table={table} />
+                    </FadeWrapper>
+                    {renderBottomToolbar({ table })}
+                </Box>
             </div>
             {CreatePrompt}
             {EditPrompt}

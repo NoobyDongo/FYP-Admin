@@ -142,12 +142,14 @@ const sharedPalette = (shade, defaultTheme) => {
   let darkMode = defaultTheme.palette.mode === 'dark'
   let background = darken(defaultTheme.palette.background.default, darkMode? .10 : .000)
   let paper = darken(defaultTheme.palette.background.paper, darkMode? .15 : 0)
+  let primary = orange[shade]
+  let secondary = red[500]
   return ({
     primary: {
-      main: orange[shade],
+      main: primary,
     },
     secondary: {
-      main: red[500],
+      main: secondary,
     },
     scrollBar: {
       main: darkMode ? lighten(background, .05) : darken(background, .15),
@@ -168,6 +170,25 @@ const sharedPalette = (shade, defaultTheme) => {
     },
     border: {
       main: alpha(defaultTheme.palette.text.disabled, 0.1)
+    },
+    progressbar:{
+      main: darkMode? primary : secondary,
+    },
+    navbar: {
+      backgroundColor: {
+        primary: darkMode ? 'transparent' : "#FFFFFF !important",
+        secondary: 'transparent',
+      },
+      text: {
+        fontWeight:{
+          primary: 600,
+          secondary: 400
+        },
+        color: {
+          primary: primary,
+          secondary: darkMode ? defaultTheme.palette.text.primary : "#FFFFFF",
+        }
+      }
     },
     logo: {
       main: darkMode ? orange[500] : "#FFFFFF",

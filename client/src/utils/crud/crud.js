@@ -112,8 +112,8 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
                 //console.log("res", e)
                 return e
             } catch (err) {
-                //console.log(err)
-                alertError({ error: err })
+                console.log(err)
+                alertError({ error: 'Something went wrong' })
             }
         })
     }

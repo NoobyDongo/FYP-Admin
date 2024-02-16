@@ -96,7 +96,6 @@ const useCustomTableProps = (props = {}) => {
     const theme = useTheme()
 
     const {
-        pagination,
         setPagination,
         enableSelection,
         enableColumnFilterModes,
@@ -161,7 +160,7 @@ const useCustomTableProps = (props = {}) => {
     const muiTableContainerProps = ({ table }) => {
         return ({
             sx: {
-                overflow: table.getState().noRow || table.getState().isLoading ? "hidden" : "overlay",
+                overflow: table.getState().noRow || table.getState().isLoading? 'hidden' : 'overlay',
                 scrollbarGutter: 'stable',
                 minHeight: 300,
                 pl: 1,
@@ -176,14 +175,15 @@ const useCustomTableProps = (props = {}) => {
                     left: 0,
                 },
 
-                ...(table.getState().noRecord && table.getState().columnFilters.length > 0 && {
+                ...((table.getState().noRecord || table.getState().noRow) && table.getState().columnFilters.length > 0 && {
                     '&>.MuiTable-root:has(.norecord)': {
                         '&>thead': {
                             '&>tr': {
                                 width: 1,
                                 overflowX: "overlay",
+                                scrollbarWidth: 'none',
                                 scrollbarGutter: 'stable',
-                            }
+                            },
                         },
                     },
                 }),
@@ -198,8 +198,9 @@ const useCustomTableProps = (props = {}) => {
                                 opacity: 0,
                                 borderColor: 'transparent',
                             }),
+                            boxShadow: "none",
                             transitionProperty: 'border-color opacity',
-                            transitionDuration: '200ms',
+                            transitionDuration: '300ms',
                             backgroundColor: `transparent !important`,
                             '&>th:first-of-type': {
                                 ...(mini && { pl: 0, }),
@@ -233,14 +234,14 @@ const useCustomTableProps = (props = {}) => {
                                             },
                                             '& .MuiButtonBase-root.Mui-active:has(.MuiSvgIcon-root[data-testid="SyncAltIcon"])': {
                                                 opacity: 0,
-                                                transition: 'opacity 200ms',
+                                                transition: 'opacity 300ms',
                                             }
                                         }
                                     },
                                     '& > .Mui-TableHeadCell-Content-Actions': {
                                         opacity: 0,
                                         transitionProperty: 'opacity',
-                                        transitionDuration: '200ms',
+                                        transitionDuration: '300ms',
                                     },
                                 },
                                 '&:hover': {
@@ -276,7 +277,7 @@ const useCustomTableProps = (props = {}) => {
                     '&>tbody': {
                         transitionProperty: 'opacity',
                         transitionDelay: '100ms',
-                        transitionDuration: '200ms',
+                        transitionDuration: '300ms',
                         '&>tr:not(:hover):not(.Mui-selected)': {
                             '&>td': {
                                 backgroundColor: theme.palette.background.default,
@@ -399,7 +400,7 @@ const useCustomTableProps = (props = {}) => {
                     }
                 })}>
                     <Stack sx={{ pl: 1, alignItems: "baseline" }}>
-                        <Collapse sx={{transitionDelay: 400}} timeout={600} in={Boolean(table.getState().totalRowCount && table.getState().rowCount != table.getState().totalRowCount && !table.getState().isLoading)}>
+                        <Collapse sx={{ transitionDelay: 400 }} timeout={600} in={Boolean(table.getState().totalRowCount && table.getState().rowCount != table.getState().totalRowCount && !table.getState().isLoading)}>
                             <Box sx={(theme) => ({
                                 width: "fit-content",
                                 whiteSpace: "nowrap",
@@ -560,8 +561,8 @@ const useCustomTableProps = (props = {}) => {
             <Box
                 sx={{
                     //backgroundColor: lighten(theme.palette.background.default, 0.05),
-                    pb: 2.5,
                     pl: mini ? 0 : 1 * scale,
+                    pb: 1,
                     pt: table.getState().isFullScreen ? 1 : 0,
                     display: 'flex',
                     alignItems: "center",
@@ -571,6 +572,7 @@ const useCustomTableProps = (props = {}) => {
                 }}
             >
                 <Box sx={(theme) => ({
+                    pb: 1.5,
                     display: 'flex',
                     height: "fit-content",
                     alignItems: 'center',

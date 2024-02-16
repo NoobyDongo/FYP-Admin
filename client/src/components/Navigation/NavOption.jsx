@@ -11,8 +11,7 @@ import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box';
 import LayersIcon from '@mui/icons-material/Layers';
 import CustomHtmlTooltip from "../ToolTip/CustomHtmlTooltip"
-
-export const changeLocationEvent = (e) => new CustomEvent("changeLocation", { detail: e })
+import changeLocationEvent from "../../utils/events/changeLocationEvent"
 
 const iconSize = 25
 
@@ -76,13 +75,19 @@ export default function NavOption(props) {
             } placement="right">
 
                 <CustomListItemButton
-                    sx={{
+                    sx={theme => ({
                         minHeight: height,
                         height: height,
                         px: 1.5,
                         borderRadius: 2,
+                        backgroundColor: active ?
+                            theme.palette.navbar.backgroundColor.primary :
+                            theme.palette.navbar.backgroundColor.secondary,
+                        color: (active ?
+                            theme.palette.navbar.text.color.primary :
+                            textColor || theme.palette.navbar.text.color.secondary),
                         ...buttonSx
-                    }}
+                    })}
                     {...otherButtonProps}
                     onClick={onClick}
                 >
@@ -94,6 +99,7 @@ export default function NavOption(props) {
                                 gap: 1.2,
                                 justifyContent: "initial",
                                 alignItems: "center",
+                                color: 'inherit',
                                 ...iconSx
                             }} {...otherIconProps}>
                                 <Box sx={{
@@ -128,7 +134,7 @@ export default function NavOption(props) {
                         </>
                     }
                     {!parent &&
-                        <CustomListItemIcon open={open} active={active} sx={{ ...iconSx }} {...otherIconProps}>
+                        <CustomListItemIcon open={open} active={active} sx={{ color: 'inherit', ...iconSx }} {...otherIconProps}>
                             {icon}
                         </CustomListItemIcon>
                     }
@@ -136,9 +142,13 @@ export default function NavOption(props) {
                         <CustomListItemText
                             primaryTypographyProps={{
                                 fontSize: 13.5,
-                                fontWeight: 500,
-                                color: (active ? 'logo.main' : textColor || 'text.secondary'),
-                                ...othertextSx
+                                ...othertextSx,
+                                sx: theme => ({
+                                    fontWeight: active ?
+                                        theme.palette.navbar.text.fontWeight.primary :
+                                        theme.palette.navbar.text.fontWeight.secondary,
+                                    ...othertextSx?.sx
+                                })
                             }}
                             primary={displayName}
                             {...otherTextProps}

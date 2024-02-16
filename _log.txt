@@ -369,3 +369,15 @@ added preference to table component
 added scroll to topbar and bottombar
 added delay to tabMenu indicator's transition to avoid lag...
 
+17/2/2024
+navigation menu is secretly very buggy...
+to do:
+socket security
+done:
+minor UI changes
+added feedback when redirected by hashMenu
+removed searchbar
+status of darkmode is now saved in localStorage
+added a settings page
+correct some navbar/progressbar color issues
+fixed RecordTextField

@@ -12,6 +12,7 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import Stack from '@mui/material/Stack';
 import IconButtonWithTooltip from '../IconButtonWithTooltip'
 import Close from '@mui/icons-material/Close';
+import settings from "@/app/admin/settings";
 
 export default function CustomDialog(props) {
     const {
@@ -22,6 +23,7 @@ export default function CustomDialog(props) {
     const { sx: paperSx, ...otherPaperProps } = PaperProps || {}
 
     const [fullScreen, setFullScreen] = React.useState(false)
+    const [allowBackdropClose, setAllowBackdropClose] = React.useState(true)
 
     const exitIcon = React.useMemo(() => (
         <IconButtonWithTooltip onClick={handleClose}>
@@ -37,7 +39,13 @@ export default function CustomDialog(props) {
         </IconButtonWithTooltip>
     ), [fullScreen])
 
+    React.useEffect(() => {
+        setAllowBackdropClose(localStorage.getItem(settings.promptAllowBackdropClickClose) !== 'false')
+    }, [])
+
     const onClose = React.useCallback((event, reason) => {
+        if (!allowBackdropClose && reason === 'backdropClick')
+            return
         handleClose(event, reason)
     }, [handleClose])
 
