@@ -35,7 +35,7 @@ function usePagenation(dependency = []) {
 }
 /*
 async function getCount(tablename) {
-    let api = dataFn('api/record/' + tablename)
+    let api = dataFn('api/record/')
     let res = await api({
         method: 'GET',
         option: "count"
@@ -73,21 +73,98 @@ const RawTable = (props) => {
     const enableSelection = false
 
     const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
-    const [columnVisibility, setColumnVisibility] = React.useState(initialState?.columnVisibility || {})
-    const [columnFilters, setColumnFilters] = React.useState(baseSearchCriteria ? [baseSearchCriteria] : [])
-    
-    
-    /*
-    const handleOnColumnFiltersChange = React.useCallback((columnFilters) => {
-        setColumnFilters(baseSearchCriteria? [baseSearchCriteria, ...columnFilters] : columnFilters)
-    }, [columnFilters])
-    */
-    const [rawGlobalFilter, _setGlobalFilter] = React.useState('')
-    const [, setGlobalFilter] = useCustomTransition(_setGlobalFilter)
-    const [sorting, setSorting] = React.useState([])
-    const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
+
+    const getStorage = (key, defaultValue) => {
+        try {
+            return JSON.parse(sessionStorage.getItem(key + '_' + tableName)) || defaultValue
+        } catch (err) {
+            return defaultValue
+        }
+    }
+    const setStorage = (key, value) => {
+        sessionStorage.setItem(key + '_' + tableName, JSON.stringify(value))
+    }
+
+    const [columnFilters, _setColumnFilters] = React.useState(
+        baseSearchCriteria ?
+            [...getStorage('mrt_columnFilters', []), baseSearchCriteria] :
+            [...getStorage('mrt_columnFilters', [])]
+    )
+    const [columnVisibility, _setColumnVisibility] = React.useState(
+        initialState?.columnVisibility ?
+            { ...getStorage('mrt_columnVisibility', {}), ...initialState.columnVisibility } :
+            { ...getStorage('mrt_columnVisibility', {}) }
+    )
+    const [density, _setDensity] = React.useState(
+        getStorage('mrt_density', 'comfortable')
+    )
+    const [rawGlobalFilter, __setGlobalFilter] = React.useState(
+        getStorage('mrt_globalFilter', '')
+    )
+    const [showGlobalFilter, _setShowGlobalFilter] = React.useState(
+        getStorage('mrt_showGlobalFilter', false)
+    )
+    const [showColumnFilters, _setShowColumnFilters] = React.useState(
+        getStorage('mrt_showColumnFilters', false)
+    )
+    const [sorting, _setSorting] = React.useState(
+        getStorage('mrt_sorting', [])
+    )
 
     const globalFilter = useGlobalFilter(columns, columnVisibility, rawGlobalFilter)
+    const [, _setGlobalFilter] = useCustomTransition(__setGlobalFilter)
+
+    const setColumnFilters = React.useCallback((value) => {
+        _setColumnFilters(prev => {
+            let res = value(prev)
+            setStorage(
+                'mrt_columnFilters', res || []
+            );
+            return res
+        })
+    }, []);
+    const setColumnVisibility = React.useCallback((value) => {
+        _setColumnVisibility(prev => {
+            let res = value(prev)
+            setStorage(
+                'mrt_columnVisibility', res || {}
+            );
+            return res
+        })
+    }, []);
+    const setDensity = React.useCallback((value) => {
+        _setDensity(value)
+        setStorage(
+            'mrt_density', value
+        );
+    }, []);
+    const setGlobalFilter = React.useCallback((value) => {
+        _setGlobalFilter(value)
+        setStorage(
+            'mrt_globalFilter', value ?? '',
+        );
+    }, []);
+    const setShowGlobalFilter = React.useCallback((value) => {
+        _setShowGlobalFilter(value)
+        setStorage(
+            'mrt_showGlobalFilter', value
+        );
+    }, []);
+    const setShowColumnFilters = React.useCallback((value) => {
+        _setShowColumnFilters(value)
+        setStorage(
+            'mrt_showColumnFilters', value
+        );
+    }, []);
+    const setSorting = React.useCallback((value) => {
+        _setSorting(value)
+        setStorage(
+            'mrt_sorting', value
+        );
+    }, []);
+
+    const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
+
 
     const [useCreate, useGet, useUpdate, useDelete] = CRUD(
         { tableName, ...crud }, false,
@@ -98,19 +175,7 @@ const RawTable = (props) => {
     const { mutateAsync: updateRecord, isPending: isUpdatingRecord } = useUpdate()
     const { mutateAsync: deleteRecord, isPending: isDeletingRecord } = useDelete()
 
-    const [loading, startLoading] = React.useTransition()
-    /*
-        const [data, setData] = React.useState([])
-        React.useEffect(() => {
-            startLoading(() => {
-                setData((fetchAll ? fetchedRecords : fetchedRecords?.content) || [])
-            })
-        }, [fetchedRecords, columns])
-    */
     const data = React.useMemo(() => (fetchedRecords?.content || []), [fetchedRecords])
-    React.useEffect(() => {
-        console.log('table fetchedRecords', fetchedRecords)
-    }, [fetchedRecords])
 
     const [rowCount, noRecord] = useRowCount(fetchedRecords, pagination, setPagination,
         columnFilters.length < 1 && !rawGlobalFilter && sorting.length < 1)
@@ -119,7 +184,7 @@ const RawTable = (props) => {
         inputs, upload, createRecord, updateRecord, deleteRecord
     })
 
-    const renderEmptyRowsFallback = React.useCallback(({table}) => {
+    const renderEmptyRowsFallback = React.useCallback(({ table }) => {
         return (
             <Fade in={table.getState().noRow && !table.getState().isLoading && !table.getState().isFetching} style={{ transitionDelay: '200ms' }} timeout={300} mountOnEnter unmountOnExit>
                 <Stack sx={{
@@ -135,7 +200,9 @@ const RawTable = (props) => {
                     <Typography variant="body" fontStyle="italic" align="center" color="textSecondary">
                         No record to display
                     </Typography>
-                    <Button variant="outlined" endIcon={<CachedIcon />} onClick={refetch}>fetch again</Button>
+                    {table.getState().noRecord && !table.getState().searching &&
+                        <Button variant="outlined" endIcon={<CachedIcon />} onClick={refetch}>fetch again</Button>
+                    }
                 </Stack>
             </Fade>
         )
@@ -176,6 +243,10 @@ const RawTable = (props) => {
         onGlobalFilterChange: setGlobalFilter,
         onSortingChange: setSorting,
 
+        onDensityChange: setDensity,
+        onShowColumnFiltersChange: setShowColumnFilters,
+        onShowGlobalFilterChange: setShowGlobalFilter,
+
         onIsFullScreenChange: setIsFullScreen,
 
         renderEmptyRowsFallback,
@@ -183,14 +254,21 @@ const RawTable = (props) => {
 
         state: {
             ...props.state,
+
             columnFilters,
+            columnVisibility,
+            density,
+            showColumnFilters,
+            showGlobalFilter,
+            sorting,
+
             globalFilter: rawGlobalFilter,
             pagination,
-            sorting,
             columnVisibility,
             isFullScreen,
             rowCount,
-            noRecord,
+            searching: columnFilters.length > 0 || rawGlobalFilter,
+            noRecord: noRecord ,
             noRow: rowCount < 1,
 
             //showGlobalFilter: !noRecord && showSearchBar,

@@ -23,6 +23,7 @@ import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import React from 'react'
 import { useTheme } from '@emotion/react'
 import CustomTooltip from '@/components/ToolTip/CustomTooltip'
+import Collapse from '@mui/material/Collapse';
 
 
 const tableProps = {
@@ -95,7 +96,6 @@ const useCustomTableProps = (props = {}) => {
         enableSelection,
         enableColumnFilterModes,
         mini,
-        showSearchBar,
         disableTopToolbar,
         disableBottomToolbar,
         createTitle = 'Create New Record',
@@ -157,11 +157,12 @@ const useCustomTableProps = (props = {}) => {
     const muiTableContainerProps = ({ table }) => {
         return ({
             sx: {
-                overflow: table.getState().noRow || table.getState().isLoading ? "hidden" : "overlay",
+                overflow: table.getState().noRow || table.getState().isLoading ? "hidden" : "overlay" ,
                 scrollbarGutter: 'stable',
                 minHeight: 300,
                 pl: 1,
                 ...mini && { height: 600, maxHeight: 600 },
+
                 "&>.MuiBox-root": {
                     position: 'absolute',
                     height: 1,
@@ -171,13 +172,29 @@ const useCustomTableProps = (props = {}) => {
                     left: 0,
                 },
 
+                ...(table.getState().noRecord && table.getState().searching && {
+                    '&>.MuiTable-root:has(.norecord)':{
+                        '&>thead': {
+                            '&>tr': {
+                                width: 1,
+                                overflowX: "overlay",
+                                scrollbarGutter: 'stable',
+                            }
+                        },
+    
+                    },
+                }),
+
                 '&>.MuiTable-root': {
                     '&>thead': {
                         '&>tr': {
                             borderBottom: 1,
-                            opacity: table.getState().noRow && table.getState().noRecord ? 0 : 1,
-                            userSelect: table.getState().noRow && table.getState().noRecord ? 'none' : 'auto',
-                            borderColor: table.getState().noRow && table.getState().noRecord ? 'transparent' : theme.palette.border.main,
+                            borderColor: theme.palette.border.main,
+                            ...(table.getState().noRecord && !table.getState().searching && {
+                                pointerEvents: 'none',
+                                opacity: 0,
+                                borderColor: 'transparent',
+                            }),
                             transitionProperty: 'border-color opacity',
                             backgroundColor: `transparent !important`,
                             '&>th:first-of-type': {
@@ -360,7 +377,7 @@ const useCustomTableProps = (props = {}) => {
                         display: "none"
                     },
                 })}>
-                    Total Record:
+                    Number of Record:
                     <Box component='span' sx={(theme) => ({
                         color: theme.palette.primary.main,
                         fontSize: 14 * fontScale,
@@ -419,6 +436,7 @@ const useCustomTableProps = (props = {}) => {
             </Box>,
 
             <MRT_ToggleFiltersButton table={table} key={2} />,
+
             <MRT_ShowHideColumnsButton table={table} key={3} />,
             !mini && <MRT_ToggleDensePaddingButton table={table} key={4} />,
             <MRT_ToggleFullScreenButton table={table} key={5} />,
@@ -476,8 +494,6 @@ const useCustomTableProps = (props = {}) => {
     return {
         initialState: {
             ...props.initialState,
-            showColumnFilters: false,
-            showGlobalFilter: showSearchBar,
             columnPinning: { right: ['mrt-row-actions'] }
         },
         ...tableProps,

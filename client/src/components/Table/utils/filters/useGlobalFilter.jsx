@@ -10,7 +10,7 @@ export default function useGlobalFilter(rawColumns, columnVisibility, rawGlobalF
     );
 
     const globalFilter = React.useMemo(() => {
-        if (rawGlobalFilter) {
+        if (rawGlobalFilter && typeof rawGlobalFilter === 'string') {
             let columnAndValue = findFilterColumn(rawGlobalFilter);
             //console.log(columnAndValue, globleFilterColumns);
             if (columnAndValue.id && globleFilterColumns.has(columnAndValue.id))

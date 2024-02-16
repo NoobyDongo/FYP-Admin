@@ -140,7 +140,7 @@ const sharedTypographyTheme = {
 const sharedPalette = (shade, defaultTheme) => {
 
   let darkMode = defaultTheme.palette.mode === 'dark'
-  let background = darken(defaultTheme.palette.background.default, darkMode? .15 : .000)
+  let background = darken(defaultTheme.palette.background.default, darkMode? .10 : .000)
   let paper = darken(defaultTheme.palette.background.paper, darkMode? .15 : 0)
   return ({
     primary: {
