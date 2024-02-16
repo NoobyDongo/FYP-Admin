@@ -13,7 +13,7 @@ import React from 'react'
 import toFilters from '../../components/Table/utils/filters/toFilters'
 import isEmptyObject from '../isEmptyObject'
 
-export default function CRUD({ tableName, methods = {}, allowSimple = false }, fetchAll, options = {}) {
+export default function CRUD({ tableName, methods = {}, allowSimple = false, refetchTotalRowCount}, fetchAll, options = {}) {
 
     const { pagination, columnFilters, globalFilter, sorting } = options
 
@@ -138,7 +138,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: [tableName] })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 
@@ -199,7 +204,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 
@@ -219,7 +229,12 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false }, f
             onError: (err) => {
                 alertError({ error: err })
             },
-            ...(!fetchAll && { onSettled: () => queryClient.invalidateQueries({ queryKey }) })
+            ...(!fetchAll && {
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: [tableName] })
+                    refetchTotalRowCount()
+                }
+            })
         })
     }
 

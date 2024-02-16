@@ -14,6 +14,7 @@ export default function TabMenu({ tabs, value, handleChange, TabProps, sx, ...ot
     return (
         <Tabs {...other} value={value} onChange={handleChange} sx={{
             "& .MuiTabs-indicator": {
+                transitionDelay: '300ms',
                 transform: "scaleX(.85) translateY(-5px)",
                 borderRadius: 50,
             },

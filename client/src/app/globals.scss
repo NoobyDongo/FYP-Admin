@@ -66,6 +66,23 @@ a {
       & .MuiTableContainer-root {
         flex: 1;
         flex-basis: 0;
+
+        & .MuiTableCell-root {
+          white-space: nowrap;
+
+          & .MuiButtonBase-root:not(.MuiIconButton-root){
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+          }
+
+          & .imagecell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+          }
+        }
+
       }
     }
   }

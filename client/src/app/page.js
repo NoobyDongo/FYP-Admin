@@ -1,12 +1,6 @@
-//'use client'
-//import React from 'react';
-/*
-import { Bar, Pie, Doughnut } from 'react-chartjs-2';
-import { Chart, LinearScale, CategoryScale, BarElement, ArcElement, Legend } from 'chart.js';
-import { Box, Paper, Stack, Typography, lighten } from '@mui/material';
-import { useTheme } from '@emotion/react';
-*/
-//Chart.register(LinearScale, CategoryScale, BarElement, ArcElement, Legend);
+'use client'
+import { Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 
 export default function Home() {
@@ -89,7 +83,13 @@ export default function Home() {
 
 */
 
+  const router = useRouter();
+
   return (
-    <></>
+    <>
+      <Button variant="contained" onClick={() => router.push('/admin')} color="primary">
+        To Admin
+      </Button>
+    </>
   );
 }

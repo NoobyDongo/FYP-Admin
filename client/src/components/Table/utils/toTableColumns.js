@@ -191,10 +191,8 @@ function TableColumn(props) {
                 [formEditMode.create]: !noncreatetype.includes(inputType) && input[formEditMode.create] !== false,
                 [formEditMode.update]: input[formEditMode.update] !== false,
             },
-            ...((!inputType || inputType === "text") && TableTextCell()),
             ...(inputType && {
                 ...(inputType === "image" && TableImageTextCell({ accessorFn })),
-                ...(inputType === "select" && TableSelectCell(input)),
             }),
         }),
     };
@@ -207,11 +205,7 @@ function TableImageTextCell(props) {
     return {
         Cell: ({ renderedCellValue, row }) => {
             return (
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                }}>
+                <div className="imagecell">
                     <Box sx={{
                         maxHeight: 0,
                         display: 'flex',
@@ -235,32 +229,8 @@ function TableImageTextCell(props) {
                         />
                     </Box>
                     {showText && <span style={{ whiteSpace: "nowrap" }}>{renderedCellValue}</span>}
-                </Box>
+                </div>
             );
         },
-    };
-}
-
-
-function TableTextCell() {
-    return {
-        Cell: ({ renderedCellValue }) => {
-            return (
-                <Box sx={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span>{renderedCellValue}</span>
-                </Box>
-            );
-        },
-    };
-}
-
-function TableSelectCell(input) {
-
-    return {
-        Cell: ({ cell }) => (
-            <Box sx={{ textTransform: "capitalize" }}>
-                {cell.getValue()}
-            </Box>
-        ),
     };
 }

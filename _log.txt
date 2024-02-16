@@ -353,3 +353,19 @@ removed fetchAll option from table component
 improved custom dialog by adding a fullscreen toggle and preventing it from overflowing from the screen
 changed the return type of form component to object
 fixed a bug in the useClientLogin which marks the lastVisitedPage when client hasnt login
+
+8/2/2024
+done:
+moved admin panel to /admin
+
+10/2/2024 - 16/2/2024
+to do:
+coupons and promotions, this has to wait
+socket security
+done:
+added a shortcut key to admin panel on the index page
+added more indicators to the table component regarding the numbers of records
+added preference to table component
+added scroll to topbar and bottombar
+added delay to tabMenu indicator's transition to avoid lag...
+

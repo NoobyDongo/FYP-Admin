@@ -40,8 +40,7 @@ const totalRowReq = {
     option: "count"
 }
 function useTotalRowCount(tablename) {
-    let res = GET('/api/record/' + tablename, totalRowReq, 0)
-    return res
+    return GET('/api/record/' + tablename, totalRowReq)
 }
 
 /*
@@ -57,10 +56,13 @@ async function getCount(tablename) {
 
 function useRowCount(data, pagination, setPagination, valid) {
     const rowCount = React.useMemo(() => data?.totalElements || 0, [data])
+    const [noRecord, setNoRecord] = React.useState(true)
     const lastRowCount = React.useMemo(() => rowCount, [pagination, rowCount > 0])
-    console.log("rowCount", rowCount, "lastRowCount", lastRowCount)
+    //console.log("rowCount", rowCount, "lastRowCount", lastRowCount)
 
     React.useEffect(() => {
+        if (noRecord && rowCount > 0)
+            setNoRecord(false)
         let size = pagination.pageSize
         let index = pagination.pageIndex
         let max = Math.ceil(rowCount / size)
@@ -75,14 +77,14 @@ function useRowCount(data, pagination, setPagination, valid) {
             }
     }, [rowCount])
 
-    return rowCount
+    return [rowCount, noRecord]
 }
 
 const RawTable = (props) => {
     const enableSelection = false
-    console.log('tableRendered')
+    console.log('Table Rendered')
 
-    const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
+    const { columns, initialState, tableName, crud, baseSearchCriteria, mini = false } = props
 
     const getStorage = (key, defaultValue) => {
         try {
@@ -173,12 +175,11 @@ const RawTable = (props) => {
         );
     }, []);
 
-    //const [rawRowCount, setRowCount] = React.useState(0)
-    const { data: totalRowCount = 0, refetch: refetchTotalRowCount } = useTotalRowCount(tableName)
     const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
 
+
     const [useCreate, useGet, useUpdate, useDelete] = CRUD(
-        { tableName, refetchTotalRowCount, ...crud }, false,
+        { tableName, ...crud }, false,
         { pagination, columnFilters, globalFilter, sorting })
 
     const { mutateAsync: createRecord, isPending: isCreatingRecord } = useCreate()
@@ -188,12 +189,12 @@ const RawTable = (props) => {
 
     const data = React.useMemo(() => (fetchedRecords?.content || []), [fetchedRecords])
 
+    const { data: totalRowCount } = useTotalRowCount(tableName)
 
-    const rowCount = useRowCount(fetchedRecords, pagination, setPagination, columnFilters.length < 1 && !rawGlobalFilter && sorting.length < 1)
+    const [rowCount, noRecord] = useRowCount(fetchedRecords, pagination, setPagination,
+        columnFilters.length < 1 && !rawGlobalFilter && sorting.length < 1)
 
-    const { CreatePrompt, EditPrompt, /*DeletePrompt,*/ toCreate, toEdit, toDelete } = useCreateEditDeletePrompts({
-        inputs, upload, createRecord, updateRecord, deleteRecord
-    })
+
 
     const renderEmptyRowsFallback = React.useCallback(({ table }) => {
         return (
@@ -212,21 +213,30 @@ const RawTable = (props) => {
                         No record to display
                     </Typography>
                     {table.getState().noRecord && !table.getState().searching &&
-                        <Button variant="outlined" endIcon={<CachedIcon />} onClick={() => {
-                            refetch()
-                            refetchTotalRowCount()
-                        }}>fetch again</Button>
+                        <Button variant="outlined" endIcon={<CachedIcon />} onClick={refetch}>fetch again</Button>
                     }
                 </Stack>
             </Fade>
         )
-    }, [refetch, refetchTotalRowCount])
+    }, [refetch])
+
+    const toCreate = React.useCallback(() => {
+        window.dispatchEvent(new CustomEvent('openPrompt', { detail: { type: 'create', tableName } }))
+    }, [tableName])
+
+    const toEdit = React.useCallback((record) => {
+        window.dispatchEvent(new CustomEvent('openPrompt', { detail: { type: 'edit', tableName, record } }))
+    }, [tableName])
+
+    const toDelete = React.useCallback((record) => {
+        window.dispatchEvent(new CustomEvent('openPrompt', { detail: { type: 'delete', tableName, record } }))
+    }, [tableName])
 
     const { renderTopToolbar, ...tableProps } = useCustomTableProps({
         initialState,
         pagination,
         setPagination,
-        rowCount: rowCount,
+        rowCount,
         enableSelection,
         toCreate,
         toEdit,
@@ -282,9 +292,9 @@ const RawTable = (props) => {
             columnVisibility,
             isFullScreen,
             totalRowCount,
-            rowCount: rowCount,
+            rowCount,
             searching: columnFilters.length > 0 || rawGlobalFilter,
-            noRecord: totalRowCount < 1,
+            noRecord: noRecord,
             noRow: rowCount < 1,
 
             //showGlobalFilter: !noRecord && showSearchBar,
@@ -295,26 +305,51 @@ const RawTable = (props) => {
         },
     })
 
-    return (
+    return [(
         <>
             <div className='MuiPaper-root'>
                 {renderTopToolbar({ table })}
                 <FadeWrapper variants={{
                     initial: { scale: 1, opacity: 0 },
-                }}
-                    transition={{ duration: .35 }}>
+                }} transition={{ duration: .35 }}>
                     <MaterialReactTable table={table} />
                 </FadeWrapper>
             </div>
-            {CreatePrompt}
-            {EditPrompt}
         </>
-    )
+    ), createRecord, updateRecord, deleteRecord] 
 }
 
 export default function CrudTable(props) {
+    const { inputs, upload = false, ...others } = props
+
+    const [Table, createRecord, updateRecord, deleteRecord] = RawTable(others)
+
+    const { CreatePrompt, EditPrompt, toCreate, toEdit, toDelete } = useCreateEditDeletePrompts({
+        inputs, upload, createRecord, updateRecord, deleteRecord
+    })
+
+    React.useEffect(() => {
+        const openPrompt = (e) => {
+            const { type, record } = e.detail
+            if (type === 'create')
+                toCreate()
+            if (type === 'edit')
+                toEdit(record)
+            if (type === 'delete')
+                toDelete(record)
+        }
+        window.addEventListener('openPrompt', openPrompt)
+        return () => {
+            window.removeEventListener('openPrompt', openPrompt)
+        }
+    }, [])
+
     return (
-        <RawTable {...props} />
+        <>
+            {Table}
+            {CreatePrompt}
+            {EditPrompt}
+        </>
     )
 }
 
