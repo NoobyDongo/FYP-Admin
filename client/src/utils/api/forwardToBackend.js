@@ -7,7 +7,7 @@ export default async(body, tableName) => {
     try {
         res = await toApi(body, tableName);
     } catch (err) {
-        console.log("Error:", err)
+        console.error(err)
     }
 
     if (res?.status === 200)

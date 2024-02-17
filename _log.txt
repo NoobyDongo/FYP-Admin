@@ -381,3 +381,33 @@ status of darkmode is now saved in localStorage
 added a settings page
 correct some navbar/progressbar color issues
 fixed RecordTextField
+
+Version 1.0 summery
+admin panel
+issues:
+kind of laggy when rendering table content...
+done:
+manage records
+other supportive features
+pending features:
+inventory alert
+reports
+nav searchbar?
+
+plan for client side:
+Manage account
+    register account
+    reset password
+    change account details
+Manage order
+    create order
+    with delivery
+    with payment gateway
+    view past orders
+    cancel?
+    review... (╯°□°）╯︵ ┻━┻
+Browse product
+    catalog
+    detail
+    banner?
+public announcement... (╯°□°）╯︵ ┻━┻

@@ -6,7 +6,6 @@ import path from 'path';
 
 export async function GET(req, { params }) {
     const { id, name } = params;
-    //console.log(params)
     const filePath = path.join(process.cwd(), 'public', 'image', 'product', id, name);
 
     try {

@@ -129,7 +129,6 @@ export default function toTableColumns(list, addColumns = true) {
                             )
                             : v
                     ]).filter((e) => {
-                        //console.log("dwadwadawdwadaw", e[1], e)
                         return Object.keys(e[1]).length > 0;
                     })
             )

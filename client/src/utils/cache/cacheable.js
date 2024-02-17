@@ -5,7 +5,6 @@ export default async (fn, key, defaultValue) => {
     try {
         // retrieve the data from backend.
         result = await fn();
-        console.log("promise", result)
         // save the data to localStorage.
         localStorage.setItem(key, JSON.stringify(result));
     } catch {
@@ -14,7 +13,5 @@ export default async (fn, key, defaultValue) => {
         // use the cached data if available, otherwise the default value.
         result = cached ? JSON.parse(cached) : defaultValue;
     }
-
-    console.log("result", result)
     return result;
 }

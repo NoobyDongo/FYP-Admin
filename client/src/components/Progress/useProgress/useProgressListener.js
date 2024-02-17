@@ -5,7 +5,6 @@ export default function useProgressListener(id = "", fn) {
     const [loading, setLoading] = React.useState(false)
 
     const onMakingProgress = (e) => {
-        console.log("making progress..................",id, e.detail.status)
         setLoading(e.detail.status)
     }
     React.useEffect(() => {

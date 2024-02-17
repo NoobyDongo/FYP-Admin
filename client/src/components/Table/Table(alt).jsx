@@ -58,7 +58,6 @@ function useRowCount(data, pagination, setPagination, valid) {
     const rowCount = React.useMemo(() => data?.totalElements || 0, [data])
     const [noRecord, setNoRecord] = React.useState(true)
     const lastRowCount = React.useMemo(() => rowCount, [pagination, rowCount > 0])
-    //console.log("rowCount", rowCount, "lastRowCount", lastRowCount)
 
     React.useEffect(() => {
         if (noRecord && rowCount > 0)
@@ -82,7 +81,6 @@ function useRowCount(data, pagination, setPagination, valid) {
 
 const RawTable = (props) => {
     const enableSelection = false
-    console.log('Table Rendered')
 
     const { columns, initialState, tableName, crud, baseSearchCriteria, mini = false } = props
 

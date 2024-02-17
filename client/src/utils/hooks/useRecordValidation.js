@@ -21,7 +21,6 @@ export default function useRecordValidation(inputs){
                 ...newErrorText
             }
         }
-        console.log("errorText", validators, record, errorText)
         if (Object.values(errorText).some((error) => error)) {
             setValidationErrors(errorText)
             return false

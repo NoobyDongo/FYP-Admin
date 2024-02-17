@@ -33,12 +33,10 @@ const TableColumnEditField = React.forwardRef((props, ref) => {
             inputComponent.current?.clear()
         else
             setValue(value)
-        //console.log('TableColumnEditField', value, 'localValue', localValue)
     }, [record])
 
 
     const onChange = React.useCallback((e) => {
-        //console.log('onChange', e.target.value)
         setValue(e.target.value)
     }, [])
 

@@ -36,7 +36,6 @@ export default function Home() {
             await startAsync(async () => {
                 try {
                     const response = await axios.post('/api/login', formData)
-                    console.log("Response:", response)
                     return response.data.valid
                 } catch (error) {
                     displayError({ error: "Login Request Failed" })

@@ -80,6 +80,7 @@ export default function NavOption(props) {
                         height: height,
                         px: 1.5,
                         borderRadius: 2,
+                        boxShadow: active ? theme.palette.mode === 'dark'? "none" : theme.shadows[2] : "none",
                         backgroundColor: active ?
                             theme.palette.navbar.backgroundColor.primary :
                             theme.palette.navbar.backgroundColor.secondary,

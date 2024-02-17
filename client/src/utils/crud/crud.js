@@ -35,7 +35,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
 
     const getFn = React.useCallback(async () => {
 
-        //console.log("fetchAll", deleteOption)
         let criteriaList = toFilters(columnFilters) || []
         criteriaList = criteriaList.concat(globalFilter)
 
@@ -45,12 +44,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
             page: pagination.pageIndex,
             size: pagination.pageSize,
         }
-        /*
-        //console.log("columnFilters", toFilters(columnFilters))
-        //console.log("globalFilter", globalFilter)
-        //console.log("sorting", sorting)
-        //console.log(JSON.stringify(body))
-        */
 
         let res = await get({
             option: getOption || (fetchAll ? "all" : "search"),
@@ -85,7 +78,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
         let o = {
             ...others, [tableName]: updateMethod(newRecord, table)
         }
-        //console.log(o)
         return o
     }
     const append = (prevRecords, newRecord) => {
@@ -106,13 +98,11 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
             try {
                 let e = await aquireDataFn(record)
                 if (isEmptyObject(e)) {
-                    //console.log("empty object", e)
                     return null
                 }
-                //console.log("res", e)
                 return e
             } catch (err) {
-                console.log(err)
+                console.error(err)
                 alertError({ error: 'Something went wrong' })
             }
         })
@@ -123,7 +113,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
         return useMutation({
             mutationFn: _mutationFn(createFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (!newRecord?.id) {
                     alertError({ error: "Failed to create record" })
                     return
@@ -164,15 +153,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
                     setTries(0)
                 }
                 record = table
-                //console.log("record", record)
-                /*
-                await Promise.all(otherAPIs.map(async (e) => {
-                    let table = await e.fn()
-                    if (alertError(table))
-                        return
-                    record[e.name] = table
-                }))
-                */
                 return record
             }),
             onError: (err) => {
@@ -188,7 +168,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
         return useMutation({
             mutationFn: _mutationFn(updateFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (!newRecord?.id) {
                     alertError({ error: "Failed to update record" })
                     return
@@ -218,7 +197,6 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
         return useMutation({
             mutationFn: _mutationFn(deleteFn),
             onSuccess: (newRecord) => {
-                //console.log("newREcord", newRecord)
                 if (alertError(newRecord))
                     return
 

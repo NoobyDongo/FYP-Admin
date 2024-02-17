@@ -62,7 +62,6 @@ const invoiceproduct = reformat({
         crud:{
             methods:{
                 customCreate: (record) => {
-                    console.log('cuhiwahdwai', record)
                     record.price = record.product.price
                     record.product = record.product.id
                     return record

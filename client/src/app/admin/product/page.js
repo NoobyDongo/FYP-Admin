@@ -33,8 +33,7 @@ export default function Home() {
       }
     }
   })
-  console.log("page rendered", NavTabs, value)
-
+  
   const Table = React.useCallback(() => {
     return CrudTable({
       columns: tables[value].columns,
@@ -43,10 +42,6 @@ export default function Home() {
       ...tables[value].props,
     })
   }, [value])
-
-  React.useEffect(() => {
-    console.log("page changed value", value);
-  }, [value]);
 
   return (
     <>
@@ -119,13 +114,9 @@ function ImageUploadDemo() {
 
     ],
   }), [])
-  console.log('columnscolumnscolumnscolumns', columns)
+  
   const { setFormData, validate, form } = useForm({ inputs: columns.inputs, mode: formEditMode.create })
   //const [f2, v2, ff1] = useForm({ inputs: product.inputs })
-
-  const sendForm = () => {
-    validate((e) => console.log(e))
-  }
 
   return (
     <>

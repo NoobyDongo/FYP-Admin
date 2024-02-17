@@ -10,7 +10,6 @@ export default function useNotification() {
     }
     const makeError = (response) => {
         if(response?.error){
-            console.log("Error:", response.error)
             makeNew(`Error: ${response.error}`, "error")
             return true
         }

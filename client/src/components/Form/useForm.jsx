@@ -66,7 +66,6 @@ const FormTab = React.forwardRef((properties, ref) => {
 
     React.useImperativeHandle(ref, () => ({
         save(form) {
-            console.log('formGroups', formGroups.current)
             formGroups.current.forEach((group) => {
                 group.save(form)
             })
@@ -89,15 +88,7 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
     const sortedColumns = React.useMemo(() => inputs[mode][formEditMode.content], [mode])
     const [formData, setFormData] = React.useState(data || {})
     const formTabs = React.useRef([])
-    /*
-        const onChange = React.useCallback((fn) => {
-            let newForm = fn({ ...formData })
-    
-            setFormData(newForm)
-            console.log(newForm)
-    
-        }, [formData])
-    */
+
     const setForm = (data) => {
         setFormData(data)
         setValidationErrors({})
@@ -119,20 +110,15 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
     }, [formData, data, validateRecord])
 
     React.useEffect(() => {
-        //console.log('sortedColumns', inputs)
         return () => {
             setValidationErrors({})
         }
     }, [inputs])
 
-    React.useEffect(() => {
-        //console.log('sortedColumns', sortedColumns)
-    }, [sortedColumns])
 
     const props = React.useMemo(() => ({
         disabled,
         record: formData,
-        //onChange,
         validationErrors,
         setValidationErrors,
         ...inputProps,
@@ -141,11 +127,6 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
 
     const form = React.useMemo(() => {
         const renderTab = (tab) => {
-            /*
-            console.log('tab', Object.keys(tab).length)
-            if(Object.keys(tab).length < 1)
-                return
-            */
             return Object.keys(tab).map((key, i) => {
                 let resTab = ({
                     name: key == 0 ? 'Basic Information' : key,
@@ -154,17 +135,12 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
                 return resTab
             })
         }
-        //console.log('formData', formData)
-
-        //console.log('tab content', renderTab(sortedColumns[formEditMode.content]))
-
         return renderTab(sortedColumns)
 
     }, [sortedColumns, formData, gap, inputProps, props])
 
     const pageSwitchAction = React.useCallback((index, fn) => {
         let fd = { ...data, ...formData }
-        console.log('pageSwitchAction', index)
         formTabs.current.forEach((input) => {
             input?.save(fd)
         })
@@ -212,7 +188,6 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
         }
     })
 
-    //console.log('Object.keys(sortedColumns).length', Object.keys(sortedColumns).length)
     const final = React.useMemo(() => (<div>
         {Object.keys(sortedColumns).length > 1 && <div>
             {menu}
@@ -220,49 +195,5 @@ export default function useForm({ data, inputs, disabled, gap = customDialogConf
         {tabs}
     </div>), [menu, tabs])
 
-    //console.log('final', { mode, sortedColumns, })
-
     return { setFormData: setForm, validate, form: final, formData }
 }
-
-/*
-React.useEffect(() => {
-        const sortColumn = () => {
-            const list = []
-            const filteredArray = []
-
-            inputs.forEach((i, index) => {
-                const group = i.group || 0
-
-                if (!list[group])
-                    list[group] = []
-
-                const place = i.order || index
-
-                let targetList = list[group]
-                let currentIndex = place
-
-                while (targetList[currentIndex]) {
-                    currentIndex++
-                }
-
-                targetList[currentIndex] = i
-            })
-
-            list.forEach((group) => {
-                if (group) {
-                    const filteredGroup = group.filter((element) => {
-                        return element !== undefined && element !== null && element !== ''
-                    })
-                    filteredArray.push(filteredGroup)
-                }
-            })
-            console.log(filteredArray)
-            setColumns(filteredArray)
-        }
-        sortColumn()
-        return () => {
-            setValidationErrors({})
-        }
-    }, [inputs])
-*/

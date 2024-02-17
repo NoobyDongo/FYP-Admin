@@ -236,9 +236,7 @@ const ImagesUpload = React.forwardRef((props, ref) => {
             imageList[i].isUploading = false
             imageList[i].size = bytesToSize(imageList[i].file.size)
         })
-        console.log("imageList", imageList, "addUpdateIndex", addUpdateIndex);
         changeParent?.(simpleMode ? imageList[0] : imageList)
-
         setImages(imageList)
         addToHistory(imageList)
     }, [changeParent, simpleMode, validationErrors, name, setValidationErrors, setImages, addToHistory])
@@ -384,10 +382,6 @@ export function ImageUpload(props) {
 
     const { name, onChange } = props
     const { images, maxNumber, inputProps, ...others } = props
-
-    React.useEffect(() => {
-        console.log(images)
-    }, [images])
 
     const onImageChange = (imageList, addUpdateIndex) => {
         onChange({ ...imageList })

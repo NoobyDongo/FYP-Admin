@@ -133,7 +133,6 @@ const configurateOption = (option, tabs) => {
             name: sanitizeString(item.name),
             displayname: capitalizeEachWord(item.displayname?.tab || item.name),
         }))
-        console.log('tabs', tabs)
     }
     if (updatedOption.link) {
         var str = updatedOption.link.split("#")
@@ -161,9 +160,9 @@ const configurateOption = (option, tabs) => {
         updatedOption.func = updatedOption.hash || pendingObject ? (window, router) => {
             router.push(updatedOption.link);
             window.dispatchEvent(event({ path: updatedOption.link, hash: updatedOption.hash }))
-            console.log('pushing to', updatedOption.link + (updatedOption.hash ? '#' + updatedOption.hash : ''))
+            //console.log('pushing to', updatedOption.link + (updatedOption.hash ? '#' + updatedOption.hash : ''))
         } : (window, router) => {
-            console.log('pushing to', updatedOption.link)
+            //console.log('pushing to', updatedOption.link)
             router.push(updatedOption.link)
         };
     }

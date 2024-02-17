@@ -13,7 +13,6 @@ export default function useHistory({ initialValue, valueSetter, comparator, disa
     const numRedo = () => history.current.length - pointer.current - 1
 
     const add = React.useCallback((value) => {
-        console.log("history", pointer.current, history.current)
         const newValue = comparator(value)
         const currentValue = comparator(history.current[pointer.current])
 
@@ -22,11 +21,9 @@ export default function useHistory({ initialValue, valueSetter, comparator, disa
             history.current.push(value)
             pointer.current++
         }
-        //console.log("new history", pointer.current, history.current)
     }, [comparator])
 
     const undo = React.useCallback(() => {
-        //console.log("history", pointer.current, history.current)
         if (pointer.current > 0) {
             pointer.current--
             valueSetter(history.current[pointer.current])
@@ -34,7 +31,6 @@ export default function useHistory({ initialValue, valueSetter, comparator, disa
     }, [valueSetter])
 
     const redo = React.useCallback(() => {
-        //console.log("history", pointer.current, history.current)
         if (pointer.current < history.current.length - 1) {
             pointer.current++
             valueSetter(history.current[pointer.current])
