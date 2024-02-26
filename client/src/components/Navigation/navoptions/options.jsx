@@ -1,5 +1,4 @@
 import Dashboard from '@mui/icons-material/Dashboard'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import Category from '@mui/icons-material/Category'
 import BusinessIcon from '@mui/icons-material/Business';
 import capitalizeEachWord from '@/utils/capitalizeEachWord';

@@ -10,12 +10,18 @@ import openCloseTransitionMixin from "@/utils/styles/openCloseTransitionMixin"
 import React from 'react'
 import Stack from '@mui/material/Stack'
 import UserCorner from '../UserCorner'
-import DrawerHeader from '../drawer/CustomDrawerHeader'
 import { closedWidthMixin } from '../mixin'
 import DynamicText from '../../DynamicText'
-
+import changeLocationEvent from '@/utils/events/changeLocationEvent'
+import { useLocation } from '../LocationContext'
 
 const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
+    const { location } = useLocation();
+
+    React.useEffect(() => {
+        if(location)
+            window.dispatchEvent(changeLocationEvent(location))
+    }, [location])
 
     return (
         <AppBar ref={ref} elevation={0} position="sticky" open={open}>

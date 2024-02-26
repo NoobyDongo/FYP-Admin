@@ -11,7 +11,7 @@ import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box';
 import LayersIcon from '@mui/icons-material/Layers';
 import CustomHtmlTooltip from "../ToolTip/CustomHtmlTooltip"
-import changeLocationEvent from "../../utils/events/changeLocationEvent"
+import { useLocation } from "./LocationContext"
 
 const iconSize = 25
 
@@ -29,6 +29,7 @@ export default function NavOption(props) {
     const pathname = usePathname()
     const router = useRouter()
     const displayName = nav || name
+    const { changeLocation } = useLocation();
     //const {start} = useProgress(1)
 
     //let active = path + window.location.hash === link || pathname === base || (landing && !searchString && pathname === parent.base)
@@ -43,8 +44,9 @@ export default function NavOption(props) {
     React.useEffect(() => {
         if (!active && validator?.(window)) {
             setActive(true)
-            if (!parent)
-                window.dispatchEvent(changeLocationEvent({ text: title }))
+            if (!parent){
+                changeLocation({ text: title })
+            }
         }
         else
             if (active && !validator?.(window))

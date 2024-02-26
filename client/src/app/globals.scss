@@ -36,6 +36,17 @@ a {
   text-transform: capitalize;
 }
 
+body{
+  & > .MuiBox-root{
+    & > .MuiAppBar-root{
+      z-index: 5;
+    }
+  }
+  & > .sidebar{
+    z-index: 20;
+  }
+}
+
 #pageContainer {
   height: 100%;
 

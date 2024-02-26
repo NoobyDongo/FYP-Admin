@@ -6,7 +6,6 @@ import * as React from 'react'
 import useDarkMode from "@/utils/hooks/useDarkmode"
 import CustomAppbar from "./appbar/CustomAppbar"
 import Body from './Body'
-import DrawerHeader from './drawer/CustomDrawerHeader'
 import CustomDrawer from './drawer/CustomDrawer'
 import Box from "@mui/material/Box"
 
@@ -16,6 +15,7 @@ import Fade from "@mui/material/Fade"
 import { SimplifiedNavOptions } from "./navoptions/options"
 import TableWrapper from "../Table/_wrapper"
 import link from "@/app/admin/link"
+import { LocationProvider } from "./LocationContext"
 
 
 export default function NavWrapper({ children }) {
@@ -54,25 +54,27 @@ export default function NavWrapper({ children }) {
         <Themed darkmode={darkmode}>
 
             {valid && location !== link.signin && <>
-                <Fade in={valid} mountOnEnter unmountOnExit>
-                    <div>
-                        <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
-                            <ProgressBar id={1} />
-                        </Box>
-                        <CustomDrawer optionLists={SimplifiedNavOptions} toggleDarkMode={toggleDarkMode} open={open} />
-                    </div>
-                </Fade>
+                <LocationProvider>
+                    <Fade in={valid} mountOnEnter unmountOnExit>
+                        <div className="sidebar">
+                            <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
+                                <ProgressBar id={1} />
+                            </Box>
+                            <CustomDrawer optionLists={SimplifiedNavOptions} toggleDarkMode={toggleDarkMode} open={open} />
+                        </div>
+                    </Fade>
 
-                <Body ref={bodyRef} open={open}>
-                    <CustomAppbar ref={appbarRef} open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
-                    <Box id="pageContainer" sx={{ transition: "padding 200ms", px: { xs: 2, md: 4 }, }}>
-                        <FadeWrapper key={location}>
-                            <TableWrapper>
-                                {children}
-                            </TableWrapper>
-                        </FadeWrapper>
-                    </Box>
-                </Body>
+                    <Body ref={bodyRef} open={open}>
+                        <CustomAppbar ref={appbarRef} open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
+                        <Box id="pageContainer" sx={{ transition: "padding 200ms", px: { xs: 2, md: 4 }, }}>
+                            <FadeWrapper key={location}>
+                                <TableWrapper>
+                                    {children}
+                                </TableWrapper>
+                            </FadeWrapper>
+                        </Box>
+                    </Body>
+                </LocationProvider>
             </>}
 
             {(!valid && location === link.signin) &&

@@ -9,6 +9,8 @@ export default styled(Box, { shouldForwardProp: (prop) => prop !== 'open' })(({ 
     display: "flex",
     flexDirection: "column",
     overflowX: "hidden",
+    overflowY: "overlay",
+    scrollbarGutter: 'stable',
     ...openCloseTransitionMixin({
         theme, open, transition: "width", onOpen: {
             paddingLeft: `calc(100% - ${drawerOpenedWidth}px - 100%)`,

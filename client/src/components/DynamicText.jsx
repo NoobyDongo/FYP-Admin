@@ -16,7 +16,7 @@ export default function DynamicText({ event, placeholder = "" }) {
         return () => {
             window.removeEventListener(event, handleEvent)
         }
-    }, [event])
+    }, [])
 
     return (
         <Fade in={Boolean(text.length > 0)}>
