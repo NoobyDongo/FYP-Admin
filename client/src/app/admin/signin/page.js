@@ -46,7 +46,8 @@ export default function Home() {
                     displayNotes("Login Successful", "success")
 
                     setTimeout(() => {
-                        let page = localStorage.getItem('lastVisitedPage') || link.base
+                        let lastVisitedPage = localStorage.getItem('lastVisitedPage')
+                        let page = lastVisitedPage?.startsWith(link.base)? lastVisitedPage : link.base
                         if (page == link.signin) {
                             page = link.base
                         }
