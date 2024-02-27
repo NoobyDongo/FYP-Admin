@@ -134,7 +134,7 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
 const sharedTypographyTheme = {
   typography: {    
     fontSize: 13, 
-    "fontFamily": "Inter"
+    "fontFamily": "inherit",
   }
 }
 const sharedPalette = (shade, defaultTheme) => {
