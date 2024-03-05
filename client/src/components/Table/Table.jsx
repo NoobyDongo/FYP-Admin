@@ -79,8 +79,6 @@ function useRowCount(data, pagination, setPagination, valid) {
 }
 
 const RawTable = (props) => {
-    const enableSelection = false
-
     const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
 
     const getStorage = (key, defaultValue) => {
@@ -93,6 +91,7 @@ const RawTable = (props) => {
     const setStorage = (key, value) => {
         sessionStorage.setItem(key + '_' + tableName, JSON.stringify(value))
     }
+    const [enableSelection, _setEnableSelection] = React.useState(false)
 
     const [columnFilters, _setColumnFilters] = React.useState(
         baseSearchCriteria ?
@@ -299,7 +298,10 @@ const RawTable = (props) => {
         <>
             <div className='MuiPaper-root'>
                 {renderTopToolbar({ table })}
-                <Box className="fadeWrapper" sx={{ pl: 2 }}>
+                <Box className="fadeWrapper" sx={{
+                    transition: "padding 200ms",
+                    pl: enableSelection ? 0 : 2
+                }}>
                     <FadeWrapper keyValue={pagination.pageIndex} variants={{
                         initial: { scale: 1, opacity: 0 },
                     }} transition={{ duration: .45 }}>

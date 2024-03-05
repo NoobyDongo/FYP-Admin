@@ -1,22 +1,26 @@
 import { Inter } from "next/font/google";
+import { cookies } from 'next/headers'
+import { CookiesProvider } from 'next-client-cookies/server';
 import './globals.scss'
 
 export const metadata = {
-  title: 'V# Admin Panel',
-  description: '',
+  title: 'V#',
+  description: 'Shop Online',
 }
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
+  const cookieStore = cookies()
+  const darkMode = cookieStore.get('darkMode')
+  console.log(darkMode)
 
   return (
-    <html style={{
-      overflow: "hidden"
-    }} className={inter.className}  lang="en">
-
-      <body suppressHydrationWarning  style={{ fontFamily: "inherit", height: "100vh", width: "100vw", overflow: "auto", display: "flex" }}>
-        {children}
-      </body>
+    <html className={inter.className} lang="en">
+      <CookiesProvider>
+        <body suppressHydrationWarning>
+          {children}
+        </body>
+      </CookiesProvider>
     </html>
   )
 }

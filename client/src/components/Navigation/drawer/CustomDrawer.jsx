@@ -80,6 +80,8 @@ export default function CustomDrawer(props) {
 export const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
         flexGrow: 0,
+        position: 'relative',
+        zIndex: 1,
         flexShrink: 0,
         whiteSpace: 'nowrap',
         boxSizing: 'border-box',
