@@ -140,6 +140,7 @@ export default function CRUD({ tableName, methods = {}, allowSimple = false, ref
         return useQuery({
             queryKey: queryKey,
             queryFn: _mutationFn(async () => {
+                await refetchTotalRowCount()
                 let record = []
                 let table = await getFn()
                 if (table.error) {

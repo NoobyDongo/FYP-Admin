@@ -21,7 +21,7 @@ import Stack from "@mui/material/Stack"
 //what a load of crap (╯°□°）╯︵ ┻━┻
 const RecordTextField = React.forwardRef((props, ref) => {
     const {
-        input, onChange: onParentChange, value: unUsedValue, name, disabled, validationErrors, setValidationErrors, ...others
+        input, onChange: onParentChange, value: unUsedValue, name, disabled, validationErrors, setValidationErrors, record, ...others
     } = props
     const { full = false, sx } = input
     let useMultiple = false
@@ -79,7 +79,7 @@ const RecordTextField = React.forwardRef((props, ref) => {
                 },
                 simple: false
             })
-            setOptions(res.content || [])
+            setOptions(res?.content || [])
 
             clearTimeout(timeoutId)
             setFetched(true)

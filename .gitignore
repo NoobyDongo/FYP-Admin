@@ -1,4 +1,5 @@
 client/.next
 client/node_modules
-client/public/image
-!client/public/image/avatar.png
+client/*.key
+client/public/image/product/*
+!client/public/image/product/_default/

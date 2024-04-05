@@ -121,7 +121,7 @@ function SectionItem({ item }) {
                 boxShadow: 'none',
               }
             }),
-          })} onClick={inCart ? removeFromCart : addToCart}>
+          })} onClick={inCart ? removeFromCart : addToCart} disableRipple>
             {inCart ? `Remove from Cart` : "Add to Cart"}
           </Button>
         }
@@ -267,7 +267,7 @@ const ShoppingCartItem = React.forwardRef(({ item }, ref) => {
 
   return (
     <ListItem sx={{ p: 0 }} className="item">
-      <Stack direction='row' sx={{width: 1}}>
+      <Stack direction='row' sx={{ width: 1 }}>
         <ProductImage id={product.id} name={product.images?.[0]?.name} size={90} />
         <Stack sx={{
           pl: 2,
@@ -304,7 +304,7 @@ ShoppingCartItem.displayName = 'ShoppingCartItem'
 
 function ShoppingCart() {
   const { cartList, setCart } = useCart()
-  const [preview, setPreview] = React.useState(true)
+  const [preview, setPreview] = React.useState(false)
   const itemRef = React.useRef([])
 
   React.useEffect(() => {
@@ -323,7 +323,8 @@ function ShoppingCart() {
     <>
       <IconButtonWithTooltip label={"Shopping Cart"} onClick={() => setPreview(true)}>
         <ShoppingCartOutlinedIcon />
-        <Fade in={cartList.length > 0}>
+        {
+          cartList.length > 0 &&
           <Box sx={{
             borderRadius: '50%',
             width: 10,
@@ -340,7 +341,7 @@ function ShoppingCart() {
           }}>
             <Typography variant='body2' fontWeight={600} color='primary'>{cartList.length}</Typography>
           </Box>
-        </Fade>
+        }
       </IconButtonWithTooltip>
 
 
@@ -409,7 +410,7 @@ function ShoppingCart() {
             '&:hover': {
               boxShadow: 'none',
             },
-          }}>Go to shopping cart</Button>
+          }}>Checkout</Button>
         </Stack>
 
       </Drawer>
@@ -428,7 +429,7 @@ function ProductImage({ id, name, size = 50, sx, style, ...others }) {
     }} style={{
       objectFit: 'contain',
       ...style,
-    }} src={`/image/product/${id}/${name}`} width={size} height={size} />
+    }} src={`/api/image/product/${id}/${name}`} width={size} height={size} />
 
   )
 }

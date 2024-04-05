@@ -16,6 +16,7 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
 
     let darkMode = theme.palette.mode === 'dark'
     let background = sharedPalette.background.default
+    let formLabelOffset = theme.spacing(1)
     return ({
         components: {
             MuiCssBaseline: {
@@ -44,6 +45,15 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
                     },
                 },
             },
+            MuiPopover: {
+                styleOverrides: {
+                    paper: {
+                        '& > *': {
+                            transform: 'translateX(0) !important', //prevent weird pixel shift
+                        },
+                    },
+                },
+            },
             MuiMenu: {
                 styleOverrides: {
                     paper: {
@@ -57,6 +67,7 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
             MuiTooltip: {
                 styleOverrides: {
                     tooltip: {
+                        transform: 'translateX(0) !important', //prevent weird pixel shift
                         color: theme.palette.text.primary,
                         backgroundColor: background,
                     },
@@ -95,6 +106,9 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
             MuiInputLabel: {
                 styleOverrides: {
                     root: {
+                        '&.MuiInputLabel-outlined':{
+                            marginTop: formLabelOffset,
+                        },
                         color: sharedPalette.input.label.main,
                     },
                 },
@@ -113,6 +127,7 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: {
+                        marginTop: formLabelOffset,
                         '& .MuiInput-underline::before': {
                             borderColor: sharedPalette.input.border.main,
                         },
@@ -123,6 +138,11 @@ const sharedComponentsTheme = (theme, sharedPalette) => {
                             zIndex: 10,
                             transition: 'border-color 100ms',
                             borderColor: sharedPalette.input.border.main,
+                        },
+                        '&.Mui-focused': {
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderWidth: '1px !important',
+                            },
                         },
                         '&.Mui-disabled  .MuiOutlinedInput-notchedOutline ': {
                             borderColor: sharedPalette.input.border.secondary,

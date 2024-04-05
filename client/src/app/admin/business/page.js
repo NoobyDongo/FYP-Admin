@@ -8,6 +8,7 @@ import useHashTabMenu from '@/components/Tabs/useHashTabMenu.js'
 import Box from '@mui/material/Box';
 import customer from '@/schema/business/customer'
 import invoice from '@/schema/business/invoice'
+import FadeWrapper from '@/components/FadeWrapper'
 
 
 export default function Home() {
@@ -43,9 +44,9 @@ export default function Home() {
     <>
       <TableContainer>
         {menu}
-        <div className="tabpanel">
+        <FadeWrapper keyValue={value < 1? value : -1} className="tabpanel">
           <Table />
-        </div>
+        </FadeWrapper>
       </TableContainer>
     </>
   )

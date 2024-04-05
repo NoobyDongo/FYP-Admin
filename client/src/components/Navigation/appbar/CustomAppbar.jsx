@@ -15,11 +15,9 @@ import { closedWidthMixin } from '../mixin'
 import DynamicText from '../../DynamicText'
 import changeLocationEvent from '@/utils/events/changeLocationEvent'
 import { useLocation } from '../LocationContext'
-import useTheme from '@mui/material/styles/useTheme'
 
 export default function CustomAppbar({ open, onOpen, onClose }){
     const { location } = useLocation();
-    const theme = useTheme();
     const ref = React.useRef(null)
 
     React.useEffect(() => {
@@ -65,8 +63,8 @@ export default function CustomAppbar({ open, onOpen, onClose }){
 
 const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open', })(
     ({ theme, open }) => ({
+        zIndex: theme.zIndex.drawer - 1,
         paddingTop: theme.spacing(.5),
-        backgroundColor: 'transparent',
         ...(theme.palette.mode == 'dark' && {
             backdropFilter: "blur(50px) saturate(150%) brightness(100%)"
         }),

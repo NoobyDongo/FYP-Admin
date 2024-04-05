@@ -46,6 +46,9 @@ const inventoryproduct = reformat({
                 errorMessage: "Number format incorrect"
             },
         },
-    ]
+    ],
+    props: {
+        getRowId: (row) => {row.id? row.id.product : 0 },
+    }
 })
 export default inventoryproduct

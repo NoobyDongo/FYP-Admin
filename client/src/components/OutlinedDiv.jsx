@@ -11,7 +11,7 @@ const OutlinedDiv = ({ children, label, boxSx, sx, active, disabled, error, ...o
             sx={(theme) => ({
                 ...(!disabled && !error && {
                     '&> .MuiInputBase-root > .MuiOutlinedInput-notchedOutline.Mui-focused, :not(.Mui-error) > .MuiInputBase-root > .MuiOutlinedInput-notchedOutline': {
-                        borderWidth: `${active ? 2 : 1}px !important`,
+                        borderWidth: `${active ? 1 : 1}px !important`,
                         borderColor: `${active ? theme.palette.primary.main : theme.palette.input.border.main} !important`,
                     },
 

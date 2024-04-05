@@ -53,15 +53,12 @@ export default function NavWrapper({ children }) {
 
             {valid && location !== link.signin && <>
                 <LocationProvider>
-                    <Fade in={valid} mountOnEnter unmountOnExit>
-                        <div className="sidebar">
-                            <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
-                                <ProgressBar id={1} />
-                            </Box>
-                            <CustomDrawer optionLists={SimplifiedNavOptions} toggleDarkMode={toggleDarkMode} open={open} />
-                        </div>
-                    </Fade>
-
+                    <div className="sidebar">
+                        <Box sx={{ zIndex: 3000, width: 1, height: 10, position: "absolute" }}>
+                            <ProgressBar id={1} />
+                        </Box>
+                        <CustomDrawer optionLists={SimplifiedNavOptions} toggleDarkMode={toggleDarkMode} open={open} />
+                    </div>
                     <Body ref={bodyRef} open={open}>
                         <CustomAppbar open={open} onOpen={onDrawerClose} onClose={onDrawerOpen} />
                         <Box id="pageContainer" sx={{ transition: "padding 200ms", px: { xs: 2, md: 4 }, }}>

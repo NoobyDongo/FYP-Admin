@@ -5,6 +5,7 @@ import TabMenu from './TabMenu';
 import TabPanel from './TabPanel';
 import customHashChangeEvent from '@/utils/events/customHashChangeEvent';
 import { useRouter } from 'next/navigation';
+import FadeWrapper from '../FadeWrapper';
 
 function getTab(tabIndicators, previousValue) {
     let hashValue = Number(tabIndicators.findIndex(e => e.name === window.location.hash.substring(1)))
@@ -50,7 +51,13 @@ export default function useHashTabMenu({ tabs: inTabs, tabIndicators = [], sx, M
     }, [])
 
     const tabs = React.useMemo(() => inTabs ? (
-        inTabs.map((e, i) => <TabPanel key={i} index={i} value={value} {...TabProps}>{e.content}</TabPanel>)
+        <div style={{backgroundColor: 'yellow'}}>
+            <FadeWrapper keyValue={value}>
+                {
+                    inTabs.map((e, i) => <TabPanel key={i} index={i} value={value} {...TabProps}>{e.content}</TabPanel>)
+                }
+            </FadeWrapper>
+        </div>
     ) : null, [value, inTabs])
 
     const menu = React.useMemo(() => (

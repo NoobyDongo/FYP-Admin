@@ -54,6 +54,7 @@ const tableProps = {
     muiTablePaperProps: ({ table }) => ({
         elevation: 0,
         sx: (theme) => ({
+            borderRadius: 0,
             transition: 'none',
             backgroundColor: table.getState().isFullScreen ? theme.palette.background.default : 'transparent',
         }),
@@ -128,6 +129,7 @@ const useCustomTableProps = (props = {}) => {
         variant: 'outlined',
         placeholder: 'Search...',
         sx: {
+            marginTop: -1,
             width: mini ? 250 : 300,
         },
         InputProps: {
@@ -144,43 +146,11 @@ const useCustomTableProps = (props = {}) => {
         }
     })
 
+
     const muiTableBodyRowProps = ({ row }) => ({
         ...(enableSelection && {
             onClick: row.getToggleSelectedHandler(),
         }),
-        sx: {
-            '&:not(.Mui-selected)': {
-                py: .25,
-                '&:not(:hover)': {
-                    '&>td': {
-                        backgroundColor: theme.palette.background.default,
-                    },
-                },
-            },
-            backgroundColor: 'transparent !important',
-            '&>td': {
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                border: "none",
-                boxShadow: "none",
-                ...(!enableSelection && {
-                    backgroundColor: theme.palette.background.default + ' !important',
-                }),
-            },
-            ...(enableSelection && {
-                cursor: 'pointer',
-                '&:hover > td': {
-                    backgroundColor: theme.palette.table.hover,
-                },
-                '&.Mui-selected > td': {
-                    backgroundColor: theme.palette.table.selected,
-                },
-                '&.Mui-selected:hover > td': {
-                    backgroundColor: theme.palette.table.selectedhover,
-                },
-            }),
-            backgroundColor: 'transparent',
-        }
     })
 
     const muiTableContainerProps = ({ table }) => {
@@ -198,6 +168,11 @@ const useCustomTableProps = (props = {}) => {
                     backgroundColor: 'transparent',
                     top: 0,
                     left: 0,
+                },
+                '&>.MuiTable-root .norecord': {
+                    height: '80vh',
+                    position: 'absolute',
+                    top: 0,
                 },
 
                 ...((table.getState().noRecord || table.getState().noRow) && table.getState().columnFilters.length > 0 && {
@@ -230,19 +205,22 @@ const useCustomTableProps = (props = {}) => {
                             '&>th:first-of-type': {
                                 ...(mini && { pl: 0, }),
                             },
+                            '&>th[data-pinned]': {
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            },
                             '&>th': {
                                 fontSize: theme.typography.fontSize * fontScale,
                                 overflow: "hidden",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
                                 pb: ".5rem",
                                 ...(mini && { py: .5, px: 2 }),
-                                boxShadow: "none",
-                                border: 0,
                                 textTransform: "capitalize",
-                                boxSizing: "border-box",
+                                border: 'none !important',
                                 backgroundColor: theme.palette.background.default,
+
+                                "&::before": {
+                                    display: 'none',
+                                },
                                 "& .Mui-TableHeadCell-ResizeHandle-Wrapper": {
                                     position: 'absolute',
                                     right: 0,
@@ -288,21 +266,56 @@ const useCustomTableProps = (props = {}) => {
                             }
                         }
                     },
+                    '&>tbody:has(.norecord)': {
+                        display: 'flex',
+                        position: 'absolute',
+                        top: 0,
+                    },
                     '&>tbody:not(:has(.norecord))': {
                         opacity: table.getState().noRow ? 0 : 1,
-                        '&>tr:not(.Mui-selected)': {
-                            '&>td:first-of-type': {
-                                ...(mini && { pl: 100, }),
-                            },
+                        '&>tr': {
                             '&>td': {
                                 ...(mini && { py: .5, px: 2 }),
                             },
-                        }
+                            '&>td:first-of-type': {
+                                ...(mini && { pl: '0px !important', }),
+                            },
+                        },
                     },
                     '&>tbody': {
                         transitionProperty: 'opacity',
                         transitionDelay: '100ms',
                         transitionDuration: '300ms',
+
+                        '&>tr': {
+                            '&:not(.Mui-selected)': {
+                                py: .25,
+                                '&:not(:hover)': {
+                                    '&>td': {
+                                        backgroundColor: `${theme.palette.background.default} !important`,
+                                    },
+                                },
+                            },
+                            backgroundColor: `transparent !important`,
+                            '&>td': {
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                border: "none",
+                                boxShadow: "none",
+                                backgroundColor: `${theme.palette.background.default} !important`,
+                                "&::before": {
+                                    display: 'none',
+                                },
+                                ...(!enableSelection && {
+                                    "&::after": {
+                                        display: 'none',
+                                    },
+                                }),
+                            },
+                            ...(enableSelection && {
+                                cursor: 'pointer',
+                            }),
+                        }
                     }
                 }
             }
@@ -346,7 +359,7 @@ const useCustomTableProps = (props = {}) => {
         return (
             <Box sx={theme => ({
                 position: "sticky",
-                zIndex: 1,
+                zIndex: 15,
                 bottom: 0,
                 height: 55,
                 width: 1,
@@ -358,7 +371,7 @@ const useCustomTableProps = (props = {}) => {
                     sx={(theme) => ({
                         height: 1,
                         borderTop: 1,
-                        borderColor: table.getState().noRow ? 'transparent' : theme.palette.border.main,
+                        borderColor: table.getState().noRecord ? 'transparent' : theme.palette.border.main,
                         overflowX: "overlay",
                         scrollbarWidth: 'none',
                         display: 'flex',
@@ -380,13 +393,22 @@ const useCustomTableProps = (props = {}) => {
                             paddingBottom: 0.3 * scale,
                             fontSize: 14 * fontScale,
                         },
-                        '& > #table-pagination-wrapper': {
+                        '& > .table-pagination-wrapper': {
                             flex: 1,
                             maxWidth: 1,
                             height: 1,
                             display: 'flex',
                             overflowX: 'visible',
                             position: 'relative',
+                            transform: 'translateX(0)',
+
+                            '& > .MuiTablePagination-root': {
+                                transition: 'opacity 200ms',
+                                ...(table.getState().noRow && {
+                                    pointerEvents: 'none',
+                                    opacity: 0,
+                                }),
+                            }
                         },
 
                         "& .MuiTablePagination-root": {
@@ -404,6 +426,7 @@ const useCustomTableProps = (props = {}) => {
                             width: 'fit-content',
                         },
                         ...sx,
+                        transform: 'translateX(0px)',
                     })}
                 >
                     <Collapse orientation="horizontal" in={!Boolean(simple)} sx={theme => ({
@@ -413,16 +436,16 @@ const useCustomTableProps = (props = {}) => {
                         [theme.breakpoints.down('md')]: {
                             width: 0,
                             mr: 0,
-                        }
+                        },
                     })}>
                         <Stack sx={{ pl: 1, alignItems: "baseline" }}>
                             <Collapse sx={{ transitionDelay: 400 }} timeout={600} in={Boolean(table.getState().totalRowCount && table.getState().rowCount != table.getState().totalRowCount && !table.getState().isLoading)}>
-                                <Box sx={(theme) => ({
+                                <Box sx={{
                                     width: "fit-content",
                                     whiteSpace: "nowrap",
                                     fontSize: 10 * fontScale,
                                     opacity: .6,
-                                })}>
+                                }}>
                                     Total:
                                     <Box component='span' sx={(theme) => ({
                                         color: theme.palette.primary.main,
@@ -448,8 +471,8 @@ const useCustomTableProps = (props = {}) => {
                         </Stack>
                     </Collapse>
 
-                    <Fade appear={simple} in={!table.getState().noRow}>
-                        <span id='table-pagination-wrapper'>
+                    <Fade appear={simple} in={!table.getState().noRecord}>
+                        <div className='table-pagination-wrapper'>
                             <Box sx={theme => ({
                                 flexShrink: 0,
                                 width: 30,
@@ -474,12 +497,12 @@ const useCustomTableProps = (props = {}) => {
                                             borderRadius: 1,
                                             userSelect: "none",
                                         }}>
-                                            <Box sx={(theme) => ({
+                                            <Box sx={{
                                                 width: "fit-content",
                                                 whiteSpace: "nowrap",
                                                 fontSize: 10 * fontScale,
                                                 opacity: .6,
-                                            })}>
+                                            }}>
                                                 Total:
                                                 <Box component='span' sx={(theme) => ({
                                                     color: theme.palette.primary.main,
@@ -509,7 +532,7 @@ const useCustomTableProps = (props = {}) => {
                                 </CustomHtmlTooltip>
                             </Box>
                             <MRT_TablePagination table={table} />
-                        </span>
+                        </div>
                     </Fade>
                 </Box >
             </Box>
