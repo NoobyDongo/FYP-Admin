@@ -8,7 +8,6 @@ const nextConfig = {
         NEXT_PUBLIC_HOSTNAME: 'localhost',
         NEXT_PUBLIC_IMAGE_UPLOAD_WS_START: 'startImageUpload',
         NEXT_PUBLIC_IMAGE_UPLOAD_WS_END: 'endImageUpload',
-        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: fs.readFileSync('./map.key', 'utf8'),
       },
 }
 
