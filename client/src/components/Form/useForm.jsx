@@ -43,7 +43,7 @@ const FormGroup = React.forwardRef((properties, ref) => {
     const group = React.useMemo(() => inputs.map((input, i) => {
         return (
             <Collapse in={true} key={i}>
-                <Box sx={{ pt: i > 0 ? gap : 1, pb: gap / 2, }}>
+                <Box sx={{ pb: i == inputs.length - 1? 0 : gap, }}>
                     <FormEditField ref={el => formInputs.current[i] = el} {...props} {...makeInput(input, inputProps, formData)} />
                 </Box>
             </Collapse>

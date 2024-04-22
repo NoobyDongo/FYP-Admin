@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 
 const NextImage = React.forwardRef((props, ref) => {
-    const { defaultSrc, src, sx, height, width, ...others } = props;
+    const { defaultSrc = '/image/default.png', src, sx, height, width, ...others } = props;
     const [source, setSource] = React.useState(src || defaultSrc);
     const [loading, setLoading] = React.useState(true);
 
@@ -29,20 +29,28 @@ const NextImage = React.forwardRef((props, ref) => {
                     sx={{
                         position: 'absolute',
                         zIndex: 1,
-                        borderRadius: '50%',
+                        borderRadius: sx?.borderRadius || '50%',
                         transform: 'scale(1)',
                     }} />
             </Fade>
             <Fade in={!loading}>
                 <Image
                     {...others}
+
+                    style={{
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        ...others?.style
+                    }}
+
                     height={height}
                     width={width}
                     alt='image'
+
+                    src={source}
                     onLoad={() => {
                         setLoading(false)
                     }}
-                    src={source}
                     onErrorCapture={() => {
                         setSource(defaultSrc);
                     }}

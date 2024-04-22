@@ -1,7 +1,7 @@
 import TextField from '@mui/material/TextField'
 
 export default function DefaultTextField(props) {
-    const { input, children, value, disabled, onChange, validationErrors, setValidationErrors, ...others } = props;
+    const { input, children, value, disabled, onChange, validationErrors, setValidationErrors, record, ...others } = props;
 
     const {
         label, name, required = false, type = "text", variant = "outlined", fullWidth = true, multiline, InputProps, labelShrink,

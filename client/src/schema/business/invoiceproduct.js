@@ -71,7 +71,8 @@ const invoiceproduct = reformat({
                     return record
                 }
             }
-        }
+        },
+        //getRowId: (row) => row.id.product.id,
     }
 })
 export default invoiceproduct

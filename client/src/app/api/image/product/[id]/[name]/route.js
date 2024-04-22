@@ -4,23 +4,32 @@ import fs from 'fs';
 import { NextResponse } from 'next/server';
 import path from 'path';
 
-export async function GET(req, { params }) {
+const defaultImage = await fs.promises.readFile(path.join(process.cwd(), 'public', 'image', 'product', '_default', 'default.png'));
+
+function makeResponse(data, name = '.png') {
+    const res = new NextResponse(data)
+    const ext = path.extname(name);
+    let contentType = 'image/jpeg'; // default to jpeg
+    if (ext === '.png') {
+        contentType = 'image/png';
+    } else if (ext === '.gif') {
+        contentType = 'image/gif';
+    }
+    res.headers.set('content-type', contentType);
+    return res;
+}
+
+export async function GET(req, { params = {} }) {
     const { id, name } = params;
     const filePath = path.join(process.cwd(), 'public', 'image', 'product', id, name);
 
     try {
-        const data = await fs.promises.readFile(filePath);
-        const res = new NextResponse(data)
-        const ext = path.extname(name);
-        let contentType = 'image/jpeg'; // default to jpeg
-        if (ext === '.png') {
-            contentType = 'image/png';
-        } else if (ext === '.gif') {
-            contentType = 'image/gif';
-        }
-        res.headers.set('content-type', contentType);
-        return res;
+        return makeResponse(await fs.promises.readFile(filePath), name);
     } catch (err) {
-        return InternalError(`Failed to read file: ${err}`)
+        try {
+            return makeResponse(defaultImage, name);
+        } catch (errr) {
+            return InternalError(`Failed to read file: ${errr.code}`)
+        }
     }
 }

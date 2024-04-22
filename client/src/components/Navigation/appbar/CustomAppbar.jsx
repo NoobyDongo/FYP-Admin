@@ -1,3 +1,4 @@
+'use client'
 import styled from '@mui/material/styles/styled'
 import MuiAppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
@@ -15,8 +16,9 @@ import DynamicText from '../../DynamicText'
 import changeLocationEvent from '@/utils/events/changeLocationEvent'
 import { useLocation } from '../LocationContext'
 
-const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
+export default function CustomAppbar({ open, onOpen, onClose }){
     const { location } = useLocation();
+    const ref = React.useRef(null)
 
     React.useEffect(() => {
         if(location)
@@ -57,14 +59,12 @@ const CustomAppbar = React.forwardRef(({ open, onOpen, onClose }, ref) => {
             </Toolbar>
         </AppBar>
     )
-})
-CustomAppbar.displayName = "CustomAppbar"
-export default CustomAppbar
+}
 
 const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open', })(
     ({ theme, open }) => ({
-        paddingTop: theme.spacing(.5),
         zIndex: theme.zIndex.drawer - 1,
+        paddingTop: theme.spacing(.5),
         ...(theme.palette.mode == 'dark' && {
             backdropFilter: "blur(50px) saturate(150%) brightness(100%)"
         }),

@@ -411,3 +411,13 @@ Browse product
     detail
     banner?
 public announcement... (╯°□°）╯︵ ┻━┻
+
+issues:
+text flickers https://github.com/vercel/next.js/issues/52159
+
+to do:
+table batch edit
+client checkout
+stripe
+stock checking
+

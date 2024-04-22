@@ -19,6 +19,7 @@ import FadeWrapper from '../FadeWrapper'
 import useCustomTransition from '../../utils/hooks/useCustomTransition'
 import GET from '@/utils/crud/get'
 import Box from '@mui/material/Box';
+import useForm from '../Form/useForm'
 
 function usePagenation(dependency = []) {
     const [pagination, setPagination] = React.useState({
@@ -79,20 +80,19 @@ function useRowCount(data, pagination, setPagination, valid) {
 }
 
 const RawTable = (props) => {
-    const enableSelection = false
+    const { columns, inputs, initialState, tableName, crud, getRowId, upload = false, baseSearchCriteria, mini = false } = props
 
-    const { columns, inputs, initialState, tableName, crud, upload = false, baseSearchCriteria, mini = false } = props
-
-    const getStorage = (key, defaultValue) => {
+    const getStorage = (key, defaultValue, extraKey = tableName) => {
         try {
-            return JSON.parse(sessionStorage.getItem(key + '_' + tableName)) || defaultValue
+            return JSON.parse(sessionStorage.getItem(key + '_' + extraKey)) || defaultValue
         } catch (err) {
             return defaultValue
         }
     }
-    const setStorage = (key, value) => {
-        sessionStorage.setItem(key + '_' + tableName, JSON.stringify(value))
+    const setStorage = (key, value, extraKey = tableName) => {
+        sessionStorage.setItem(key + '_' + extraKey, JSON.stringify(value))
     }
+    const [enableSelection, _setEnableSelection] = React.useState(false)
 
     const [columnFilters, _setColumnFilters] = React.useState(
         baseSearchCriteria ?
@@ -111,10 +111,10 @@ const RawTable = (props) => {
         getStorage('mrt_globalFilter', '')
     )
     const [showGlobalFilter, _setShowGlobalFilter] = React.useState(
-        getStorage('mrt_showGlobalFilter', false)
+        getStorage('mrt_showGlobalFilter', false, 'global')
     )
     const [showColumnFilters, _setShowColumnFilters] = React.useState(
-        getStorage('mrt_showColumnFilters', false)
+        getStorage('mrt_showColumnFilters', false, 'global')
     )
     const [sorting, _setSorting] = React.useState(
         getStorage('mrt_sorting', [])
@@ -156,13 +156,13 @@ const RawTable = (props) => {
     const setShowGlobalFilter = React.useCallback((value) => {
         _setShowGlobalFilter(value)
         setStorage(
-            'mrt_showGlobalFilter', value
+            'mrt_showGlobalFilter', value, 'global'
         );
     }, []);
     const setShowColumnFilters = React.useCallback((value) => {
         _setShowColumnFilters(value)
         setStorage(
-            'mrt_showColumnFilters', value
+            'mrt_showColumnFilters', value, 'global'
         );
     }, []);
     const setSorting = React.useCallback((value) => {
@@ -174,7 +174,7 @@ const RawTable = (props) => {
 
     //const [rawRowCount, setRowCount] = React.useState(0)
     const { data: totalRowCount = 0, refetch: refetchTotalRowCount } = useTotalRowCount(tableName)
-    const [pagination, setPagination] = usePagenation([columnFilters, rawGlobalFilter, sorting])
+    const [pagination, setPagination] = usePagenation([columnFilters.length > 0, rawGlobalFilter, sorting.length > 0])
 
     const [useCreate, useGet, useUpdate, useDelete] = CRUD(
         { tableName, refetchTotalRowCount, ...crud }, false,
@@ -211,10 +211,14 @@ const RawTable = (props) => {
                         No record to display
                     </Typography>
                     {table.getState().noRecord && !table.getState().searching &&
-                        <Button variant="outlined" endIcon={<CachedIcon />} onClick={() => {
-                            refetch()
-                            refetchTotalRowCount()
-                        }}>fetch again</Button>
+                        <Button variant="outlined" endIcon={<CachedIcon />}
+                            sx={{
+                                zIndex: 1,
+                            }}
+                            onClick={() => {
+                                refetch()
+                                refetchTotalRowCount()
+                            }}>fetch again</Button>
                     }
                 </Stack>
             </Fade>
@@ -246,6 +250,9 @@ const RawTable = (props) => {
             renderTopToolbar,
             renderBottomToolbar
         },
+        ...((enableSelection && getRowId) && {
+            getRowId,
+        }),
 
         manualPagination: true,
         manualFiltering: true,
@@ -299,7 +306,10 @@ const RawTable = (props) => {
         <>
             <div className='MuiPaper-root'>
                 {renderTopToolbar({ table })}
-                <Box className="fadeWrapper" sx={{ pl: 2 }}>
+                <Box className="fadeWrapper" sx={{
+                    transition: "padding 200ms",
+                    pl: enableSelection ? 0 : 2
+                }}>
                     <FadeWrapper keyValue={pagination.pageIndex} variants={{
                         initial: { scale: 1, opacity: 0 },
                     }} transition={{ duration: .45 }}>

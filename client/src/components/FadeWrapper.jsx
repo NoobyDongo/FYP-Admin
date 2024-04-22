@@ -11,7 +11,7 @@ export default function FadeWrapper(props) {
     return (
         <motion.div
             key={keyValue}
-            className="fadeWrapper"
+            className= {other?.className || "fadeWrapper"}
             initial={initial}
             animate={animate}
             exit={exit}

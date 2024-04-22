@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const fs = require('fs')
 const nextConfig = {
     env: {
         NEXT_PUBLIC_WS_PORT: '3001',
